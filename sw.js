@@ -1,4 +1,4 @@
-const CACHE_NAME = 'braindump-v3'; // Changed to v3 to trigger update
+const CACHE_NAME = 'braindump-v4'; // Changed to v3 to trigger update
 const urlsToCache = [
   './',
   './index.html',

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BrainDump 2.1</title>
+    <title>Pipto - your dumpyard 0.1</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2563eb">
     
@@ -82,7 +82,9 @@
         </div>
     </div>
 
-    <main class="flex-1 overflow-y-auto p-4 pb-28">
+    <main class="flex-1 overflow-y-auto p-4 pb-28" 
+        @touchstart.passive="touchStart($event)"
+        @touchend.passive="touchEnd($event)">
         
         <div x-show="sortedItems.length === 0" class="flex flex-col items-center justify-center mt-20 text-gray-300 dark:text-gray-600">
             <i data-lucide="inbox" class="w-16 h-16 mb-4 opacity-50"></i>
@@ -210,13 +212,18 @@
     <script>
         function app() {
             return {
-                version: '2.1',
+                version: '0.1',
                 activeTab: 'food',
                 tabs: ['food', 'travel', 'movies', 'music'],
                 data: {}, 
                 
                 // Theme State
                 darkMode: false,
+
+                // Swipe State
+                touchstartX: 0,
+                touchendX: 0,
+                swipeThreshold: 75, // Pixels to register a swipe
 
                 // Modals State
                 modals: { item: false, tab: false, editTab: false, delete: false },
@@ -229,7 +236,7 @@
                 itemToDelete: null,
 
                 init() {
-                    // 1. Initialize Theme (Check LocalStorage -> Check System Pref -> Default Light)
+                    // 1. Initialize Theme
                     const savedTheme = localStorage.getItem('bd_theme');
                     if (savedTheme) {
                         this.darkMode = savedTheme === 'dark';
@@ -266,6 +273,35 @@
                     this.$nextTick(() => lucide.createIcons());
                 },
 
+                // --- SWIPE HANDLERS ---
+                touchStart(e) {
+                    this.touchstartX = e.changedTouches[0].screenX;
+                },
+                
+                touchEnd(e) {
+                    this.touchendX = e.changedTouches[0].screenX;
+                    this.handleSwipe();
+                },
+                
+                handleSwipe() {
+                    const diff = this.touchstartX - this.touchendX;
+                    const tabsLength = this.tabs.length;
+                    const currentIndex = this.tabs.indexOf(this.activeTab);
+
+                    if (Math.abs(diff) > this.swipeThreshold) {
+                        if (diff > 0) {
+                            // Swiping Left (Go to next tab)
+                            const nextIndex = (currentIndex + 1) % tabsLength;
+                            this.activeTab = this.tabs[nextIndex];
+                        } else {
+                            // Swiping Right (Go to previous tab)
+                            const prevIndex = (currentIndex - 1 + tabsLength) % tabsLength;
+                            this.activeTab = this.tabs[prevIndex];
+                        }
+                    }
+                },
+
+                // --- THEME ---
                 toggleTheme() {
                     this.darkMode = !this.darkMode;
                     localStorage.setItem('bd_theme', this.darkMode ? 'dark' : 'light');
