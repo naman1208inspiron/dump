@@ -1,6 +1,7 @@
 {
-  "name": "BrainDump Organizer",
-  "short_name": "BrainDump",
+  "name": "Pipto - your dumpyard",
+  "short_name": "Pipto",
+  "description": "Your simple organization tool.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
