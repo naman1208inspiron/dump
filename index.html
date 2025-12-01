@@ -130,29 +130,42 @@
         </div>
 
         <div class="grid gap-4">
-            <template x-for="(item, index) in sortedItems" :key="item.id">
-                <div>
-                    <template x-if="item.isDone && index > 0 && !sortedItems[index - 1].isDone">
-                         <div class="text-center my-6">
-                            <div class="inline-flex items-center">
-                                <div class="h-px w-8 bg-gray-300 dark:bg-gray-700"></div>
-                                <span class="text-xs font-bold text-gray-500 dark:text-gray-500 px-3 uppercase tracking-wider">Done Items</span>
-                                <div class="h-px w-8 bg-gray-300 dark:bg-gray-700"></div>
+            <template x-for="item in sortedItems" :key="item.id">
+                <div 
+                    class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative group transition-all hover:shadow-md"
+                    :class="{ 'opacity-50 dark:opacity-40': item.isDone }"
+                    x-transition:leave.opacity.duration.300> 
+                    
+                    <button @click.stop="toggleFavorite(item.id)" 
+                        x-show="!isTodoTab(activeTab)"
+                        class="absolute top-3 right-3 p-2 rounded-full transition-colors z-10"
+                        :class="item.isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'">
+                        <i data-lucide="heart" class="w-5 h-5" :fill="item.isFavorite ? 'currentColor' : 'none'"></i>
+                    </button>
+
+                    <template x-if="isTodoTab(activeTab)">
+                        <div class="flex items-start gap-4" @click="openEditItemModal(item)">
+                            <div class="mt-1">
+                                <input type="checkbox" :checked="item.isDone" 
+                                    class="form-checkbox h-6 w-6 text-blue-600 bg-gray-200 dark:bg-gray-700 border-gray-300 rounded focus:ring-blue-500 cursor-pointer transition-colors" 
+                                    @click.stop="toggleDone(item.id)">
+                            </div>
+                            <div class="flex-1 min-w-0 cursor-pointer">
+                                <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg leading-snug" 
+                                    x-text="item.title" 
+                                    :class="{ 'line-through text-gray-400 dark:text-gray-500': item.isDone }"></h3>
+                                <p x-show="item.note" class="mt-1 text-sm text-gray-500 dark:text-gray-400 whitespace-pre-line" x-text="item.note"></p>
+                                <template x-if="item.link">
+                                    <a :href="item.link" target="_blank" @click.stop class="inline-flex items-center text-xs font-bold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 mt-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
+                                        <div x-html="getLinkIcon(item.link)" class="w-4 h-4 mr-1.5 flex items-center justify-center"></div>
+                                        <span>Visit Link</span>
+                                    </a>
+                                </template>
                             </div>
                         </div>
                     </template>
                     
-                    <div 
-                        class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative group transition-all hover:shadow-md"
-                        :class="{ 'opacity-50 dark:opacity-40': item.isDone }"
-                        x-transition:leave.opacity.duration.300> 
-                        
-                        <button @click.stop="toggleFavorite(item.id)" 
-                            class="absolute top-3 right-3 p-2 rounded-full transition-colors z-10"
-                            :class="item.isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'">
-                            <i data-lucide="heart" class="w-5 h-5" :fill="item.isFavorite ? 'currentColor' : 'none'"></i>
-                        </button>
-
+                    <template x-if="!isTodoTab(activeTab)">
                         <div @click="openEditItemModal(item)" class="cursor-pointer">
                             <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg pr-10 leading-tight" x-text="item.title" :class="{ 'line-through': item.isDone }"></h3>
                             
@@ -167,22 +180,23 @@
 
                             <div x-show="item.note" class="mt-3 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg whitespace-pre-line border border-gray-100 dark:border-gray-700" x-text="item.note" :class="{ 'line-through': item.isDone }"></div>
                         </div>
+                    </template>
 
-                        <div class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-between items-center">
-                             <span class="text-[10px] text-gray-400 dark:text-gray-600" x-text="new Date(item.id).toLocaleDateString()"></span>
-                             
-                             <div class="flex items-center gap-3">
-                                 <button @click.stop="toggleDone(item.id)" class="text-xs font-bold transition-colors py-1 px-2 rounded-full"
-                                     :class="item.isDone ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300 hover:text-blue-600'">
-                                     <i data-lucide="check-circle" class="w-3 h-3 inline-block mr-1"></i>
-                                     <span x-text="item.isDone ? 'UNDONE' : 'MARK DONE'"></span>
-                                 </button>
+                    <div class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-between items-center">
+                         <span class="text-[10px] text-gray-400 dark:text-gray-600" x-text="new Date(item.id).toLocaleDateString()"></span>
+                         
+                         <div class="flex items-center gap-3">
+                            <button @click.stop="toggleDone(item.id)" class="text-xs font-bold transition-colors py-1 px-2 rounded-full"
+                                x-show="!isTodoTab(activeTab)"
+                                :class="item.isDone ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300 hover:text-blue-600'">
+                                <i data-lucide="check-circle" class="w-3 h-3 inline-block mr-1"></i>
+                                <span x-text="item.isDone ? 'UNDONE' : 'MARK DONE'"></span>
+                            </button>
 
-                                 <button @click.stop="confirmDelete(item.id)" class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
-                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                 </button>
-                             </div>
-                        </div>
+                            <button @click.stop="confirmDelete(item.id)" class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                         </div>
                     </div>
                 </div>
             </template>
@@ -241,7 +255,7 @@
                     <input type="text" x-model="form.title" class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" :placeholder="getTitlePlaceholder()">
                 </div>
 
-                <div x-show="activeTab !== 'secure'">
+                <div x-show="activeTab !== 'secure' && !isTodoTab(activeTab)">
                     <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Link</label>
                     <div class="flex gap-2">
                         <input type="text" x-model="form.link" class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" 
@@ -266,6 +280,21 @@
         <div class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 shadow-xl dark:border dark:border-gray-700">
             <h2 class="text-xl font-bold mb-4 dark:text-white">Create New Tab</h2>
             <input type="text" x-model="newTabName" class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border dark:border-gray-600 rounded-xl mb-4" placeholder="e.g. Books, Shopping, Ideas">
+            
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">Tab Type</label>
+                <div class="flex space-x-4">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="radio" x-model="newTabType" value="normal" name="tab-type" class="text-blue-600 focus:ring-blue-500 w-4 h-4">
+                        <span class="text-sm">Standard (Notes & Links)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="radio" x-model="newTabType" value="todo" name="tab-type" class="text-blue-600 focus:ring-blue-500 w-4 h-4">
+                        <span class="text-sm">To-Do List (Checkboxes)</span>
+                    </label>
+                </div>
+            </div>
+
             <p class="text-xs text-gray-400 mb-4">This will create a new category.</p>
             <div class="flex gap-3">
                 <button @click="modals.tab = false" class="flex-1 py-3 text-gray-500 dark:text-gray-400 font-bold">Cancel</button>
@@ -320,15 +349,36 @@
                 <button @click="modals.settings = false" class="text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
 
+            <div class="mb-6 border-b border-gray-100 dark:border-gray-700 pb-6">
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">Default Starting Tab</label>
+                <div class="relative">
+                    <select x-model="defaultTabID" @change="persist()" 
+                        class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none pr-10">
+                        <template x-for="tab in tabs" :key="tab">
+                            <option :value="tab" x-text="toTitleCase(tab)"></option>
+                        </template>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 dark:text-gray-500">
+                        <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 mt-2">This tab will open automatically when Pipto loads.</p>
+            </div>
+
             <div class="mb-6">
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">Music Link Preference</label>
-                <select x-model="musicAppPreference" @change="persist()" 
-                    class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-                    <option value="youtube_music">YouTube Music</option>
-                    <option value="spotify">Spotify</option>
-                    <option value="apple_music">Apple Music</option>
-                    <option value="generic_search">Generic Web Search (Fallback)</option>
-                </select>
+                <div class="relative">
+                    <select x-model="musicAppPreference" @change="persist()" 
+                        class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none pr-10">
+                        <option value="youtube_music">YouTube Music</option>
+                        <option value="spotify">Spotify</option>
+                        <option value="apple_music">Apple Music</option>
+                        <option value="generic_search">Generic Web Search (Fallback)</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 dark:text-gray-500">
+                        <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                    </div>
+                </div>
                 <p class="text-xs text-gray-400 mt-2">Auto-generated links in the Music tab will open this app directly.</p>
             </div>
 
@@ -353,14 +403,19 @@
     <script>
         function app() {
             return {
-                // VERSION UPDATED
-                version: '3.4.0', 
+                version: '3.4.1', // UPDATED DISPLAY VERSION
                 activeTab: 'food',
                 tabs: ['food', 'travel', 'movies', 'music', 'secure'],
                 data: {}, 
                 
                 musicAppPreference: 'youtube_music',
                 oldMusicAppPreference: 'youtube_music', 
+                
+                // NEW: Tab metadata for handling tab types (e.g., 'normal', 'todo')
+                tabMetadata: {}, 
+                
+                // Default tab state
+                defaultTabID: localStorage.getItem('bd_default_tab') || 'food', 
 
                 // Theme State
                 darkMode: false,
@@ -384,6 +439,7 @@
                 form: { id: null, title: '', link: '', note: '', isFavorite: false, isDone: false },
                 editingItem: false,
                 newTabName: '',
+                newTabType: 'normal', 
                 editTabName: '',
                 itemToDelete: null,
                 tabToDelete: null,
@@ -405,6 +461,8 @@
                     const sData = localStorage.getItem('bd_data');
                     const sTabs = localStorage.getItem('bd_tabs');
                     const sMusicApp = localStorage.getItem('bd_music_app');
+                    const sDefaultTab = localStorage.getItem('bd_default_tab');
+                    const sTabMetadata = localStorage.getItem('bd_tab_metadata'); 
 
                     if (sData) this.data = JSON.parse(sData);
                     if (sTabs) {
@@ -417,6 +475,24 @@
                         this.musicAppPreference = sMusicApp;
                         this.oldMusicAppPreference = sMusicApp; 
                     }
+                    
+                    // NEW: Initialize or load tab metadata
+                    if (sTabMetadata) {
+                        this.tabMetadata = JSON.parse(sTabMetadata);
+                    }
+                    
+                    // Ensure all existing tabs (including default ones) have a 'type'
+                    this.tabs.forEach(t => {
+                        if (!this.tabMetadata[t]) {
+                            this.tabMetadata[t] = t === 'secure' ? 'secure' : 'normal'; 
+                        }
+                    });
+
+                    // Load default tab and set activeTab
+                    if (sDefaultTab && this.tabs.includes(sDefaultTab)) {
+                        this.defaultTabID = sDefaultTab;
+                    }
+                    this.activeTab = this.defaultTabID;
 
 
                     this.tabs.forEach(t => { 
@@ -488,6 +564,8 @@
                     localStorage.setItem('bd_data', JSON.stringify(this.data));
                     localStorage.setItem('bd_tabs', JSON.stringify(this.tabs));
                     localStorage.setItem('bd_music_app', this.musicAppPreference);
+                    localStorage.setItem('bd_default_tab', this.defaultTabID); 
+                    localStorage.setItem('bd_tab_metadata', JSON.stringify(this.tabMetadata));
                     
                     this.$nextTick(() => lucide.createIcons());
                 },
@@ -496,19 +574,31 @@
                 // --- SWIPE HANDLERS ---
                 touchStart(e) { this.touchstartX = e.changedTouches[0].screenX; },
                 touchEnd(e) { this.touchendX = e.changedTouches[0].screenX; this.handleSwipe(); },
-                handleSwipe() {
-                    if (this.activeTab === 'secure') return;
-                    
-                    const diff = this.touchstartX - this.touchendX;
-                    const visibleTabs = this.tabs.filter(t => t !== 'secure');
-                    const tabsLength = visibleTabs.length;
-                    const currentIndex = visibleTabs.indexOf(this.activeTab);
 
+                handleSwipe() {
+                    const diff = this.touchstartX - this.touchendX;
+                    
+                    // 1. Secure Tab Exit Logic: Swipe Right (diff < 0)
+                    if (this.activeTab === 'secure') {
+                        if (diff < -this.swipeThreshold) { 
+                            // Exit to the default tab, prioritizing non-secure tabs
+                            const targetTab = (this.defaultTabID && this.defaultTabID !== 'secure') ? this.defaultTabID : 'food';
+                            this.activeTab = targetTab;
+                            this.scrollTabIntoView(targetTab, 'smooth', 'center');
+                        }
+                        return;
+                    }
+                    
+                    // 2. Regular Tab Swipe Logic
                     if (Math.abs(diff) > this.swipeThreshold) {
+                        const visibleTabs = this.tabs.filter(t => t !== 'secure');
+                        const tabsLength = visibleTabs.length;
+                        const currentIndex = visibleTabs.indexOf(this.activeTab);
+
                         let nextIndex;
-                        if (diff > 0) { 
+                        if (diff > 0) { // Swipe Left: Go to next tab (index + 1)
                             nextIndex = (currentIndex + 1) % tabsLength;
-                        } else { 
+                        } else { // Swipe Right: Go to previous tab (index - 1)
                             nextIndex = (currentIndex - 1 + tabsLength) % tabsLength;
                         }
                         this.activeTab = visibleTabs[nextIndex];
@@ -572,25 +662,27 @@
                 },
 
 
-                // --- DATA GETTERS (UPDATED SORTING LOGIC) ---
+                // --- DATA GETTERS ---
                 get sortedItems() {
                     const list = this.data[this.activeTab] || [];
+                    const isTodo = this.isTodoTab(this.activeTab);
+
                     return list.sort((a, b) => {
-                        // 1. Done items go to the bottom (false:0 comes before true:1)
-                        if (a.isDone !== b.isDone) {
-                            return a.isDone - b.isDone;
-                        }
-                        // 2. Favorites go to the top of their section (true:1 comes before false:0)
-                        if (a.isFavorite !== b.isFavorite) {
-                            return b.isFavorite - a.isFavorite;
-                        }
-                        // 3. Fallback: Sort by ID (newest first)
+                        if (isTodo) {
+                            // Todo sorting: isDone (undone first) > creation date (newest first)
+                            if (a.isDone !== b.isDone) return a.isDone - b.isDone; 
+                            return b.id - a.id; 
+                        } 
+                        
+                        // Normal sorting: isFavorite (fav first) > isDone (undone first) > creation date (newest first)
+                        if (a.isFavorite !== b.isFavorite) return b.isFavorite - a.isFavorite;
+                        if (a.isDone !== b.isDone) return a.isDone - b.isDone; 
                         return b.id - a.id;
                     });
                 },
 
 
-                // --- ITEM ACTIONS ---
+                // --- ITEM ACTIONS (FIXED) ---
                 openAddItemModal() {
                     this.editingItem = false;
                     this.form = { id: Date.now(), title: '', link: '', note: '', isFavorite: false, isDone: false };
@@ -607,8 +699,10 @@
                     if (!this.form.title) return;
                     let list = this.data[this.activeTab];
                     
-                    // Clear link if in secure mode
-                    if (this.activeTab === 'secure') this.form.link = '';
+                    // Clear link if in secure mode OR a To-Do List tab
+                    if (this.activeTab === 'secure' || this.isTodoTab(this.activeTab)) {
+                        this.form.link = ''; 
+                    }
 
                     if (this.editingItem) {
                         const index = list.findIndex(i => i.id === this.form.id);
@@ -621,7 +715,7 @@
                             list[index] = { ...this.form };
                         }
                     } else {
-                        // Auto-generate link on creation if required
+                        // Auto-generate link on creation if required (only for music tab, which is 'normal')
                         if (!this.form.link && this.activeTab === 'music') {
                             this.form.link = this.autoGenerateMusicLink(this.form.title);
                         }
@@ -654,7 +748,7 @@
                     const item = this.data[this.activeTab].find(i => i.id === id);
                     if (item) {
                         item.isFavorite = !item.isFavorite;
-                        this.persist();
+                        this.persist(); 
                     }
                 },
 
@@ -662,14 +756,15 @@
                     const item = this.data[this.activeTab].find(i => i.id === id);
                     if (item) {
                         item.isDone = !item.isDone;
-                        this.persist();
+                        this.persist(); 
                     }
                 },
 
 
-                // --- TAB ACTIONS ---
+                // --- TAB ACTIONS (MODIFIED) ---
                 openNewTabModal() {
                     this.newTabName = '';
+                    this.newTabType = 'normal'; 
                     this.modals.tab = true;
                 },
 
@@ -680,10 +775,23 @@
                         const secureIndex = this.tabs.indexOf('secure');
                         this.tabs.splice(secureIndex, 0, newName);
                         this.data[newName] = [];
-                        this.activeTab = newName;
+                        this.tabMetadata[newName] = this.newTabType; 
+                        this.activeTab = newName; // This line automatically opens the new tab
                         this.persist();
                         this.modals.tab = false;
-                        this.$nextTick(() => this.scrollTabIntoView(newName, 'auto', 'end'));
+                        
+                        // FIX: Scroll to the end of the tab scroller to ensure the new tab is fully visible.
+                        // Manually scroll to the maximum right position to reliably show the last tab,
+                        // overriding the scrollIntoView issue with fixed overlays.
+                        this.$nextTick(() => {
+                            const scroller = this.$refs.tabScroller;
+                            if (scroller) {
+                                scroller.scrollTo({
+                                    left: scroller.scrollWidth,
+                                    behavior: 'smooth'
+                                });
+                            }
+                        });
                     }
                 },
 
@@ -703,11 +811,16 @@
                             this.data[newName] = this.data[oldName];
                             delete this.data[oldName];
 
-                            // 2. Rename the tab in the array
+                            // 2. Transfer metadata
+                            this.tabMetadata[newName] = this.tabMetadata[oldName];
+                            delete this.tabMetadata[oldName];
+                            
+                            // 3. Rename the tab in the array
                             this.tabs.splice(index, 1, newName);
                             this.activeTab = newName;
                             this.persist();
                             this.modals.editTab = false;
+                            this.$nextTick(() => this.scrollTabIntoView(newName, 'smooth', 'center'));
                         }
                     }
                 },
@@ -727,10 +840,13 @@
                                 // 1. Delete data
                                 delete this.data[this.tabToDelete];
 
-                                // 2. Delete tab
+                                // 2. Delete metadata
+                                delete this.tabMetadata[this.tabToDelete];
+                                
+                                // 3. Delete tab
                                 this.tabs.splice(index, 1);
 
-                                // 3. Set new active tab (fall back to 'food')
+                                // 4. Set new active tab (fall back to 'food')
                                 this.activeTab = this.tabs[0]; 
 
                                 this.persist();
@@ -751,12 +867,16 @@
                         // Insert at new position
                         this.tabs.splice(newIndex, 0, tab);
                         this.persist();
-                        this.$nextTick(() => this.scrollTabIntoView(tab, 'auto', 'center'));
+                        this.$nextTick(() => this.scrollTabIntoView(tab, 'smooth', 'center'));
                     }
                 },
 
 
                 // --- HELPERS ---
+                isTodoTab(tabName) {
+                    return this.tabMetadata[tabName] === 'todo';
+                },
+
                 toTitleCase(str) {
                     if (!str) return '';
                     return str.split(' ').map(word => {
@@ -805,6 +925,7 @@
                 
                 // HINT TEXTS
                 getTitlePlaceholder() {
+                    if (this.isTodoTab(this.activeTab)) return 'e.g. Buy milk, Call dentist';
                     if (this.activeTab === 'food') return 'e.g. Grandma\'s Pasta';
                     if (this.activeTab === 'travel') return 'e.g. Paris Trip';
                     if (this.activeTab === 'music') return 'e.g. Bohemian Rhapsody';
@@ -819,6 +940,7 @@
                 },
 
                 getNoteLabel() {
+                    if (this.isTodoTab(this.activeTab)) return 'Extra Details (Optional)';
                     if (this.activeTab === 'food') return 'Ingredients & Steps';
                     if (this.activeTab === 'travel') return 'Location Details';
                     if (this.activeTab === 'secure') return 'Sensitive Information / Password Notes';
@@ -826,6 +948,7 @@
                 },
 
                 getNotePlaceholder() {
+                    if (this.isTodoTab(this.activeTab)) return 'Set a deadline, or add a store location.';
                     if (this.activeTab === 'food') return '- 2 Cups Rice\n- Boil water...';
                     if (this.activeTab === 'travel') return 'Best time to visit: October\nGoogle Map Coords...';
                     if (this.activeTab === 'secure') return 'Write your secure notes here.';
