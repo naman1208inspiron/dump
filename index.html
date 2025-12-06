@@ -302,12 +302,11 @@
                     :class="{ 'opacity-50 dark:opacity-40': item.isDone && activeTab !== 'secure' }"
                     x-transition:leave.opacity.duration.300>
 
-                    <button @click.stop="toggleFavorite(item.id)"
-                        x-show="!isTodoTab(activeTab) && activeTab !== 'secure'"
-                        class="absolute top-3 right-3 p-2 rounded-full transition-colors z-10"
-                        :class="item.isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'">
-                        <i data-lucide="heart" class="w-5 h-5" :fill="item.isFavorite ? 'currentColor' : 'none'"></i>
-                    </button>
+                    <a :href="item.link" target="_blank" @click.stop
+                        x-show="!isTodoTab(activeTab) && activeTab !== 'secure' && item.link"
+                        class="absolute top-3 right-3 p-2 rounded-full transition-colors z-10 text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-800/50">
+                        <i :data-lucide="activeTab === 'music' ? 'music' : 'link'" class="w-5 h-5"></i>
+                    </a>
 
                     <template x-if="isTodoTab(activeTab)">
                         <div class="flex items-start gap-4" @click="openEditItemModal(item)">
@@ -357,12 +356,12 @@
 
                             <div class="mt-3 flex items-center gap-2">
                                 <template x-if="item.link">
-                                    <a :href="item.link" target="_blank" @click.stop
+                                    <!-- <a :href="item.link" target="_blank" @click.stop
                                         class="inline-flex items-center text-xs font-bold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
                                         <div x-html="getLinkIcon(item.link)"
                                             class="w-4 h-4 mr-1.5 flex items-center justify-center"></div>
                                         <span x-text="activeTab === 'music' ? 'Open Song' : 'Visit Link'"></span>
-                                    </a>
+                                    </a> -->
                                 </template>
                             </div>
 
@@ -378,6 +377,12 @@
                             x-text="new Date(item.id).toLocaleDateString()"></span>
 
                         <div class="flex items-center gap-3">
+                            <button @click.stop="toggleFavorite(item.id)" 
+                                x-show="!isTodoTab(activeTab) && activeTab !== 'secure'"
+                                class="p-1 rounded-full transition-colors active:scale-95"
+                                :class="item.isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'">
+                                <i data-lucide="heart" class="w-5 h-5" :fill="item.isFavorite ? 'currentColor' : 'none'"></i>
+                            </button>
                             <button @click.stop="toggleDone(item.id)"
                                 class="text-xs font-bold transition-colors py-1 px-2 rounded-full"
                                 x-show="!isTodoTab(activeTab)"
