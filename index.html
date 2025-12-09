@@ -807,7 +807,7 @@
         function app() {
             return {
                 version: '3.5.3', // UPDATED DISPLAY VERSION
-                activeTab: 'food',
+                activeTab: localStorage.getItem('bd_default_tab') || 'food', // FIX: Initialize activeTab from storage
                 tabs: ['food', 'travel', 'movies', 'music', 'secure'],
                 data: {},
                 musicAppPreference: 'youtube_music',
