@@ -1083,7 +1083,13 @@
                 },
 
                 openSettingsModal() {
+                    // Load current saved preferences into temporary state
+                    // FIX: Ensure temp variables reflect current saved settings on open
+                    this.tempDefaultTabID = this.defaultTabID;
+                    this.tempMusicAppPreference = this.musicAppPreference;
+                    
                     this.modals.settings = true;
+                    this.$nextTick(() => lucide.createIcons());
                 },
 
                 openSecureNotesSettings() {
