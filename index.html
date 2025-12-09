@@ -322,14 +322,14 @@
                                 <p x-show="item.note"
                                     class="mt-1 text-sm text-gray-500 dark:text-gray-400 whitespace-pre-line"
                                     x-text="item.note"></p>
-                                <template x-if="item.link">
+                                <!-- <template x-if="item.link">
                                     <a :href="item.link" target="_blank" @click.stop
                                         class="inline-flex items-center text-xs font-bold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 mt-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
                                         <div x-html="getLinkIcon(item.link)"
                                             class="w-4 h-4 mr-1.5 flex items-center justify-center"></div>
                                         <span>Visit Link</span>
                                     </a>
-                                </template>
+                                </template> -->
                             </div>
                         </div>
                     </template>
@@ -692,7 +692,7 @@
 
             <div class="mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <h3 class="font-bold text-lg mb-3">Default Tab</h3>
-                <select x-model="defaultTabID" @change="persist()"
+                <select x-model="tempDefaultTabID" @change="persist()"
                     class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                     <template x-for="tab in tabs.filter(t => t !== 'secure')">
                         <option :value="tab" x-text="toTitleCase(tab)"></option>
@@ -702,7 +702,7 @@
 
             <div class="mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <h3 class="font-bold text-lg mb-3">Music Link Preference</h3>
-                <select x-model="musicAppPreference" @change="persist()"
+                <select x-model="tempMusicAppPreference" @change="persist()"
                     class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                     <option value="youtube_music">YouTube Music</option>
                     <option value="spotify">Spotify</option>
@@ -710,6 +710,14 @@
                 </select>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Applies to all new items in the Music tab.</p>
             </div>
+
+            <button @click="savePreferences()"
+                :disabled="tempDefaultTabID === defaultTabID && tempMusicAppPreference === musicAppPreference"
+                class="w-full mt-6 py-3.5 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform hover:bg-blue-700 disabled:opacity-50">
+                Save Changes
+            </button>
+            
+            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
 
             <!-- <div class="mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <h3 class="font-bold text-lg mb-3 text-red-500 dark:text-red-400">Danger Zone</h3>
@@ -810,6 +818,8 @@
                 newTabError: '',
                 // NEW: Secure View State
                 secureView: 'notes', // 'notes' or 'cards'
+                tempDefaultTabID: 'food',
+                tempMusicAppPreference: 'youtube_music',
                 // Swipe State
                 touchstartX: 0,
                 touchendX: 0,
@@ -934,6 +944,28 @@
                 // --- PERSISTENCE AND MIGRATION ---
                 migrateOldData() {
                     // Migration logic for old data (not relevant to current request, keeping structure)
+                },
+
+                updateExistingMusicLinks() {
+                    // Update all existing items in the 'music' tab to use the new music app preference
+                    const musicData = this.data['music'] || [];
+                    this.data['music'] = musicData.map(item => {
+                        let isAutoLink = false;
+                        const oldApp = this.oldMusicAppPreference;
+                        const newApp = this.musicAppPreference;
+
+                        if (oldApp !== newApp) {
+                            // Check if the link was likely an auto-generated search link
+                            if (item.link && (item.link.includes('spotify.com/0') || item.link.includes('apple.com/us/search') || item.link.includes('youtube.com/search'))) {
+                                isAutoLink = true;
+                            }
+                        }
+
+                        if (item.title && isAutoLink) {
+                            item.link = this.autoGenerateMusicLink(item.title);
+                        }
+                        return item;
+                    });
                 },
 
                 updateExistingMusicLinks() {
@@ -1611,9 +1643,43 @@
                     return 'Add any extra details here...';
                 },
 
+                toggleTabType(tab) {
+                    const currentType = this.tabMetadata[tab] ? this.tabMetadata[tab].type : 'normal';
+                    const newType = currentType === 'normal' ? 'todo' : 'normal';
+                    this.tabMetadata[tab] = { type: newType };
+                    this.modals.tabContext = false;
+                    this.persist();
+                    this.showCopyToast(`Tab type changed to ${newType}!`);
+                },
+
                 reloadApp() {
                     if (this.waitingWorker) this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-                }
+                },
+
+                // --- APP SETTINGS ACTIONS ---
+                savePreferences() {
+                    // Update the actual preference variables from the temporary ones
+                    let preferencesChanged = false;
+
+                    if (this.tempDefaultTabID !== this.defaultTabID) {
+                        this.defaultTabID = this.tempDefaultTabID;
+                        preferencesChanged = true;
+                    }
+
+                    if (this.tempMusicAppPreference !== this.musicAppPreference) {
+                        this.musicAppPreference = this.tempMusicAppPreference;
+                        preferencesChanged = true;
+                    }
+
+                    if (preferencesChanged) {
+                        this.persist();
+                        this.showCopyToast('Preferences saved successfully!');
+                    } else {
+                         this.showCopyToast('No changes to save.');
+                    }
+                    
+                    this.modals.settings = false;
+                },
             }
         }
     </script>
