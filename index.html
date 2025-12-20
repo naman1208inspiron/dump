@@ -290,9 +290,10 @@
                                 class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-800/30 transition-colors">
                                 <i :data-lucide="getTabIcon(tab)" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
                             </div>
-                            <span class="font-bold text-gray-800 dark:text-gray-100 text-sm"
+                            <!-- FIX 3: Increased text size in tiles -->
+                            <span class="font-bold text-gray-800 dark:text-gray-100 text-xl"
                                 x-text="toTitleCase(tab)"></span>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">
                                 <span x-text="getTabCount(tab)"></span> items
                             </span>
                         </button>
@@ -301,8 +302,8 @@
             </div>
         </div>
 
-        <div
-            class="flex-shrink-0 p-3 bg-gradient-to-t from-white via-white to-white/95 dark:from-darkbg dark:via-darkbg dark:to-darkbg/95 backdrop-blur-sm border-t border-gray-100 dark:border-gray-700">
+        <!-- FIX 1: Fixed positioning for bottom tab -->
+        <div class="flex-shrink-0 p-3 bg-gradient-to-t from-white via-white to-white/95 dark:from-darkbg dark:via-darkbg dark:to-darkbg/95 backdrop-blur-sm border-t border-gray-100 dark:border-gray-700 sticky bottom-0">
             <div class="grid grid-cols-4 gap-3 max-w-4xl mx-auto">
                 <button @click="switchToTab('voice')"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-voice-50 to-voice-100 dark:from-voice-900/30 dark:to-voice-800/20 hover:from-voice-100 hover:to-voice-200 dark:hover:from-voice-800/40 dark:hover:to-voice-700/30 transition-all active:scale-95 group border border-voice-100 dark:border-voice-800/30 shadow-sm">
@@ -396,7 +397,7 @@
             <div x-show="activeTab === 'cards'" class="flex flex-col h-full -mt-4 animate-slide-in-right">
                 <div class="grid gap-4 mt-4">
                     <div class="flex justify-between items-center py-3 px-1">
-                        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Secure Cards</h2>
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Secure Cards</h2>
                     </div>
 
                     <template x-for="card in cards" :key="card.id">
@@ -1024,137 +1025,129 @@
         </div>
     </div>
 
+    <!-- FIX 4: Settings modal with scrollable content and fixed save button -->
     <div x-show="modals.settings" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
         x-transition.opacity>
         <div
-            class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 shadow-xl dark:border dark:border-gray-700 max-h-[80vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100 dark:border-gray-700">
+            class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl shadow-xl dark:border dark:border-gray-700 flex flex-col max-h-[80vh]">
+            <div class="flex justify-between items-center p-6 pb-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
                 <h2 class="text-xl font-bold dark:text-white">App Settings</h2>
-                <button @click="modals.settings = false" class="text-gray-400"><i data-lucide="x"
-                        class="w-6 h-6"></i></button>
-            </div>
-
-            <!-- Default Launch View Settings -->
-            <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
-                <h3 class="font-bold text-md mb-2">Default Launch View</h3>
-                <div class="space-y-2">
-                    <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
-                        <input type="radio" x-model="tempDefaultView" value="home" name="default-view"
-                            class="form-radio h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
-                        Home Dashboard
-                    </label>
-                    <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
-                        <input type="radio" x-model="tempDefaultView" value="tab" name="default-view"
-                            class="form-radio h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
-                        Specific Tab
-                    </label>
-
-                    <div x-show="tempDefaultView === 'tab'" class="mt-2">
-                        <select x-model="tempDefaultTabID"
-                            class="w-full p-2 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-                            <template x-for="tab in tabs">
-                                <template x-if="tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice'">
-                                    <option :value="tab" x-text="toTitleCase(tab)"></option>
-                                </template>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Voice Notes Settings -->
-            <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
-                <h3 class="font-bold text-md mb-2">Voice Notes Settings</h3>
-                <div class="space-y-2">
-                    <div>
-                        <label
-                            class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Language</label>
-                        <select x-model="tempVoiceLanguage"
-                            class="w-full p-2 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-                            <option value="en-US">English (US)</option>
-                            <option value="en-GB">English (UK)</option>
-                            <option value="es-ES">Spanish</option>
-                            <option value="fr-FR">French</option>
-                            <option value="de-DE">German</option>
-                        </select>
-                    </div>
-
-                    <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
-                        <input type="checkbox" x-model="tempAutoSaveVoiceNotes" name="auto-save-voice"
-                            class="form-checkbox h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
-                        Auto-save voice notes
-                    </label>
-                </div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Works best in Chrome/Edge browsers.</p>
-            </div>
-
-            <!-- Theme Settings -->
-            <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-md mb-0.5">Theme</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Switch between light and dark mode</p>
-                    </div>
-                    <button @click="toggleTheme()"
-                        class="p-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors active:scale-95">
-                        <i x-show="darkMode" data-lucide="sun" class="w-5 h-5 text-yellow-500"></i>
-                        <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5 text-blue-500"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Theme Settings -->
-            <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
-                <h3 class="font-bold text-md mb-2">Theme</h3>
-                <div class="flex items-center gap-6">
-                    <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
-                        <input type="radio" x-model="tempDarkMode" :value="false" name="theme"
-                            class="form-radio h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
-                        Light
-                    </label>
-                    <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
-                        <input type="radio" x-model="tempDarkMode" :value="true" name="theme"
-                            class="form-radio h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
-                        Dark
-                    </label>
-                </div>
-            </div>
-
-            <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
-                <h3 class="font-bold text-md mb-2">Music Link Preference</h3>
-                <select x-model="tempMusicAppPreference"
-                    class="w-full p-2 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-                    <option value="youtube_music">YouTube Music</option>
-                    <option value="spotify">Spotify</option>
-                    <option value="apple_music">Apple Music</option>
-                </select>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Applies to all new items in the Music tab.</p>
-            </div>
-
-            <!-- <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
-                <h3 class="font-bold text-md mb-2 text-red-500">Danger Zone</h3>
-                <button @click="confirmDeleteAllData()"
-                    class="w-full py-2 bg-red-500 text-white rounded-xl font-bold shadow-md hover:bg-red-600 text-sm">
-                    Delete All App Data
+                <button @click="modals.settings = false" class="text-gray-400">
+                    <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">This will delete all your data including items,
-                    tabs, and preferences.</p>
-            </div> -->
+            </div>
 
-            <button @click="savePreferences()"
-                :disabled="tempDefaultTabID === defaultTabID && tempMusicAppPreference === musicAppPreference && tempDefaultView === defaultView && tempVoiceLanguage === voiceLanguage && tempAutoSaveVoiceNotes === autoSaveVoiceNotes"
-                class="w-full mt-4 py-3 bg-blue-600 text-white rounded-xl font-bold text-md shadow-lg active:scale-95 transition-transform hover:bg-blue-700 disabled:opacity-50">
-                Save Changes
-            </button>
+            <div class="overflow-y-auto px-6 flex-1">
+                <!-- Default Launch View Settings -->
+                <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                    <h3 class="font-bold text-md mb-2">Default Launch View</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
+                            <input type="radio" x-model="tempDefaultView" value="home" name="default-view"
+                                class="form-radio h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
+                            Home Dashboard
+                        </label>
+                        <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
+                            <input type="radio" x-model="tempDefaultView" value="tab" name="default-view"
+                                class="form-radio h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
+                            Specific Tab
+                        </label>
 
-            <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-                <div class="flex justify-between items-center text-xs text-gray-400 dark:text-gray-600">
-                    <span>Version <span x-text="version"></span></span>
-                    <span x-show="updateAvailable"
-                        class="text-blue-500 dark:text-blue-400 font-bold flex items-center gap-1">
-                        Update Available!
-                    </span>
+                        <div x-show="tempDefaultView === 'tab'" class="mt-2">
+                            <select x-model="tempDefaultTabID"
+                                class="w-full p-2 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                                <template x-for="tab in tabs">
+                                    <template x-if="tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice'">
+                                        <option :value="tab" x-text="toTitleCase(tab)"></option>
+                                    </template>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Voice Notes Settings -->
+                <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                    <h3 class="font-bold text-md mb-2">Voice Notes Settings</h3>
+                    <div class="space-y-2">
+                        <div>
+                            <label
+                                class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Language</label>
+                            <select x-model="tempVoiceLanguage"
+                                class="w-full p-2 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                                <option value="en-US">English (US)</option>
+                                <option value="en-GB">English (UK)</option>
+                                <option value="es-ES">Spanish</option>
+                                <option value="fr-FR">French</option>
+                                <option value="de-DE">German</option>
+                            </select>
+                        </div>
+
+                        <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
+                            <input type="checkbox" x-model="tempAutoSaveVoiceNotes" name="auto-save-voice"
+                                class="form-checkbox h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
+                            Auto-save voice notes
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Works best in Chrome/Edge browsers.</p>
+                </div>
+
+                <!-- Theme Settings -->
+                <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-md mb-0.5">Theme</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Switch between light and dark mode</p>
+                        </div>
+                        <button @click="toggleTheme()"
+                            class="p-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors active:scale-95">
+                            <i x-show="darkMode" data-lucide="sun" class="w-5 h-5 text-yellow-500"></i>
+                            <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5 text-blue-500"></i>
+                        </button>
+                    </div>
+                </div>
+
+                
+
+                <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                    <h3 class="font-bold text-md mb-2">Music Link Preference</h3>
+                    <select x-model="tempMusicAppPreference"
+                        class="w-full p-2 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                        <option value="youtube_music">YouTube Music</option>
+                        <option value="spotify">Spotify</option>
+                        <option value="apple_music">Apple Music</option>
+                    </select>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Applies to all new items in the Music tab.</p>
+                </div>
+
+                <!-- <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                    <h3 class="font-bold text-md mb-2 text-red-500">Danger Zone</h3>
+                    <button @click="confirmDeleteAllData()"
+                        class="w-full py-2 bg-red-500 text-white rounded-xl font-bold shadow-md hover:bg-red-600 text-sm">
+                        Delete All App Data
+                    </button>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">This will delete all your data including items,
+                        tabs, and preferences.</p>
+                </div> -->
+
+                <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <div class="flex justify-between items-center text-xs text-gray-400 dark:text-gray-600">
+                        <span>Version <span x-text="version"></span></span>
+                        <span x-show="updateAvailable"
+                            class="text-blue-500 dark:text-blue-400 font-bold flex items-center gap-1">
+                            Update Available!
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fixed Save Button -->
+            <div class="p-6 pt-4 flex-shrink-0 border-t border-gray-100 dark:border-gray-700">
+                <button @click="savePreferences()"
+                    :disabled="tempDefaultTabID === defaultTabID && tempMusicAppPreference === musicAppPreference && tempDefaultView === defaultView && tempVoiceLanguage === voiceLanguage && tempAutoSaveVoiceNotes === autoSaveVoiceNotes"
+                    class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold text-md shadow-lg active:scale-95 transition-transform hover:bg-blue-700 disabled:opacity-50">
+                    Save Changes
+                </button>
             </div>
         </div>
     </div>
@@ -1233,6 +1226,9 @@
                 autoSaveVoiceNotes: false,
                 tempVoiceLanguage: 'en-US',
                 tempAutoSaveVoiceNotes: false,
+                // FIX 2: Added for better voice transcription
+                finalTranscript: '',
+                interimTranscript: '',
 
                 // New state for Home Dashboard
                 currentView: 'home',
@@ -1452,7 +1448,7 @@
                     }
                 },
 
-                // NEW: Initialize Speech Recognition - FIXED for better transcription
+                // FIX 2: Improved Speech Recognition initialization to fix duplication
                 initializeSpeechRecognition() {
                     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -1461,51 +1457,49 @@
                         this.recognition.continuous = true;
                         this.recognition.interimResults = true;
                         this.recognition.lang = this.voiceLanguage;
-
-                        // Store interim results separately
+                        
+                        // Reset transcripts
+                        this.finalTranscript = '';
                         this.interimTranscript = '';
 
                         this.recognition.onresult = (event) => {
-                            let finalTranscript = '';
-                            this.interimTranscript = '';
-
+                            let interimTranscript = '';
+                            let newFinalTranscript = '';
+                            
+                            // Process all results
                             for (let i = event.resultIndex; i < event.results.length; i++) {
                                 const transcript = event.results[i][0].transcript;
                                 if (event.results[i].isFinal) {
-                                    finalTranscript += transcript;
-                                    // Add space between final results
-                                    if (i < event.results.length - 1) {
-                                        finalTranscript += ' ';
+                                    // Only add new final results that aren't duplicates
+                                    if (newFinalTranscript.indexOf(transcript) === -1) {
+                                        newFinalTranscript += transcript + ' ';
                                     }
                                 } else {
-                                    this.interimTranscript += transcript;
+                                    interimTranscript += transcript;
                                 }
                             }
 
-                            // Update voice text with final results + current interim
-                            if (finalTranscript) {
-                                // Clean up the text - remove duplicate words and fix spacing
-                                let cleanText = finalTranscript.trim();
-
-                                // Basic cleaning: remove common duplication patterns
-                                cleanText = cleanText.replace(/(\b\w+\b)(?:\s+\1)+/gi, '$1');
-
-                                // Add to existing text
-                                if (this.voiceText && !this.voiceText.endsWith(cleanText)) {
-                                    this.voiceText = this.voiceText + ' ' + cleanText;
-                                } else {
-                                    this.voiceText = cleanText;
+                            // Update final transcript with new unique final results
+                            if (newFinalTranscript) {
+                                // Remove duplicates by checking if the text already exists
+                                const newWords = newFinalTranscript.trim().split(' ');
+                                const existingWords = this.finalTranscript.trim().split(' ');
+                                
+                                // Only add words that don't already exist in the final transcript
+                                const uniqueNewWords = newWords.filter(word => 
+                                    !existingWords.some(existingWord => 
+                                        existingWord.toLowerCase() === word.toLowerCase()
+                                    )
+                                );
+                                
+                                if (uniqueNewWords.length > 0) {
+                                    this.finalTranscript += uniqueNewWords.join(' ') + ' ';
                                 }
-
-                                // Clean up the final text
-                                this.voiceText = this.cleanVoiceText(this.voiceText);
                             }
 
-                            // If we have interim results, show them temporarily
-                            if (this.interimTranscript && !this.interimTranscript.includes(this.voiceText)) {
-                                const displayText = this.voiceText + ' ' + this.interimTranscript;
-                                this.voiceText = displayText.trim();
-                            }
+                            // Update the displayed text
+                            this.voiceText = this.cleanVoiceText(this.finalTranscript + interimTranscript);
+                            this.interimTranscript = interimTranscript;
                         };
 
                         this.recognition.onerror = (event) => {
@@ -1524,12 +1518,30 @@
                     }
                 },
 
-                // NEW: Clean voice text to fix common issues
+                // FIX 2: Enhanced voice text cleaning to remove duplicates
                 cleanVoiceText(text) {
                     if (!text) return '';
 
                     // Remove extra spaces
                     text = text.replace(/\s+/g, ' ');
+                    
+                    // Remove duplicate words or phrases (simple approach)
+                    const words = text.split(' ');
+                    const uniqueWords = [];
+                    
+                    for (let i = 0; i < words.length; i++) {
+                        // Skip if the same word appears consecutively
+                        if (i === 0 || words[i] !== words[i - 1]) {
+                            // Also check for longer pattern repeats (like "hello hello")
+                            if (i >= 2 && words[i] === words[i - 2] && words[i - 1] === words[i - 3]) {
+                                // Skip this duplicate pattern
+                                continue;
+                            }
+                            uniqueWords.push(words[i]);
+                        }
+                    }
+                    
+                    text = uniqueWords.join(' ');
 
                     // Fix common punctuation issues
                     text = text.replace(/\s*\.\s*/g, '. ');
@@ -1549,6 +1561,8 @@
                 // NEW: Voice Input Functions - Direct recording in voice tab
                 startVoiceInput() {
                     this.voiceText = '';
+                    this.finalTranscript = '';
+                    this.interimTranscript = '';
                     this.modals.voiceInput = true;
                     this.$nextTick(() => {
                         lucide.createIcons();
@@ -1559,6 +1573,8 @@
                     // Direct recording from voice tab floating button
                     if (this.activeTab === 'voice' && this.currentView === 'tab') {
                         this.voiceText = '';
+                        this.finalTranscript = '';
+                        this.interimTranscript = '';
                         this.modals.voiceInput = true;
                         this.$nextTick(() => {
                             this.startActualRecording();
@@ -1579,6 +1595,7 @@
                         this.isRecording = true;
                         this.recordingTime = 0;
                         this.voiceText = '';
+                        this.finalTranscript = '';
                         this.interimTranscript = '';
 
                         // Start timer
@@ -1603,6 +1620,8 @@
                     }
                     this.modals.voiceInput = false;
                     this.voiceText = '';
+                    this.finalTranscript = '';
+                    this.interimTranscript = '';
                 },
 
                 stopRecording() {
@@ -1619,6 +1638,9 @@
                         clearInterval(this.recordingTimer);
                         this.recordingTimer = null;
                     }
+
+                    // Clean up the final text one more time
+                    this.voiceText = this.cleanVoiceText(this.finalTranscript);
 
                     // If auto-save is enabled and we have text, save immediately
                     if (this.autoSaveVoiceNotes && this.voiceText.trim()) {
@@ -1655,6 +1677,8 @@
                     this.modals.voiceInput = false;
                     this.showCopyToast('Voice note saved successfully!');
                     this.voiceText = '';
+                    this.finalTranscript = '';
+                    this.interimTranscript = '';
 
                     this.$nextTick(() => lucide.createIcons());
                 },
@@ -1982,8 +2006,8 @@
                         }
 
                         if (a.isFavorite !== b.isFavorite) {
-                            return a.isFavorite ? -1 : 1;
-                        }
+                                return a.isFavorite ? -1 : 1;
+                            }
 
                         return b.id - a.id;
                     });
