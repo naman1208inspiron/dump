@@ -11,12 +11,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class', // Enables manual toggling
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#0f172a', // Slate 900
-                        darkcard: '#1e293b', // Slate 800
+                        darkbg: '#0f172a',
+                        darkcard: '#1e293b',
+                        voice: {
+                            50: '#faf5ff',
+                            100: '#f3e8ff',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95'
+                        }
                     }
                 }
             }
@@ -45,7 +54,6 @@
             display: none !important;
         }
 
-        /* Smooth transition for theme switch */
         body,
         div,
         p,
@@ -58,7 +66,6 @@
             transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
         }
 
-        /* Animation for context menu */
         .animate-scale-in {
             animation: scale-in 0.15s ease-out;
         }
@@ -75,13 +82,10 @@
             }
         }
 
-        /* CSS for the tab scroller to respect the fixed button width (56px) */
         .tab-scroller-fixed {
-            /* Adjusted padding to reliably ensure the last tab is fully visible */
             padding-right: 68px !important;
         }
 
-        /* Provider Icons CSS - using filter for dark mode compatibility on white icons */
         .icon-spotify {
             color: #1DB954;
         }
@@ -98,7 +102,6 @@
             color: #2563EB;
         }
 
-        /* Animation for Card Page transition */
         @keyframes slide-in-from-right {
             from {
                 transform: translateX(100%);
@@ -115,7 +118,6 @@
             animation: slide-in-from-right 0.3s ease-out;
         }
 
-        /* Animation for home dashboard */
         @keyframes fade-in-up {
             from {
                 opacity: 0;
@@ -132,15 +134,102 @@
             animation: fade-in-up 0.3s ease-out;
         }
 
-        /* Home dashboard grid item */
         .home-grid-item {
             aspect-ratio: 1 / 1;
         }
 
-        /* Ensure proper height calculation for home dashboard */
         .home-dashboard-container {
             height: calc(100vh - 64px);
-            /* 64px is the header height */
+        }
+
+        /* Voice Recording Animation - Minimal */
+        .pulse-ring {
+            animation: pulse-ring 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 0.4;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+        }
+
+        .waveform-minimal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            height: 20px;
+        }
+
+        .waveform-bar-minimal {
+            width: 2px;
+            background: #8b5cf6;
+            border-radius: 2px;
+            animation: waveform-minimal 1.2s ease-in-out infinite;
+        }
+
+        .waveform-bar-minimal:nth-child(1) {
+            animation-delay: 0s;
+            height: 6px;
+        }
+
+        .waveform-bar-minimal:nth-child(2) {
+            animation-delay: 0.2s;
+            height: 12px;
+        }
+
+        .waveform-bar-minimal:nth-child(3) {
+            animation-delay: 0.4s;
+            height: 18px;
+        }
+
+        .waveform-bar-minimal:nth-child(4) {
+            animation-delay: 0.6s;
+            height: 14px;
+        }
+
+        .waveform-bar-minimal:nth-child(5) {
+            animation-delay: 0.8s;
+            height: 10px;
+        }
+
+        @keyframes waveform-minimal {
+
+            0%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            50% {
+                transform: scaleY(0.5);
+            }
+        }
+
+        @keyframes slide-up {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-slide-up {
+            animation: slide-up 0.3s ease-out;
         }
     </style>
 </head>
@@ -153,30 +242,35 @@
         class="bg-white dark:bg-darkcard dark:border-gray-700 p-4 shadow-sm flex justify-between items-center z-20 border-b border-gray-100 transition-colors">
         <div class="flex items-center gap-2">
             <button @click="goToHome()" class="flex items-center gap-2 cursor-pointer">
-                <h1 class="text-xl font-bold tracking-tight text-blue-600 dark:text-blue-400">Pipto</h1>
+                <h1 class="text-xl font-bold tracking-tight text-blue-600 dark:text-blue-400">Pipto - Your DumpYard</h1>
                 <i x-show="currentView !== 'home'" data-lucide="home" class="w-4 h-4 text-blue-500"></i>
             </button>
-            <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-300 px-2 py-0.5 rounded-full"
-                x-text="'v' + version"></span>
+            <!-- <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-300 px-2 py-0.5 rounded-full"
+                x-text="'v' + version"></span> -->
         </div>
 
         <div class="flex items-center gap-3">
-            <button @click="openSecureNotesSettings()"
+            <!-- <button @click="startVoiceInput()"
+                class="text-gray-400 hover:text-voice-600 dark:hover:text-voice-400 transition-transform active:scale-95">
+                <i data-lucide="mic" class="w-5 h-5"></i>
+            </button> -->
+
+            <!-- <button @click="openSecureNotesSettings()"
                 class="text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 transition-transform active:scale-95">
                 <i data-lucide="lock" class="w-5 h-5"
                     :class="activeTab === 'secure' ? 'text-yellow-600 dark:text-yellow-400' : ''"></i>
-            </button>
+            </button> -->
 
             <button @click="openSettingsModal()"
                 class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-transform active:scale-95">
                 <i data-lucide="settings" class="w-5 h-5"></i>
             </button>
 
-            <button @click="toggleTheme()"
+            <!-- <button @click="toggleTheme()"
                 class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-transform active:scale-95">
                 <i x-show="darkMode" data-lucide="sun" class="w-5 h-5"></i>
                 <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5"></i>
-            </button>
+            </button> -->
         </div>
     </header>
 
@@ -184,22 +278,21 @@
     <div x-show="currentView === 'home'" x-transition:enter.duration.300
         class="home-dashboard-container flex flex-col animate-fade-in-up">
 
-        <!-- Scrollable Grid Area -->
         <div class="flex-1 overflow-y-auto p-3">
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-full max-w-2xl mx-auto">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-full max-w-4xl mx-auto">
                 <template x-for="tab in tabs" :key="tab">
-                    <template x-if="tab !== 'secure-notes' && tab !== 'cards'">
+                    <template x-if="tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice'">
                         <button @click="switchToTab(tab)" @touchstart.passive="homeLongPressStart($event, tab)"
                             @touchend.passive="homeLongPressEnd($event, tab)"
                             @contextmenu.prevent="openTabContextMenu(tab, $event)"
-                            class="bg-white dark:bg-darkcard p-4 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center gap-2 transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 group home-grid-item">
+                            class="bg-white dark:bg-darkcard p-3 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center gap-1 transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 group home-grid-item">
                             <div
                                 class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-800/30 transition-colors">
                                 <i :data-lucide="getTabIcon(tab)" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
                             </div>
-                            <span class="font-bold text-gray-800 dark:text-gray-100 text-lg"
+                            <span class="font-bold text-gray-800 dark:text-gray-100 text-sm"
                                 x-text="toTitleCase(tab)"></span>
-                            <span class="text-[15px] text-gray-500 dark:text-gray-400">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">
                                 <span x-text="getTabCount(tab)"></span> items
                             </span>
                         </button>
@@ -208,36 +301,41 @@
             </div>
         </div>
 
-        <!-- Fixed Bottom Row - Reduced Height -->
         <div
-            class="flex-shrink-0 p-1.5 bg-gradient-to-t from-white via-white to-white/95 dark:from-darkbg dark:via-darkbg dark:to-darkbg/95 backdrop-blur-sm border-t border-gray-100 dark:border-gray-700">
-            <div class="grid grid-cols-3 gap-3 max-w-4xl mx-auto">
-                <!-- Secure Notes Tile -->
+            class="flex-shrink-0 p-3 bg-gradient-to-t from-white via-white to-white/95 dark:from-darkbg dark:via-darkbg dark:to-darkbg/95 backdrop-blur-sm border-t border-gray-100 dark:border-gray-700">
+            <div class="grid grid-cols-4 gap-3 max-w-4xl mx-auto">
+                <button @click="switchToTab('voice')"
+                    class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-voice-50 to-voice-100 dark:from-voice-900/30 dark:to-voice-800/20 hover:from-voice-100 hover:to-voice-200 dark:hover:from-voice-800/40 dark:hover:to-voice-700/30 transition-all active:scale-95 group border border-voice-100 dark:border-voice-800/30 shadow-sm">
+                    <i data-lucide="mic"
+                        class="w-5 h-5 text-voice-600 dark:text-voice-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Voice</span>
+                    <span class="text-xs text-voice-600 dark:text-voice-400 mt-0.5"
+                        x-text="getTabCount('voice')"></span>
+                </button>
+
                 <button @click="switchToTab('secure-notes')"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/20 hover:from-yellow-100 hover:to-yellow-200 dark:hover:from-yellow-800/40 dark:hover:to-yellow-700/30 transition-all active:scale-95 group border border-yellow-100 dark:border-yellow-800/30 shadow-sm">
                     <i data-lucide="lock"
                         class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mb-1 group-hover:scale-110 transition-transform"></i>
-                    <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Secure Notes</span>
-                    <span class="text-[15px] text-yellow-600 dark:text-yellow-400 mt-0.5"
+                    <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Secure</span>
+                    <span class="text-xs text-yellow-600 dark:text-yellow-400 mt-0.5"
                         x-text="secureNotes.length"></span>
                 </button>
 
-                <!-- Cards Tile -->
                 <button @click="switchToTab('cards')"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-800/40 dark:hover:to-blue-700/30 transition-all active:scale-95 group border border-blue-100 dark:border-blue-800/30 shadow-sm">
                     <i data-lucide="credit-card"
                         class="w-5 h-5 text-blue-600 dark:text-blue-400 mb-1 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Cards</span>
-                    <span class="text-[15px] text-blue-600 dark:text-blue-400 mt-0.5" x-text="cards.length"></span>
+                    <span class="text-xs text-blue-600 dark:text-blue-400 mt-0.5" x-text="cards.length"></span>
                 </button>
 
-                <!-- New Tab Tile -->
                 <button @click="openNewTabModal()"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 hover:from-green-100 hover:to-green-200 dark:hover:from-green-800/40 dark:hover:to-green-700/30 transition-all active:scale-95 group border border-green-100 dark:border-green-800/30 shadow-sm">
                     <i data-lucide="plus-circle"
                         class="w-5 h-5 text-green-600 dark:text-green-400 mb-1 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm text-gray-800 dark:text-gray-100">New Tab</span>
-                    <span class="text-[15px] text-green-600 dark:text-green-400 mt-0.5">+</span>
+                    <span class="text-xs text-green-600 dark:text-green-400 mt-0.5">+</span>
                 </button>
             </div>
         </div>
@@ -246,14 +344,14 @@
     <!-- TAB VIEW -->
     <div x-show="currentView === 'tab'" x-transition:enter.duration.300>
         <div class="bg-white dark:bg-darkcard shadow-sm pt-2 pb-0 z-10 transition-colors"
-            x-show="activeTab !== 'secure-notes' && activeTab !== 'cards'">
+            x-show="activeTab !== 'secure-notes' && activeTab !== 'cards' && activeTab !== 'voice'">
             <div class="relative flex items-center h-[50px]">
 
                 <div class="flex overflow-x-auto no-scrollbar gap-4 pb-0 pl-4 tab-scroller-fixed h-full flex-1"
                     x-ref="tabScroller">
                     <div class="flex items-end space-x-4">
                         <template x-for="tab in tabs" :key="tab">
-                            <template x-if="tab !== 'secure-notes' && tab !== 'cards'">
+                            <template x-if="tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice'">
                                 <button :x-ref="'tab-' + tab" :id="getTabElementID(tab)"
                                     @click="if (!longPressActive) { activeTab = tab; scrollTabIntoView(tab, 'smooth', 'center'); }"
                                     @touchstart.passive="longPressStart($event, tab)"
@@ -281,7 +379,13 @@
         <main class="flex-1 overflow-y-auto p-4 pb-28" @touchstart.passive="touchStart($event)"
             @touchend.passive="touchEnd($event)">
 
-            <!-- Secure Notes Header -->
+            <div x-show="activeTab === 'voice'"
+                class="text-center bg-voice-50 dark:bg-voice-900/20 p-4 rounded-xl mb-4 border border-voice-100 dark:border-voice-800/30">
+                <p class="text-gray-700 dark:text-gray-300 font-bold flex justify-center items-center gap-2">
+                    <i data-lucide="mic" class="w-5 h-5 text-voice-600"></i> Voice Notes
+                </p>
+            </div>
+
             <div x-show="activeTab === 'secure-notes'"
                 class="text-center bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl mb-4 border border-yellow-100 dark:border-yellow-800/30">
                 <p class="text-gray-700 dark:text-gray-300 font-bold flex justify-center items-center gap-2">
@@ -289,7 +393,6 @@
                 </p>
             </div>
 
-            <!-- Cards Header -->
             <div x-show="activeTab === 'cards'" class="flex flex-col h-full -mt-4 animate-slide-in-right">
                 <div class="grid gap-4 mt-4">
                     <div class="flex justify-between items-center py-3 px-1">
@@ -382,7 +485,8 @@
                 </div>
             </div>
 
-            <div x-show="sortedItems.length === 0 && activeTab !== 'secure-notes' && activeTab !== 'cards'">
+            <div
+                x-show="sortedItems.length === 0 && activeTab !== 'secure-notes' && activeTab !== 'cards' && activeTab !== 'voice'">
                 <div class="flex flex-col items-center justify-center mt-20 text-gray-300 dark:text-gray-600">
                     <i data-lucide="inbox" class="w-16 h-16 mb-4 opacity-50"></i>
                     <p>No items in <span class="font-bold text-gray-400 dark:text-gray-500"
@@ -390,7 +494,63 @@
                 </div>
             </div>
 
-            <div class="grid gap-4" x-show="activeTab !== 'cards'">
+            <!-- Voice Notes Display -->
+            <div x-show="activeTab === 'voice'" class="grid gap-4">
+                <template x-for="item in sortedItems" :key="item.id">
+                    <div class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative group transition-all hover:shadow-md"
+                        :class="{ 'opacity-50 dark:opacity-40': item.isDone }" x-transition:leave.opacity.duration.300>
+
+                        <div @click="openEditItemModal(item)" class="cursor-pointer">
+                            <div x-show="item.note"
+                                class="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg whitespace-pre-line border border-gray-100 dark:border-gray-700"
+                                x-text="item.note"></div>
+                        </div>
+
+                        <div
+                            class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-between items-center">
+                            <span class="text-[10px] text-gray-400 dark:text-gray-600"
+                                x-text="new Date(item.id).toLocaleDateString()"></span>
+
+                            <div class="flex items-center gap-3">
+                                <button @click.stop="toggleFavorite(item.id)"
+                                    class="p-1 rounded-full transition-colors active:scale-95"
+                                    :class="item.isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'">
+                                    <i data-lucide="heart" class="w-5 h-5"
+                                        :fill="item.isFavorite ? 'currentColor' : 'none'"></i>
+                                </button>
+
+                                <button @click.stop="toggleDone(item.id)"
+                                    class="text-xs font-bold transition-colors py-1 px-2 rounded-full"
+                                    :class="item.isDone ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300 hover:text-blue-600'">
+                                    <i data-lucide="check-circle" class="w-3 h-3 inline-block mr-1"></i>
+                                    <span x-text="item.isDone ? 'UNDONE' : 'MARK DONE'"></span>
+                                </button>
+
+                                <button @click.stop="confirmDelete(item.id)"
+                                    class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <div x-show="sortedItems.length === 0 && activeTab === 'voice'"
+                    class="flex flex-col items-center justify-center py-16 text-gray-300 dark:text-gray-600">
+                    <div
+                        class="w-20 h-20 rounded-full bg-voice-50 dark:bg-voice-900/20 flex items-center justify-center mb-4">
+                        <i data-lucide="mic" class="w-8 h-8 text-voice-400 dark:text-voice-500"></i>
+                    </div>
+                    <p class="text-lg font-medium text-gray-400 dark:text-gray-500 mb-2">No voice notes yet</p>
+                    <p class="text-sm text-gray-400 dark:text-gray-600 text-center max-w-xs">
+                        Tap the microphone button to record your first voice note
+                    </p>
+                </div>
+            </div>
+
+            <!-- Other Tabs Display -->
+            <div class="grid gap-4"
+                x-show="activeTab !== 'cards' && activeTab !== 'voice' && activeTab !== 'secure-notes'">
                 <template x-for="item in sortedItems" :key="item.id">
                     <div class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative group transition-all hover:shadow-md"
                         :class="{ 'opacity-50 dark:opacity-40': item.isDone && activeTab !== 'secure-notes' }"
@@ -420,21 +580,6 @@
                             </div>
                         </template>
 
-                        <template x-if="activeTab === 'secure-notes'">
-                            <div @click="openEditItemModal(item)" class="cursor-pointer">
-                                <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg pr-10 leading-tight"
-                                    x-text="item.title"></h3>
-                                <div x-show="item.note"
-                                    class="mt-3 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg whitespace-pre-line border border-gray-100 dark:border-gray-700 flex justify-between items-start">
-                                    <p class="whitespace-pre-line break-words mr-2" x-text="item.note"></p>
-                                    <button @click.stop="copyToClipboard(item.note, 'Secure Note')"
-                                        class="p-1 flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 active:scale-95 transition-transform">
-                                        <i data-lucide="copy" class="w-3 h-3"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </template>
-
                         <template x-if="!isTodoTab(activeTab) && activeTab !== 'secure-notes'">
                             <div @click="openEditItemModal(item)" class="cursor-pointer">
                                 <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg pr-10 leading-tight"
@@ -449,8 +594,8 @@
                             </div>
                         </template>
 
-                        <div class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-between items-center"
-                            x-show="activeTab !== 'secure-notes'">
+                        <div
+                            class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-between items-center">
                             <span class="text-[10px] text-gray-400 dark:text-gray-600"
                                 x-text="new Date(item.id).toLocaleDateString()"></span>
 
@@ -476,9 +621,31 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </template>
+            </div>
 
-                        <div class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-end items-center"
-                            x-show="activeTab === 'secure-notes'">
+            <!-- Secure Notes Display -->
+            <div x-show="activeTab === 'secure-notes'" class="grid gap-4">
+                <template x-for="item in sortedItems" :key="item.id">
+                    <div class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative group transition-all hover:shadow-md"
+                        x-transition:leave.opacity.duration.300>
+
+                        <div @click="openEditItemModal(item)" class="cursor-pointer">
+                            <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg pr-10 leading-tight"
+                                x-text="item.title"></h3>
+                            <div x-show="item.note"
+                                class="mt-3 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg whitespace-pre-line border border-gray-100 dark:border-gray-700 flex justify-between items-start">
+                                <p class="whitespace-pre-line break-words mr-2" x-text="item.note"></p>
+                                <button @click.stop="copyToClipboard(item.note, 'Secure Note')"
+                                    class="p-1 flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 active:scale-95 transition-transform">
+                                    <i data-lucide="copy" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div
+                            class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-end items-center">
                             <button @click.stop="confirmDelete(item.id)"
                                 class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -501,12 +668,107 @@
         <i data-lucide="plus" class="w-6 h-6"></i>
     </button>
 
-    <button x-show="currentView === 'tab' && activeTab !== 'cards'" @click="openAddItemModal()"
+    <!-- Voice Tab Floating Microphone -->
+    <button x-show="currentView === 'tab' && activeTab === 'voice'" @click="startRecording()"
+        class="fixed bottom-6 right-6 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800 bg-gradient-to-br from-voice-600 to-indigo-600 hover:from-voice-700 hover:to-indigo-700">
+        <i data-lucide="mic" class="w-6 h-6"></i>
+    </button>
+
+    <button x-show="currentView === 'tab' && activeTab !== 'cards' && activeTab !== 'voice'" @click="openAddItemModal()"
         class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800">
         <i data-lucide="plus" class="w-8 h-8"></i>
     </button>
 
-    <!-- MODALS (Keep all existing modals) -->
+    <!-- Minimal Voice Input Modal -->
+    <div x-show="modals.voiceInput"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end justify-center p-0" x-transition.opacity
+        @click.self="closeVoiceModal()">
+        <div
+            class="bg-white dark:bg-darkcard w-full max-w-md rounded-t-2xl shadow-2xl animate-slide-up border dark:border-gray-700">
+            <div class="flex flex-col items-center p-6">
+                <!-- Recording Indicator -->
+                <div x-show="isRecording" class="flex flex-col items-center justify-center mb-4">
+                    <div class="relative mb-3">
+                        <div class="absolute inset-0 rounded-full bg-red-100 dark:bg-red-900/30 pulse-ring"></div>
+                        <div
+                            class="w-16 h-16 bg-red-500 dark:bg-red-600 rounded-full flex items-center justify-center relative">
+                            <i data-lucide="mic" class="w-6 h-6 text-white"></i>
+                        </div>
+                    </div>
+
+                    <div class="waveform-minimal">
+                        <div class="waveform-bar-minimal"></div>
+                        <div class="waveform-bar-minimal"></div>
+                        <div class="waveform-bar-minimal"></div>
+                        <div class="waveform-bar-minimal"></div>
+                        <div class="waveform-bar-minimal"></div>
+                    </div>
+
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">
+                        <span class="font-bold text-red-500" x-text="recordingTime"></span> seconds
+                    </p>
+                </div>
+
+                <!-- Ready to Record State -->
+                <div x-show="!isRecording && !voiceText" class="flex flex-col items-center justify-center mb-6">
+                    <div
+                        class="w-20 h-20 rounded-full bg-voice-100 dark:bg-voice-900/30 flex items-center justify-center mb-4">
+                        <i data-lucide="mic" class="w-8 h-8 text-voice-600 dark:text-voice-400"></i>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300 font-medium">Tap to start recording</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Speak clearly into your microphone</p>
+                </div>
+
+                <!-- Transcript Display -->
+                <div x-show="voiceText" class="w-full mb-6">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">
+                        Transcript
+                    </label>
+                    <div class="relative">
+                        <textarea x-model="voiceText" rows="4"
+                            class="w-full p-4 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-voice-500 outline-none pr-10 text-sm"
+                            placeholder="Your voice note will appear here..." :readonly="isRecording"></textarea>
+
+                        <button x-show="voiceText && !isRecording" @click="voiceText = ''"
+                            class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col w-full gap-3">
+                    <!-- Start/Stop Recording Button -->
+                    <button x-show="!isRecording" @click="startRecording()"
+                        class="flex items-center justify-center gap-2 py-4 bg-voice-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-voice-700 active:scale-95 transition-transform w-full">
+                        <i data-lucide="mic" class="w-5 h-5"></i>
+                        <span x-text="voiceText ? 'Record Again' : 'Start Recording'"></span>
+                    </button>
+
+                    <button x-show="isRecording" @click="stopRecording()"
+                        class="flex items-center justify-center gap-2 py-4 bg-red-500 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-red-600 active:scale-95 transition-transform w-full">
+                        <i data-lucide="square" class="w-5 h-5"></i>
+                        Stop Recording
+                    </button>
+
+                    <!-- Save Button -->
+                    <button x-show="voiceText && !isRecording" @click="saveVoiceNote()"
+                        class="flex items-center justify-center gap-2 py-4 bg-green-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-green-700 active:scale-95 transition-transform w-full">
+                        <i data-lucide="save" class="w-5 h-5"></i>
+                        Save Voice Note
+                    </button>
+                </div>
+
+                <!-- Close Button -->
+                <button @click="closeVoiceModal()"
+                    class="mt-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
     <div x-show="modals.item"
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
         x-transition.opacity>
@@ -519,13 +781,13 @@
             </div>
 
             <div class="space-y-4">
-                <div>
+                <div x-show="activeTab !== 'voice'">
                     <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Title</label>
                     <input type="text" x-model="form.title"
                         class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                         :placeholder="getTitlePlaceholder()">
                 </div>
-                <template x-if="activeTab !== 'secure-notes' && !isTodoTab(activeTab)">
+                <template x-if="activeTab !== 'secure-notes' && !isTodoTab(activeTab) && activeTab !== 'voice'">
                     <div>
                         <label
                             class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Link</label>
@@ -552,7 +814,7 @@
 
             <button @click="saveItem()"
                 class="w-full mt-6 py-3.5 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform hover:bg-blue-700"
-                :disabled="!form.title.trim()">
+                :disabled="!form.title.trim() && activeTab !== 'voice'">
                 <span x-text="editingItem ? 'Save Changes' : 'Save Item'"></span>
             </button>
         </div>
@@ -765,17 +1027,17 @@
     <div x-show="modals.settings" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
         x-transition.opacity>
         <div
-            class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 shadow-xl dark:border dark:border-gray-700">
-            <div class="flex justify-between items-center mb-6">
+            class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 shadow-xl dark:border dark:border-gray-700 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100 dark:border-gray-700">
                 <h2 class="text-xl font-bold dark:text-white">App Settings</h2>
                 <button @click="modals.settings = false" class="text-gray-400"><i data-lucide="x"
                         class="w-6 h-6"></i></button>
             </div>
 
-            <!-- UPDATED: Default Launch View Settings - Inline Layout -->
-            <div class="mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
-                <h3 class="font-bold text-lg mb-3">Default Launch View</h3>
-                <div class="flex items-center gap-6 mb-3">
+            <!-- Default Launch View Settings -->
+            <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                <h3 class="font-bold text-md mb-2">Default Launch View</h3>
+                <div class="space-y-2">
                     <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
                         <input type="radio" x-model="tempDefaultView" value="home" name="default-view"
                             class="form-radio h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
@@ -786,39 +1048,107 @@
                             class="form-radio h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
                         Specific Tab
                     </label>
-                </div>
 
-                <div x-show="tempDefaultView === 'tab'" class="mt-3">
-                    <select x-model="tempDefaultTabID"
-                        class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-                        <template x-for="tab in tabs">
-                            <template x-if="tab !== 'secure-notes' && tab !== 'cards'">
-                                <option :value="tab" x-text="toTitleCase(tab)"></option>
+                    <div x-show="tempDefaultView === 'tab'" class="mt-2">
+                        <select x-model="tempDefaultTabID"
+                            class="w-full p-2 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                            <template x-for="tab in tabs">
+                                <template x-if="tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice'">
+                                    <option :value="tab" x-text="toTitleCase(tab)"></option>
+                                </template>
                             </template>
-                        </template>
-                    </select>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div class="mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
-                <h3 class="font-bold text-lg mb-3">Music Link Preference</h3>
-                <select x-model="tempMusicAppPreference" @change="persist()"
-                    class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+            <!-- Voice Notes Settings -->
+            <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                <h3 class="font-bold text-md mb-2">Voice Notes Settings</h3>
+                <div class="space-y-2">
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Language</label>
+                        <select x-model="tempVoiceLanguage"
+                            class="w-full p-2 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                            <option value="en-US">English (US)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="es-ES">Spanish</option>
+                            <option value="fr-FR">French</option>
+                            <option value="de-DE">German</option>
+                        </select>
+                    </div>
+
+                    <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
+                        <input type="checkbox" x-model="tempAutoSaveVoiceNotes" name="auto-save-voice"
+                            class="form-checkbox h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
+                        Auto-save voice notes
+                    </label>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Works best in Chrome/Edge browsers.</p>
+            </div>
+
+            <!-- Theme Settings -->
+            <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-md mb-0.5">Theme</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Switch between light and dark mode</p>
+                    </div>
+                    <button @click="toggleTheme()"
+                        class="p-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors active:scale-95">
+                        <i x-show="darkMode" data-lucide="sun" class="w-5 h-5 text-yellow-500"></i>
+                        <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5 text-blue-500"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Theme Settings -->
+            <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                <h3 class="font-bold text-md mb-2">Theme</h3>
+                <div class="flex items-center gap-6">
+                    <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
+                        <input type="radio" x-model="tempDarkMode" :value="false" name="theme"
+                            class="form-radio h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
+                        Light
+                    </label>
+                    <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
+                        <input type="radio" x-model="tempDarkMode" :value="true" name="theme"
+                            class="form-radio h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
+                        Dark
+                    </label>
+                </div>
+            </div>
+
+            <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                <h3 class="font-bold text-md mb-2">Music Link Preference</h3>
+                <select x-model="tempMusicAppPreference"
+                    class="w-full p-2 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                     <option value="youtube_music">YouTube Music</option>
                     <option value="spotify">Spotify</option>
                     <option value="apple_music">Apple Music</option>
                 </select>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Applies to all new items in the Music tab.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Applies to all new items in the Music tab.</p>
             </div>
 
+            <!-- <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                <h3 class="font-bold text-md mb-2 text-red-500">Danger Zone</h3>
+                <button @click="confirmDeleteAllData()"
+                    class="w-full py-2 bg-red-500 text-white rounded-xl font-bold shadow-md hover:bg-red-600 text-sm">
+                    Delete All App Data
+                </button>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">This will delete all your data including items,
+                    tabs, and preferences.</p>
+            </div> -->
+
             <button @click="savePreferences()"
-                :disabled="tempDefaultTabID === defaultTabID && tempMusicAppPreference === musicAppPreference && tempDefaultView === defaultView"
-                class="w-full mt-6 py-3.5 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform hover:bg-blue-700 disabled:opacity-50">
+                :disabled="tempDefaultTabID === defaultTabID && tempMusicAppPreference === musicAppPreference && tempDefaultView === defaultView && tempVoiceLanguage === voiceLanguage && tempAutoSaveVoiceNotes === autoSaveVoiceNotes"
+                class="w-full mt-4 py-3 bg-blue-600 text-white rounded-xl font-bold text-md shadow-lg active:scale-95 transition-transform hover:bg-blue-700 disabled:opacity-50">
                 Save Changes
             </button>
 
-            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                <div class="flex justify-between items-center text-xs text-gray-400 dark:text-gray-600 pt-2">
+            <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex justify-between items-center text-xs text-gray-400 dark:text-gray-600">
                     <span>Version <span x-text="version"></span></span>
                     <span x-show="updateAvailable"
                         class="text-blue-500 dark:text-blue-400 font-bold flex items-center gap-1">
@@ -827,540 +1157,811 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div x-show="modals.deleteAll" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
-            x-transition.opacity>
+    <div x-show="modals.deleteAll" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+        x-transition.opacity>
+        <div
+            class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
             <div
-                class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
-                <div
-                    class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i data-lucide="skull" class="w-6 h-6"></i>
-                </div>
-                <h3 class="text-lg font-bold mb-2 dark:text-white">Delete ALL App Data?</h3>
-                <p class="text-sm text-red-500 mb-6 font-bold">This includes all items, tabs, and preferences. THIS
-                    CANNOT
-                    BE UNDONE.</p>
-                <div class="flex gap-3">
-                    <button @click="modals.deleteAll = false"
-                        class="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-xl font-bold text-gray-600 dark:text-gray-300">Cancel</button>
-                    <button @click="performDeleteAllData()"
-                        class="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-bold shadow-md hover:bg-red-600">DELETE
-                        ALL</button>
-                </div>
+                class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="skull" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-bold mb-2 dark:text-white">Delete ALL App Data?</h3>
+            <p class="text-sm text-red-500 mb-6 font-bold">This includes all items, tabs, and preferences. THIS
+                CANNOT
+                BE UNDONE.</p>
+            <div class="flex gap-3">
+                <button @click="modals.deleteAll = false"
+                    class="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-xl font-bold text-gray-600 dark:text-gray-300">Cancel</button>
+                <button @click="performDeleteAllData()"
+                    class="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-bold shadow-md hover:bg-red-600">DELETE
+                    ALL</button>
             </div>
         </div>
+    </div>
 
-        <div x-show="modals.update" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
-            x-transition.opacity>
+    <div x-show="modals.update" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+        x-transition.opacity>
+        <div
+            class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
             <div
-                class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
-                <div
-                    class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i data-lucide="cloud-download" class="w-6 h-6"></i>
-                </div>
-                <h3 class="text-lg font-bold mb-2 dark:text-white">App Update Ready!</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">A new version is available. Restart the app to
-                    apply the update.</p>
-                <button @click="reloadApp()"
-                    class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-500">Update</button>
+                class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="cloud-download" class="w-6 h-6"></i>
             </div>
+            <h3 class="text-lg font-bold mb-2 dark:text-white">App Update Ready!</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">A new version is available. Restart the app to
+                apply the update.</p>
+            <button @click="reloadApp()"
+                class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-500">Update</button>
         </div>
+    </div>
 
-        <div x-show="modals.tabContext" x-cloak :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }"
-            @click.outside="modals.tabContext = false"
-            class="fixed bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 z-[60] text-sm animate-scale-in border border-gray-100 dark:border-gray-700">
-            <ul class="space-y-1 w-32">
-                <li>
-                    <button @click="modals.tabContext = false; openEditTabModal()"
-                        class="w-full text-left px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                        <i data-lucide="pencil" class="w-4 h-4"></i>
-                        Rename
-                    </button>
-                </li>
-                <li>
-                    <button @click="modals.tabContext = false; confirmDeleteTab(currentContextTab)"
-                        class="w-full text-left px-3 py-2 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center gap-2">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        Delete
-                    </button>
-                </li>
-            </ul>
-        </div>
+    <div x-show="modals.tabContext" x-cloak :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }"
+        @click.outside="modals.tabContext = false"
+        class="fixed bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 z-[60] text-sm animate-scale-in border border-gray-100 dark:border-gray-700">
+        <ul class="space-y-1 w-32">
+            <li>
+                <button @click="modals.tabContext = false; openEditTabModal()"
+                    class="w-full text-left px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                    Rename
+                </button>
+            </li>
+            <li>
+                <button @click="modals.tabContext = false; confirmDeleteTab(currentContextTab)"
+                    class="w-full text-left px-3 py-2 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center gap-2">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    Delete
+                </button>
+            </li>
+        </ul>
+    </div>
 
-        <script>
-            function app() {
-                return {
-                    version: '3.7.0', // Updated version for UI/UX improvements
+    <script>
+        function app() {
+            return {
+                version: '4.3.0',
 
-                    // New state for Home Dashboard
-                    currentView: 'home', // Will be set in init()
-                    defaultView: localStorage.getItem('bd_default_view') || 'home', // 'home' or 'tab'
-                    tempDefaultView: localStorage.getItem('bd_default_view') || 'home',
+                // Voice Input State
+                isRecording: false,
+                voiceText: '',
+                recognition: null,
+                recordingTime: 0,
+                recordingTimer: null,
+                voiceLanguage: 'en-US',
+                autoSaveVoiceNotes: false,
+                tempVoiceLanguage: 'en-US',
+                tempAutoSaveVoiceNotes: false,
 
-                    // Existing states
-                    activeTab: 'food', // Will be set in init()
-                    longPressActive: false,
-                    homeLongPressActive: false, // New: For home dashboard long press
-                    longPressTimer: null,
-                    homeLongPressTimer: null, // New: For home dashboard
-                    longPressDuration: 500,
-                    tabs: ['food', 'travel', 'movies', 'music', 'secure-notes', 'cards'],
-                    data: {},
-                    musicAppPreference: 'youtube_music',
-                    oldMusicAppPreference: 'youtube_music',
-                    tabMetadata: {},
-                    defaultTabID: localStorage.getItem('bd_default_tab') || 'food',
-                    darkMode: false,
-                    newTabError: '',
-                    tempDefaultTabID: 'food',
-                    tempMusicAppPreference: 'youtube_music',
-                    touchstartX: 0,
-                    touchendX: 0,
-                    swipeThreshold: 75,
-                    currentContextTab: null,
-                    contextMenuX: 0,
-                    contextMenuY: 0,
-                    copyMessage: null,
-                    copyTimer: null,
-                    modals: {
-                        item: false,
-                        tab: false,
-                        editTab: false,
-                        delete: false,
-                        deleteTab: false,
-                        tabContext: false,
-                        settings: false,
-                        cardItem: false,
-                        deleteAll: false,
-                        update: false
-                    },
-                    updateAvailable: false,
-                    waitingWorker: null,
-                    form: {
-                        id: null,
-                        title: '',
-                        link: '',
-                        note: '',
-                        isFavorite: false,
-                        isDone: false,
-                        type: 'note'
-                    },
-                    editingItem: false,
-                    cardForm: {
-                        id: null,
-                        title: '',
-                        number: '',
-                        holder: '',
-                        expiry: '',
-                        cvv: '',
-                        color: '#2563eb',
-                        type: 'card',
-                        note: ''
-                    },
-                    editingCard: false,
-                    newTabName: '',
-                    newTabType: 'normal',
-                    editTabName: '',
-                    itemToDelete: null,
-                    tabToDelete: null,
-                    ANIMATION_DURATION: 300,
+                // New state for Home Dashboard
+                currentView: 'home',
+                defaultView: localStorage.getItem('bd_default_view') || 'home',
+                tempDefaultView: localStorage.getItem('bd_default_view') || 'home',
 
-                    init() {
-                        // 1. Initialize Theme
-                        const savedTheme = localStorage.getItem('bd_theme');
-                        if (savedTheme) {
-                            this.darkMode = savedTheme === 'dark';
-                        } else {
-                            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                                this.darkMode = true;
-                            }
+                // Existing states
+                activeTab: 'food',
+                longPressActive: false,
+                homeLongPressActive: false,
+                longPressTimer: null,
+                homeLongPressTimer: null,
+                longPressDuration: 500,
+                tabs: ['food', 'travel', 'movies', 'music', 'voice', 'secure-notes', 'cards'],
+                data: {},
+                musicAppPreference: 'youtube_music',
+                oldMusicAppPreference: 'youtube_music',
+                tabMetadata: {},
+                defaultTabID: localStorage.getItem('bd_default_tab') || 'food',
+                darkMode: false,
+                newTabError: '',
+                tempDefaultTabID: 'food',
+                tempMusicAppPreference: 'youtube_music',
+                touchstartX: 0,
+                touchendX: 0,
+                swipeThreshold: 75,
+                currentContextTab: null,
+                contextMenuX: 0,
+                contextMenuY: 0,
+                copyMessage: null,
+                copyTimer: null,
+                modals: {
+                    item: false,
+                    tab: false,
+                    editTab: false,
+                    delete: false,
+                    deleteTab: false,
+                    tabContext: false,
+                    settings: false,
+                    cardItem: false,
+                    deleteAll: false,
+                    update: false,
+                    voiceInput: false
+                },
+                updateAvailable: false,
+                waitingWorker: null,
+                form: {
+                    id: null,
+                    title: '',
+                    link: '',
+                    note: '',
+                    isFavorite: false,
+                    isDone: false,
+                    type: 'note'
+                },
+                editingItem: false,
+                cardForm: {
+                    id: null,
+                    title: '',
+                    number: '',
+                    holder: '',
+                    expiry: '',
+                    cvv: '',
+                    color: '#2563eb',
+                    type: 'card',
+                    note: ''
+                },
+                editingCard: false,
+                newTabName: '',
+                newTabType: 'normal',
+                editTabName: '',
+                itemToDelete: null,
+                tabToDelete: null,
+                ANIMATION_DURATION: 300,
+
+                init() {
+                    // 1. Initialize Theme
+                    const savedTheme = localStorage.getItem('bd_theme');
+                    if (savedTheme) {
+                        this.darkMode = savedTheme === 'dark';
+                    } else {
+                        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                            this.darkMode = true;
                         }
+                    }
 
-                        // 2. Load Data and Preferences
-                        const sData = localStorage.getItem('bd_data');
-                        const sTabs = localStorage.getItem('bd_tabs');
-                        const sMusicApp = localStorage.getItem('bd_music_app');
-                        const sTabMeta = localStorage.getItem('bd_tab_metadata');
+                    // 2. Load Data and Preferences
+                    const sData = localStorage.getItem('bd_data');
+                    const sTabs = localStorage.getItem('bd_tabs');
+                    const sMusicApp = localStorage.getItem('bd_music_app');
+                    const sTabMeta = localStorage.getItem('bd_tab_metadata');
 
-                        this.data = sData ? JSON.parse(sData) : {};
-                        this.tabs = sTabs ? JSON.parse(sTabs) : ['food', 'travel', 'movies', 'music', 'secure-notes', 'cards'];
-                        this.tabMetadata = sTabMeta ? JSON.parse(sTabMeta) : {};
+                    this.data = sData ? JSON.parse(sData) : {};
+                    this.tabs = sTabs ? JSON.parse(sTabs) : ['food', 'travel', 'movies', 'music', 'voice', 'secure-notes', 'cards'];
+                    this.tabMetadata = sTabMeta ? JSON.parse(sTabMeta) : {};
 
-                        // Migrate old secure data to new structure
-                        this.migrateSecureData();
+                    // Initialize voice tab if it doesn't exist
+                    if (!this.data['voice']) {
+                        this.data['voice'] = [];
+                    }
 
-                        if (sMusicApp) {
-                            this.musicAppPreference = sMusicApp;
-                            this.oldMusicAppPreference = sMusicApp;
-                        }
+                    // Migrate old secure data to new structure
+                    this.migrateSecureData();
 
-                        this.migrateOldData();
+                    if (sMusicApp) {
+                        this.musicAppPreference = sMusicApp;
+                        this.oldMusicAppPreference = sMusicApp;
+                    }
 
-                        // 3. Load view preferences
-                        const sDefaultView = localStorage.getItem('bd_default_view');
-                        if (sDefaultView) {
-                            this.defaultView = sDefaultView;
-                            this.tempDefaultView = sDefaultView;
-                        }
+                    this.migrateOldData();
 
-                        // FIXED: Robust Default View Logic
-                        // 4. Set initial view based on default preference
-                        if (this.defaultView === 'tab') {
-                            // If default is specific tab, open that tab directly
-                            this.currentView = 'tab';
-                            this.activeTab = this.defaultTabID;
-                        } else {
-                            // Otherwise show home dashboard
-                            this.currentView = 'home';
-                            // Load last active tab from localStorage if exists
-                            const lastActiveTab = localStorage.getItem('bd_last_active_tab');
-                            if (lastActiveTab && this.tabs.includes(lastActiveTab)) {
-                                this.activeTab = lastActiveTab;
-                            }
-                        }
+                    // 3. Load voice preferences
+                    const sVoiceLanguage = localStorage.getItem('bd_voice_language');
+                    const sAutoSaveVoice = localStorage.getItem('bd_auto_save_voice');
 
-                        // 5. Ensure active tab exists
-                        if (!this.tabs.includes(this.activeTab)) {
-                            this.activeTab = this.defaultTabID;
-                        }
+                    if (sVoiceLanguage) {
+                        this.voiceLanguage = sVoiceLanguage;
+                        this.tempVoiceLanguage = sVoiceLanguage;
+                    }
+                    if (sAutoSaveVoice) {
+                        this.autoSaveVoiceNotes = sAutoSaveVoice === 'true';
+                        this.tempAutoSaveVoiceNotes = sAutoSaveVoice === 'true';
+                    }
 
-                        // 6. Alpine.js Watchers
-                        this.$watch('activeTab', (newTab) => {
-                            // Save last active tab for when returning to tab view
-                            if (this.currentView === 'tab') {
-                                localStorage.setItem('bd_last_active_tab', newTab);
-                            }
-                            this.$nextTick(() => {
-                                lucide.createIcons();
-                            });
-                        });
-                        this.$watch('darkMode', () => {
-                            this.$nextTick(() => lucide.createIcons());
-                        });
+                    // 4. Load view preferences
+                    const sDefaultView = localStorage.getItem('bd_default_view');
+                    if (sDefaultView) {
+                        this.defaultView = sDefaultView;
+                        this.tempDefaultView = sDefaultView;
+                    }
 
-                        // 7. Service Worker
-                        if ('serviceWorker' in navigator) {
-                            navigator.serviceWorker.register('sw.js').then(reg => {
-                                reg.addEventListener('waiting', () => {
-                                    this.updateAvailable = true;
-                                    this.waitingWorker = reg.waiting;
-                                });
-                            });
-                            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                                window.location.reload();
-                            });
-                        }
-
-                        this.$nextTick(() => lucide.createIcons());
-                    },
-
-                    // UPDATED: Improved long press handling for both home and tab view
-                    homeLongPressStart(event, tab) {
-                        this.homeLongPressActive = false;
-                        clearTimeout(this.homeLongPressTimer);
-
-                        this.homeLongPressTimer = setTimeout(() => {
-                            this.homeLongPressActive = true;
-                            this.openTabContextMenu(tab, event);
-                        }, this.longPressDuration);
-                    },
-
-                    homeLongPressEnd(event, tab) {
-                        clearTimeout(this.homeLongPressTimer);
-
-                        if (this.homeLongPressActive) {
-                            // Prevent normal click action after long press
-                            event.preventDefault();
-                            return;
-                        }
-                    },
-
-                    longPressStart(event, tab) {
-                        this.longPressActive = false;
-                        clearTimeout(this.longPressTimer);
-
-                        this.longPressTimer = setTimeout(() => {
-                            this.longPressActive = true;
-                            this.openTabContextMenu(tab, event);
-                        }, this.longPressDuration);
-                    },
-
-                    longPressEnd(event, tab) {
-                        clearTimeout(this.longPressTimer);
-
-                        if (this.longPressActive) {
-                            // Prevent normal click action after long press
-                            event.preventDefault();
-                            return;
-                        }
-                    },
-
-                    // UPDATED: Improved context menu positioning
-                    openTabContextMenu(tab, event) {
-                        if (tab === 'secure-notes' || tab === 'cards') return;
-                        this.currentContextTab = tab;
-
-                        // Get coordinates from touch or mouse event
-                        let clientX, clientY;
-                        if (event.touches && event.touches.length > 0) {
-                            clientX = event.touches[0].clientX;
-                            clientY = event.touches[0].clientY;
-                        } else if (event.changedTouches && event.changedTouches.length > 0) {
-                            clientX = event.changedTouches[0].clientX;
-                            clientY = event.changedTouches[0].clientY;
-                        } else {
-                            clientX = event.clientX;
-                            clientY = event.clientY;
-                        }
-
-                        // Ensure coordinates are valid
-                        if (clientX === undefined || clientY === undefined) {
-                            const targetRect = event.currentTarget.getBoundingClientRect();
-                            clientX = targetRect.left + (targetRect.width / 2);
-                            clientY = targetRect.bottom + 10;
-                        }
-
-                        const viewportWidth = window.innerWidth;
-                        const menuWidthEstimate = 200;
-                        let x = clientX;
-                        let y = clientY;
-
-                        if (x + menuWidthEstimate > viewportWidth) {
-                            x = viewportWidth - menuWidthEstimate - 10;
-                        }
-
-                        this.contextMenuX = x;
-                        this.contextMenuY = y;
-                        this.modals.tabContext = true;
-                    },
-
-                    // NEW: Function to get tab count (only un-done for todo tabs)
-                    getTabCount(tab) {
-                        const items = this.data[tab] || [];
-                        if (this.isTodoTab(tab)) {
-                            // For todo tabs, count only un-done items
-                            return items.filter(item => !item.isDone).length;
-                        }
-                        // For non-todo tabs, count all items
-                        return items.length;
-                    },
-
-                    // NEW: Home Dashboard Navigation Functions
-                    goToHome() {
-                        this.currentView = 'home';
-                        localStorage.setItem('bd_current_view', 'home');
-                        this.$nextTick(() => {
-                            lucide.createIcons();
-                        });
-                    },
-
-                    switchToTab(tab) {
+                    // Robust Default View Logic
+                    if (this.defaultView === 'tab') {
                         this.currentView = 'tab';
-                        this.activeTab = tab;
-                        localStorage.setItem('bd_current_view', 'tab');
-                        localStorage.setItem('bd_last_active_tab', tab);
+                        this.activeTab = this.defaultTabID;
+                    } else {
+                        this.currentView = 'home';
+                        const lastActiveTab = localStorage.getItem('bd_last_active_tab');
+                        if (lastActiveTab && this.tabs.includes(lastActiveTab)) {
+                            this.activeTab = lastActiveTab;
+                        }
+                    }
+
+                    // 5. Ensure active tab exists
+                    if (!this.tabs.includes(this.activeTab)) {
+                        this.activeTab = this.defaultTabID;
+                    }
+
+                    // 6. Initialize Speech Recognition if available
+                    this.initializeSpeechRecognition();
+
+                    // 7. Set up History API for back button navigation
+                    this.setupHistoryNavigation();
+
+                    // 8. Alpine.js Watchers
+                    this.$watch('activeTab', (newTab) => {
+                        if (this.currentView === 'tab') {
+                            localStorage.setItem('bd_last_active_tab', newTab);
+                            this.updateHistoryState(newTab);
+                        }
                         this.$nextTick(() => {
-                            if (tab !== 'secure-notes' && tab !== 'cards') {
-                                this.scrollTabIntoView(tab, 'smooth', 'center');
-                            }
                             lucide.createIcons();
                         });
-                    },
+                    });
+                    this.$watch('darkMode', () => {
+                        this.$nextTick(() => lucide.createIcons());
+                    });
 
-                    // Helper function for tab icons
-                    getTabIcon(tab) {
-                        const iconMap = {
-                            'food': 'utensils',
-                            'travel': 'map-pin',
-                            'movies': 'film',
-                            'music': 'music',
-                            'secure-notes': 'lock',
-                            'cards': 'credit-card',
-                            'books': 'book',
-                            'reading': 'book-open',
-                            'shopping': 'shopping-cart',
-                            'work': 'briefcase',
-                            'health': 'heart',
-                            'fitness': 'dumbbell',
-                            'ideas': 'lightbulb',
-                            'projects': 'folder-kanban'
-                        };
-                        return iconMap[tab] || 'folder';
-                    },
+                    // 9. Service Worker
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.register('sw.js').then(reg => {
+                            reg.addEventListener('waiting', () => {
+                                this.updateAvailable = true;
+                                this.waitingWorker = reg.waiting;
+                            });
+                        });
+                        navigator.serviceWorker.addEventListener('controllerchange', () => {
+                            window.location.reload();
+                        });
+                    }
 
-                    // --- EXISTING FUNCTIONS (Keep all existing functionality) ---
-                    migrateOldData() {
-                        // Migration logic remains the same
-                    },
+                    this.$nextTick(() => lucide.createIcons());
+                },
 
-                    migrateSecureData() {
-                        // If old 'secure' data exists, migrate to new structure
-                        if (this.data['secure']) {
-                            const secureData = this.data['secure'];
-
-                            // Separate notes and cards
-                            const secureNotes = secureData.filter(item => item.type !== 'card');
-                            const cards = secureData.filter(item => item.type === 'card');
-
-                            // Assign to new keys
-                            this.data['secure-notes'] = secureNotes;
-                            this.data['cards'] = cards;
-
-                            // Remove old secure key
-                            delete this.data['secure'];
-
-                            // Update tabs if needed
-                            const secureIndex = this.tabs.indexOf('secure');
-                            if (secureIndex !== -1) {
-                                this.tabs.splice(secureIndex, 1, 'secure-notes', 'cards');
-                            }
-
-                            // Persist changes
-                            this.persist();
+                // NEW: History API for back button navigation
+                setupHistoryNavigation() {
+                    // Set initial history state
+                    if (!window.history.state || window.history.state.view !== this.currentView) {
+                        const state = { view: this.currentView };
+                        if (this.currentView === 'tab') {
+                            state.tab = this.activeTab;
+                            window.history.replaceState(state, '', `#${this.activeTab}`);
+                        } else {
+                            window.history.replaceState(state, '', '#home');
                         }
-                    },
+                    }
 
-                    updateExistingMusicLinks() {
-                        const musicData = this.data['music'] || [];
-                        this.data['music'] = musicData.map(item => {
-                            let isAutoLink = false;
-                            const oldApp = this.oldMusicAppPreference;
-                            const newApp = this.musicAppPreference;
+                    // Handle back/forward navigation
+                    window.addEventListener('popstate', (event) => {
+                        if (event.state && event.state.view === 'tab' && event.state.tab) {
+                            if (this.tabs.includes(event.state.tab)) {
+                                this.currentView = 'tab';
+                                this.activeTab = event.state.tab;
+                            } else {
+                                this.goToHome();
+                            }
+                        } else {
+                            this.goToHome();
+                        }
+                    });
+                },
 
-                            if (oldApp !== newApp) {
-                                if (item.link && (item.link.includes('spotify.com/0') || item.link.includes('apple.com/us/search') || item.link.includes('youtube.com/search'))) {
-                                    isAutoLink = true;
+                // NEW: Update history state
+                updateHistoryState(tab) {
+                    if (this.currentView === 'tab') {
+                        window.history.pushState({ view: 'tab', tab: tab }, '', `#${tab}`);
+                    }
+                },
+
+                // NEW: Initialize Speech Recognition - FIXED for better transcription
+                initializeSpeechRecognition() {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+                    if (SpeechRecognition) {
+                        this.recognition = new SpeechRecognition();
+                        this.recognition.continuous = true;
+                        this.recognition.interimResults = true;
+                        this.recognition.lang = this.voiceLanguage;
+
+                        // Store interim results separately
+                        this.interimTranscript = '';
+
+                        this.recognition.onresult = (event) => {
+                            let finalTranscript = '';
+                            this.interimTranscript = '';
+
+                            for (let i = event.resultIndex; i < event.results.length; i++) {
+                                const transcript = event.results[i][0].transcript;
+                                if (event.results[i].isFinal) {
+                                    finalTranscript += transcript;
+                                    // Add space between final results
+                                    if (i < event.results.length - 1) {
+                                        finalTranscript += ' ';
+                                    }
+                                } else {
+                                    this.interimTranscript += transcript;
                                 }
                             }
 
-                            if (item.title && isAutoLink) {
-                                item.link = this.autoGenerateMusicLink(item.title);
+                            // Update voice text with final results + current interim
+                            if (finalTranscript) {
+                                // Clean up the text - remove duplicate words and fix spacing
+                                let cleanText = finalTranscript.trim();
+
+                                // Basic cleaning: remove common duplication patterns
+                                cleanText = cleanText.replace(/(\b\w+\b)(?:\s+\1)+/gi, '$1');
+
+                                // Add to existing text
+                                if (this.voiceText && !this.voiceText.endsWith(cleanText)) {
+                                    this.voiceText = this.voiceText + ' ' + cleanText;
+                                } else {
+                                    this.voiceText = cleanText;
+                                }
+
+                                // Clean up the final text
+                                this.voiceText = this.cleanVoiceText(this.voiceText);
                             }
-                            return item;
+
+                            // If we have interim results, show them temporarily
+                            if (this.interimTranscript && !this.interimTranscript.includes(this.voiceText)) {
+                                const displayText = this.voiceText + ' ' + this.interimTranscript;
+                                this.voiceText = displayText.trim();
+                            }
+                        };
+
+                        this.recognition.onerror = (event) => {
+                            console.error('Speech recognition error:', event.error);
+                            this.stopRecording();
+                            if (event.error === 'not-allowed') {
+                                this.showCopyToast('Microphone access denied. Please check permissions.');
+                            }
+                        };
+
+                        this.recognition.onend = () => {
+                            if (this.isRecording) {
+                                this.stopRecording();
+                            }
+                        };
+                    }
+                },
+
+                // NEW: Clean voice text to fix common issues
+                cleanVoiceText(text) {
+                    if (!text) return '';
+
+                    // Remove extra spaces
+                    text = text.replace(/\s+/g, ' ');
+
+                    // Fix common punctuation issues
+                    text = text.replace(/\s*\.\s*/g, '. ');
+                    text = text.replace(/\s*,\s*/g, ', ');
+                    text = text.replace(/\s*\?\s*/g, '? ');
+                    text = text.replace(/\s*!\s*/g, '! ');
+
+                    // Capitalize first letter
+                    text = text.charAt(0).toUpperCase() + text.slice(1);
+
+                    // Remove trailing space before punctuation
+                    text = text.replace(/\s+([.,?!])/g, '$1');
+
+                    return text.trim();
+                },
+
+                // NEW: Voice Input Functions - Direct recording in voice tab
+                startVoiceInput() {
+                    this.voiceText = '';
+                    this.modals.voiceInput = true;
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                    });
+                },
+
+                startRecording() {
+                    // Direct recording from voice tab floating button
+                    if (this.activeTab === 'voice' && this.currentView === 'tab') {
+                        this.voiceText = '';
+                        this.modals.voiceInput = true;
+                        this.$nextTick(() => {
+                            this.startActualRecording();
+                            lucide.createIcons();
                         });
-                    },
+                    } else {
+                        this.startVoiceInput();
+                    }
+                },
 
-                    persist() {
-                        if (this.oldMusicAppPreference !== this.musicAppPreference) {
-                            this.updateExistingMusicLinks();
-                            this.oldMusicAppPreference = this.musicAppPreference;
+                startActualRecording() {
+                    if (!this.recognition) {
+                        this.showCopyToast('Speech recognition not supported in your browser.');
+                        return;
+                    }
+
+                    try {
+                        this.isRecording = true;
+                        this.recordingTime = 0;
+                        this.voiceText = '';
+                        this.interimTranscript = '';
+
+                        // Start timer
+                        this.recordingTimer = setInterval(() => {
+                            this.recordingTime++;
+                        }, 1000);
+
+                        // Start speech recognition
+                        this.recognition.lang = this.voiceLanguage;
+                        this.recognition.start();
+
+                    } catch (error) {
+                        console.error('Error starting speech recognition:', error);
+                        this.isRecording = false;
+                        this.showCopyToast('Error starting voice recording.');
+                    }
+                },
+
+                closeVoiceModal() {
+                    if (this.isRecording) {
+                        this.stopRecording();
+                    }
+                    this.modals.voiceInput = false;
+                    this.voiceText = '';
+                },
+
+                stopRecording() {
+                    if (this.recognition && this.isRecording) {
+                        try {
+                            this.recognition.stop();
+                        } catch (error) {
+                            console.error('Error stopping speech recognition:', error);
                         }
-                        localStorage.setItem('bd_data', JSON.stringify(this.data));
-                        localStorage.setItem('bd_tabs', JSON.stringify(this.tabs));
-                        localStorage.setItem('bd_music_app', this.musicAppPreference);
-                        localStorage.setItem('bd_default_tab', this.defaultTabID);
-                        localStorage.setItem('bd_tab_metadata', JSON.stringify(this.tabMetadata));
-                        localStorage.setItem('bd_theme', this.darkMode ? 'dark' : 'light');
-                        localStorage.setItem('bd_current_view', this.currentView);
-                        localStorage.setItem('bd_default_view', this.defaultView);
-                    },
+                    }
 
-                    scrollTabIntoView(tab, behavior = 'smooth', block = 'center') {
-                        const tabElement = this.$refs[`tab-${tab}`];
-                        if (tabElement) {
-                            tabElement.scrollIntoView({ behavior: behavior, inline: block });
+                    this.isRecording = false;
+                    if (this.recordingTimer) {
+                        clearInterval(this.recordingTimer);
+                        this.recordingTimer = null;
+                    }
+
+                    // If auto-save is enabled and we have text, save immediately
+                    if (this.autoSaveVoiceNotes && this.voiceText.trim()) {
+                        setTimeout(() => this.saveVoiceNote(), 500);
+                    }
+                },
+
+                saveVoiceNote() {
+                    if (!this.voiceText.trim()) {
+                        this.showCopyToast('No text to save.');
+                        return;
+                    }
+
+                    const noteId = Date.now();
+                    const noteItem = {
+                        id: noteId,
+                        title: '', // No title for voice notes
+                        note: this.voiceText.trim(),
+                        link: '',
+                        isFavorite: false,
+                        isDone: false,
+                        type: 'note'
+                    };
+
+                    // Add to voice tab
+                    let list = this.data['voice'] || [];
+                    list.unshift(noteItem);
+                    this.data['voice'] = list;
+
+                    // Persist data
+                    this.persist();
+
+                    // Close modal and show success message
+                    this.modals.voiceInput = false;
+                    this.showCopyToast('Voice note saved successfully!');
+                    this.voiceText = '';
+
+                    this.$nextTick(() => lucide.createIcons());
+                },
+
+                // UPDATED: Improved long press handling
+                homeLongPressStart(event, tab) {
+                    this.homeLongPressActive = false;
+                    clearTimeout(this.homeLongPressTimer);
+
+                    this.homeLongPressTimer = setTimeout(() => {
+                        this.homeLongPressActive = true;
+                        this.openTabContextMenu(tab, event);
+                    }, this.longPressDuration);
+                },
+
+                homeLongPressEnd(event, tab) {
+                    clearTimeout(this.homeLongPressTimer);
+
+                    if (this.homeLongPressActive) {
+                        event.preventDefault();
+                        return;
+                    }
+                },
+
+                longPressStart(event, tab) {
+                    this.longPressActive = false;
+                    clearTimeout(this.longPressTimer);
+
+                    this.longPressTimer = setTimeout(() => {
+                        this.longPressActive = true;
+                        this.openTabContextMenu(tab, event);
+                    }, this.longPressDuration);
+                },
+
+                longPressEnd(event, tab) {
+                    clearTimeout(this.longPressTimer);
+
+                    if (this.longPressActive) {
+                        event.preventDefault();
+                        return;
+                    }
+                },
+
+                openTabContextMenu(tab, event) {
+                    if (tab === 'secure-notes' || tab === 'cards' || tab === 'voice') return;
+                    this.currentContextTab = tab;
+
+                    let clientX, clientY;
+                    if (event.touches && event.touches.length > 0) {
+                        clientX = event.touches[0].clientX;
+                        clientY = event.touches[0].clientY;
+                    } else if (event.changedTouches && event.changedTouches.length > 0) {
+                        clientX = event.changedTouches[0].clientX;
+                        clientY = event.changedTouches[0].clientY;
+                    } else {
+                        clientX = event.clientX;
+                        clientY = event.clientY;
+                    }
+
+                    if (clientX === undefined || clientY === undefined) {
+                        const targetRect = event.currentTarget.getBoundingClientRect();
+                        clientX = targetRect.left + (targetRect.width / 2);
+                        clientY = targetRect.bottom + 10;
+                    }
+
+                    const viewportWidth = window.innerWidth;
+                    const menuWidthEstimate = 200;
+                    let x = clientX;
+                    let y = clientY;
+
+                    if (x + menuWidthEstimate > viewportWidth) {
+                        x = viewportWidth - menuWidthEstimate - 10;
+                    }
+
+                    this.contextMenuX = x;
+                    this.contextMenuY = y;
+                    this.modals.tabContext = true;
+                },
+
+                // UPDATED: Voice notes counter now only counts un-done items
+                getTabCount(tab) {
+                    const items = this.data[tab] || [];
+                    if (this.isTodoTab(tab)) {
+                        return items.filter(item => !item.isDone).length;
+                    }
+                    if (tab === 'voice') {
+                        return items.filter(item => !item.isDone).length;
+                    }
+                    return items.length;
+                },
+
+                goToHome() {
+                    this.currentView = 'home';
+                    window.history.pushState({ view: 'home' }, '', '#home');
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                    });
+                },
+
+                switchToTab(tab) {
+                    this.currentView = 'tab';
+                    this.activeTab = tab;
+                    this.updateHistoryState(tab);
+                    this.$nextTick(() => {
+                        if (tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice') {
+                            this.scrollTabIntoView(tab, 'smooth', 'center');
                         }
-                    },
+                        lucide.createIcons();
+                    });
+                },
 
-                    touchStart(e) {
-                        this.touchstartX = e.changedTouches[0].screenX;
-                    },
+                getTabIcon(tab) {
+                    const iconMap = {
+                        'food': 'utensils',
+                        'travel': 'map-pin',
+                        'movies': 'film',
+                        'music': 'music',
+                        'voice': 'mic',
+                        'secure-notes': 'lock',
+                        'cards': 'credit-card',
+                        'books': 'book',
+                        'reading': 'book-open',
+                        'shopping': 'shopping-cart',
+                        'work': 'briefcase',
+                        'health': 'heart',
+                        'fitness': 'dumbbell',
+                        'ideas': 'lightbulb',
+                        'projects': 'folder-kanban'
+                    };
+                    return iconMap[tab] || 'folder';
+                },
 
-                    touchEnd(e) {
-                        this.touchendX = e.changedTouches[0].screenX;
-                        this.handleSwipe();
-                    },
+                migrateOldData() {
+                    // Migration logic remains the same
+                    // Keep existing migration code
+                },
 
-                    handleSwipe() {
-                        if (this.modals.item || this.modals.cardItem || this.modals.settings || this.modals.tabContext || this.activeTab === 'secure-notes' || this.activeTab === 'cards') return;
-                        if (this.touchendX < this.touchstartX - this.swipeThreshold) {
-                            this.changeTab('next');
-                        }
-                        if (this.touchendX > this.touchstartX + this.swipeThreshold) {
-                            this.changeTab('prev');
-                        }
-                    },
+                migrateSecureData() {
+                    if (this.data['secure']) {
+                        const secureData = this.data['secure'];
 
-                    changeTab(direction) {
-                        const visibleTabs = this.tabs.filter(t => t !== 'secure-notes' && t !== 'cards');
-                        let currentIndex = visibleTabs.indexOf(this.activeTab);
-                        let nextIndex;
+                        const secureNotes = secureData.filter(item => item.type !== 'card');
+                        const cards = secureData.filter(item => item.type === 'card');
 
-                        if (direction === 'next') {
-                            nextIndex = (currentIndex + 1) % visibleTabs.length;
-                        } else if (direction === 'prev') {
-                            nextIndex = (currentIndex - 1 + visibleTabs.length) % visibleTabs.length;
-                        }
-                        this.activeTab = visibleTabs[nextIndex];
-                        this.scrollTabIntoView(this.activeTab, 'smooth', 'center');
-                    },
+                        this.data['secure-notes'] = secureNotes;
+                        this.data['cards'] = cards;
 
-                    toggleTheme() {
-                        this.darkMode = !this.darkMode;
-                        localStorage.setItem('bd_theme', this.darkMode ? 'dark' : 'light');
-                    },
+                        delete this.data['secure'];
 
-                    openSettingsModal() {
-                        this.tempDefaultTabID = this.defaultTabID;
-                        this.tempMusicAppPreference = this.musicAppPreference;
-                        this.tempDefaultView = this.defaultView;
-                        this.modals.settings = true;
-                        this.$nextTick(() => lucide.createIcons());
-                    },
-
-                    openSecureNotesSettings() {
-                        // Now just switches to secure-notes tab
-                        this.currentView = 'tab';
-                        this.activeTab = 'secure-notes';
-                        localStorage.setItem('bd_current_view', 'tab');
-                        this.$nextTick(() => lucide.createIcons());
-                    },
-
-                    confirmDeleteAllData() {
-                        this.modals.settings = false;
-                        this.modals.deleteAll = true;
-                    },
-
-                    performDeleteAllData() {
-                        localStorage.removeItem('bd_data');
-                        localStorage.removeItem('bd_tabs');
-                        localStorage.removeItem('bd_music_app');
-                        localStorage.removeItem('bd_default_tab');
-                        localStorage.removeItem('bd_tab_metadata');
-                        localStorage.removeItem('bd_current_view');
-                        localStorage.removeItem('bd_default_view');
-                        localStorage.removeItem('bd_last_active_tab');
-                        window.location.reload();
-                    },
-
-                    reloadApp() {
-                        if (this.waitingWorker) this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-                    },
-
-                    get secureNotes() {
-                        return (this.data['secure-notes'] || []).filter(item => item.type !== 'card');
-                    },
-
-                    get cards() {
-                        return (this.data['cards'] || []).sort((a, b) => b.id - a.id);
-                    },
-
-                    getItemType(id) {
-                        if (!this.data[this.activeTab]) return 'note';
-                        const item = this.data[this.activeTab].find(i => i.id === id);
-                        return item ? item.type : 'note';
-                    },
-
-                    get sortedItems() {
-                        let items = this.data[this.activeTab] || [];
-
-                        if (this.activeTab === 'secure-notes') {
-                            return items.filter(item => item.type !== 'card').sort((a, b) => b.id - a.id);
+                        const secureIndex = this.tabs.indexOf('secure');
+                        if (secureIndex !== -1) {
+                            this.tabs.splice(secureIndex, 1, 'secure-notes', 'cards');
                         }
 
+                        this.persist();
+                    }
+                },
+
+                updateExistingMusicLinks() {
+                    const musicData = this.data['music'] || [];
+                    this.data['music'] = musicData.map(item => {
+                        let isAutoLink = false;
+                        const oldApp = this.oldMusicAppPreference;
+                        const newApp = this.musicAppPreference;
+
+                        if (oldApp !== newApp) {
+                            if (item.link && (item.link.includes('spotify.com/0') || item.link.includes('apple.com/us/search') || item.link.includes('youtube.com/search'))) {
+                                isAutoLink = true;
+                            }
+                        }
+
+                        if (item.title && isAutoLink) {
+                            item.link = this.autoGenerateMusicLink(item.title);
+                        }
+                        return item;
+                    });
+                },
+
+                persist() {
+                    if (this.oldMusicAppPreference !== this.musicAppPreference) {
+                        this.updateExistingMusicLinks();
+                        this.oldMusicAppPreference = this.musicAppPreference;
+                    }
+                    localStorage.setItem('bd_data', JSON.stringify(this.data));
+                    localStorage.setItem('bd_tabs', JSON.stringify(this.tabs));
+                    localStorage.setItem('bd_music_app', this.musicAppPreference);
+                    localStorage.setItem('bd_default_tab', this.defaultTabID);
+                    localStorage.setItem('bd_tab_metadata', JSON.stringify(this.tabMetadata));
+                    localStorage.setItem('bd_theme', this.darkMode ? 'dark' : 'light');
+                    localStorage.setItem('bd_current_view', this.currentView);
+                    localStorage.setItem('bd_default_view', this.defaultView);
+                    localStorage.setItem('bd_last_active_tab', this.activeTab);
+
+                    // Save voice preferences
+                    localStorage.setItem('bd_voice_language', this.voiceLanguage);
+                    localStorage.setItem('bd_auto_save_voice', this.autoSaveVoiceNotes);
+                },
+
+                scrollTabIntoView(tab, behavior = 'smooth', block = 'center') {
+                    const tabElement = this.$refs[`tab-${tab}`];
+                    if (tabElement) {
+                        tabElement.scrollIntoView({ behavior: behavior, inline: block });
+                    }
+                },
+
+                touchStart(e) {
+                    this.touchstartX = e.changedTouches[0].screenX;
+                },
+
+                touchEnd(e) {
+                    this.touchendX = e.changedTouches[0].screenX;
+                    this.handleSwipe();
+                },
+
+                handleSwipe() {
+                    if (this.modals.item || this.modals.cardItem || this.modals.settings || this.modals.tabContext || this.activeTab === 'secure-notes' || this.activeTab === 'cards' || this.activeTab === 'voice') return;
+                    if (this.touchendX < this.touchstartX - this.swipeThreshold) {
+                        this.changeTab('next');
+                    }
+                    if (this.touchendX > this.touchstartX + this.swipeThreshold) {
+                        this.changeTab('prev');
+                    }
+                },
+
+                changeTab(direction) {
+                    const visibleTabs = this.tabs.filter(t => t !== 'secure-notes' && t !== 'cards' && t !== 'voice');
+                    let currentIndex = visibleTabs.indexOf(this.activeTab);
+                    let nextIndex;
+
+                    if (direction === 'next') {
+                        nextIndex = (currentIndex + 1) % visibleTabs.length;
+                    } else if (direction === 'prev') {
+                        nextIndex = (currentIndex - 1 + visibleTabs.length) % visibleTabs.length;
+                    }
+                    this.activeTab = visibleTabs[nextIndex];
+                    this.updateHistoryState(this.activeTab);
+                    this.scrollTabIntoView(this.activeTab, 'smooth', 'center');
+                },
+
+                toggleTheme() {
+                    this.darkMode = !this.darkMode;
+                    localStorage.setItem('bd_theme', this.darkMode ? 'dark' : 'light');
+                },
+
+                openSettingsModal() {
+                    this.tempDefaultTabID = this.defaultTabID;
+                    this.tempMusicAppPreference = this.musicAppPreference;
+                    this.tempDefaultView = this.defaultView;
+                    this.tempVoiceLanguage = this.voiceLanguage;
+                    this.tempAutoSaveVoiceNotes = this.autoSaveVoiceNotes;
+                    this.modals.settings = true;
+                    this.$nextTick(() => lucide.createIcons());
+                },
+
+                openSecureNotesSettings() {
+                    this.currentView = 'tab';
+                    this.activeTab = 'secure-notes';
+                    this.updateHistoryState('secure-notes');
+                    this.$nextTick(() => lucide.createIcons());
+                },
+
+                confirmDeleteAllData() {
+                    this.modals.settings = false;
+                    this.modals.deleteAll = true;
+                },
+
+                performDeleteAllData() {
+                    localStorage.removeItem('bd_data');
+                    localStorage.removeItem('bd_tabs');
+                    localStorage.removeItem('bd_music_app');
+                    localStorage.removeItem('bd_default_tab');
+                    localStorage.removeItem('bd_tab_metadata');
+                    localStorage.removeItem('bd_current_view');
+                    localStorage.removeItem('bd_default_view');
+                    localStorage.removeItem('bd_last_active_tab');
+                    localStorage.removeItem('bd_voice_language');
+                    localStorage.removeItem('bd_auto_save_voice');
+                    window.location.reload();
+                },
+
+                reloadApp() {
+                    if (this.waitingWorker) this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+                },
+
+                get secureNotes() {
+                    return (this.data['secure-notes'] || []).filter(item => item.type !== 'card');
+                },
+
+                get cards() {
+                    return (this.data['cards'] || []).sort((a, b) => b.id - a.id);
+                },
+
+                getItemType(id) {
+                    if (!this.data[this.activeTab]) return 'note';
+                    const item = this.data[this.activeTab].find(i => i.id === id);
+                    return item ? item.type : 'note';
+                },
+
+                get sortedItems() {
+                    let items = this.data[this.activeTab] || [];
+
+                    if (this.activeTab === 'secure-notes') {
+                        return items.filter(item => item.type !== 'card').sort((a, b) => b.id - a.id);
+                    }
+
+                    if (this.activeTab === 'voice') {
                         return items.sort((a, b) => {
-                            const isTodo = this.isTodoTab(this.activeTab);
-
                             if (a.isDone !== b.isDone) {
                                 return a.isDone ? 1 : -1;
                             }
@@ -1371,514 +1972,560 @@
 
                             return b.id - a.id;
                         });
-                    },
+                    }
 
-                    openAddCardModal() {
-                        this.editingCard = false;
-                        this.cardForm = {
-                            id: Date.now(),
-                            title: '',
-                            number: '',
-                            holder: '',
-                            expiry: '',
-                            cvv: '',
-                            color: '#2563eb',
-                            type: 'card',
-                            note: ''
-                        };
-                        this.modals.cardItem = true;
-                    },
+                    return items.sort((a, b) => {
+                        const isTodo = this.isTodoTab(this.activeTab);
 
-                    openEditCardModal(card) {
-                        this.editingCard = true;
-                        this.cardForm = {
-                            id: card.id,
-                            title: card.title,
-                            number: card.number,
-                            holder: card.holder,
-                            expiry: this.formatExpiryDisplay(card.expiry),
-                            cvv: card.cvv,
-                            type: 'card',
-                            note: card.note
-                        };
-                        this.modals.cardItem = true;
-                    },
-
-                    saveCard() {
-                        if (!this.cardForm.number) return;
-
-                        this.cardForm.number = this.cardForm.number.replace(/\s/g, '');
-                        this.cardForm.expiry = this.cardForm.expiry.replace('/', '').slice(0, 4);
-                        this.cardForm.cvv = this.cardForm.cvv.slice(0, 4);
-
-                        let cardData = this.data['cards'] || [];
-
-                        if (this.editingCard) {
-                            const index = cardData.findIndex(i => i.id === this.cardForm.id);
-                            if (index !== -1) {
-                                cardData[index] = { ...this.cardForm };
-                            }
-                        } else {
-                            cardData.unshift(this.cardForm);
+                        if (a.isDone !== b.isDone) {
+                            return a.isDone ? 1 : -1;
                         }
 
-                        this.data['cards'] = cardData;
-                        this.persist();
-                        this.modals.cardItem = false;
-                        this.$nextTick(() => lucide.createIcons());
-                    },
-
-                    confirmDeleteCard(id) {
-                        this.itemToDelete = id;
-                        this.modals.delete = true;
-                    },
-
-                    openAddItemModal() {
-                        this.editingItem = false;
-                        this.form = {
-                            id: Date.now(),
-                            title: '',
-                            link: '',
-                            note: '',
-                            isFavorite: false,
-                            isDone: false,
-                            type: 'note'
-                        };
-                        this.modals.item = true;
-                    },
-
-                    openEditItemModal(item) {
-                        if (item.type === 'card' && this.activeTab === 'cards') {
-                            this.openEditCardModal(item);
-                            return;
-                        }
-                        this.editingItem = true;
-                        this.form = { ...item, type: item.type || 'note' };
-                        this.modals.item = true;
-                    },
-
-                    saveItem() {
-                        if (!this.form.title) return;
-                        let list = this.data[this.activeTab] || [];
-
-                        if (this.activeTab !== 'secure-notes' && !this.isTodoTab(this.activeTab) && (!this.form.link || !this.form.link.trim()) && this.form.title.trim()) {
-                            if (this.activeTab === 'food') {
-                                this.form.link = this.autoGenerateYouTubeSearchLink(this.form.title);
-                            } else if (this.activeTab !== 'music') {
-                                this.form.link = this.autoGenerateGoogleSearchLink(this.form.title);
-                            }
+                        if (a.isFavorite !== b.isFavorite) {
+                            return a.isFavorite ? -1 : 1;
                         }
 
-                        if (this.activeTab === 'secure-notes') {
-                            this.form.link = '';
-                            this.form.isDone = false;
-                            this.form.isFavorite = false;
-                            this.form.type = 'note';
+                        return b.id - a.id;
+                    });
+                },
+
+                openAddCardModal() {
+                    this.editingCard = false;
+                    this.cardForm = {
+                        id: Date.now(),
+                        title: '',
+                        number: '',
+                        holder: '',
+                        expiry: '',
+                        cvv: '',
+                        color: '#2563eb',
+                        type: 'card',
+                        note: ''
+                    };
+                    this.modals.cardItem = true;
+                },
+
+                openEditCardModal(card) {
+                    this.editingCard = true;
+                    this.cardForm = {
+                        id: card.id,
+                        title: card.title,
+                        number: card.number,
+                        holder: card.holder,
+                        expiry: this.formatExpiryDisplay(card.expiry),
+                        cvv: card.cvv,
+                        type: 'card',
+                        note: card.note
+                    };
+                    this.modals.cardItem = true;
+                },
+
+                saveCard() {
+                    if (!this.cardForm.number) return;
+
+                    this.cardForm.number = this.cardForm.number.replace(/\s/g, '');
+                    this.cardForm.expiry = this.cardForm.expiry.replace('/', '').slice(0, 4);
+                    this.cardForm.cvv = this.cardForm.cvv.slice(0, 4);
+
+                    let cardData = this.data['cards'] || [];
+
+                    if (this.editingCard) {
+                        const index = cardData.findIndex(i => i.id === this.cardForm.id);
+                        if (index !== -1) {
+                            cardData[index] = { ...this.cardForm };
                         }
-                        if (this.editingItem) {
-                            const index = list.findIndex(i => i.id === this.form.id);
-                            if (index !== -1) {
-                                const oldItem = list[index];
+                    } else {
+                        cardData.unshift(this.cardForm);
+                    }
 
-                                const wasAutoLink = oldItem.link && (
-                                    oldItem.link.includes('music.youtube.com/search?q=') ||
-                                    oldItem.link.includes('open.spotify.com/search') ||
-                                    oldItem.link.includes('music.apple.com/search?term=')
-                                );
+                    this.data['cards'] = cardData;
+                    this.persist();
+                    this.modals.cardItem = false;
+                    this.$nextTick(() => lucide.createIcons());
+                },
 
-                                if (this.activeTab !== 'secure-notes' && oldItem.title !== this.form.title && !this.form.lin) {
-                                    this.form.link = this.autoGenerateMusicLink(this.form.title);
-                                }
+                confirmDeleteCard(id) {
+                    this.itemToDelete = id;
+                    this.modals.delete = true;
+                },
 
-                                list[index] = { ...this.form };
-                            }
-                        } else {
-                            if (!this.form.link && this.activeTab !== 'secure-notes') {
+                openAddItemModal() {
+                    this.editingItem = false;
+                    this.form = {
+                        id: Date.now(),
+                        title: '',
+                        link: '',
+                        note: '',
+                        isFavorite: false,
+                        isDone: false,
+                        type: 'note'
+                    };
+                    this.modals.item = true;
+                },
+
+                openEditItemModal(item) {
+                    if (item.type === 'card' && this.activeTab === 'cards') {
+                        this.openEditCardModal(item);
+                        return;
+                    }
+                    this.editingItem = true;
+                    this.form = { ...item, type: item.type || 'note' };
+                    this.modals.item = true;
+                },
+
+                saveItem() {
+                    let list = this.data[this.activeTab] || [];
+
+                    // For voice notes, we only need the note text
+                    if (this.activeTab === 'voice') {
+                        if (!this.form.note.trim()) return;
+                        // Voice notes don't need a title
+                        this.form.title = '';
+                    } else {
+                        if (!this.form.title.trim()) return;
+                    }
+
+                    if (this.activeTab !== 'secure-notes' && !this.isTodoTab(this.activeTab) && activeTab !== 'voice' && (!this.form.link || !this.form.link.trim()) && this.form.title.trim()) {
+                        if (this.activeTab === 'food') {
+                            this.form.link = this.autoGenerateYouTubeSearchLink(this.form.title);
+                        } else if (this.activeTab !== 'music') {
+                            this.form.link = this.autoGenerateGoogleSearchLink(this.form.title);
+                        }
+                    }
+
+                    if (this.activeTab === 'secure-notes') {
+                        this.form.link = '';
+                        this.form.isDone = false;
+                        this.form.isFavorite = false;
+                        this.form.type = 'note';
+                    }
+
+                    if (this.activeTab === 'voice') {
+                        this.form.link = '';
+                        this.form.type = 'note';
+                    }
+
+                    if (this.editingItem) {
+                        const index = list.findIndex(i => i.id === this.form.id);
+                        if (index !== -1) {
+                            const oldItem = list[index];
+
+                            const wasAutoLink = oldItem.link && (
+                                oldItem.link.includes('music.youtube.com/search?q=') ||
+                                oldItem.link.includes('open.spotify.com/search') ||
+                                oldItem.link.includes('music.apple.com/search?term=')
+                            );
+
+                            if (this.activeTab !== 'secure-notes' && oldItem.title !== this.form.title && !this.form.link && this.activeTab !== 'voice') {
                                 this.form.link = this.autoGenerateMusicLink(this.form.title);
                             }
-                            list.unshift(this.form);
-                        }
-                        this.data[this.activeTab] = list;
-                        this.persist();
-                        this.modals.item = false;
-                        this.$nextTick(() => lucide.createIcons());
-                    },
 
-                    generateLinkForMusic() {
-                        if (this.form.title.trim()) {
+                            list[index] = { ...this.form };
+                        }
+                    } else {
+                        if (!this.form.link && this.activeTab !== 'secure-notes' && this.activeTab !== 'voice') {
                             this.form.link = this.autoGenerateMusicLink(this.form.title);
-                            this.showCopyToast('Link auto-generated');
-                            this.$nextTick(() => lucide.createIcons());
                         }
-                    },
+                        list.unshift(this.form);
+                    }
+                    this.data[this.activeTab] = list;
+                    this.persist();
+                    this.modals.item = false;
+                    this.$nextTick(() => lucide.createIcons());
+                },
 
-                    confirmDelete(id) {
-                        this.itemToDelete = id;
-                        this.modals.delete = true;
-                    },
+                generateLinkForMusic() {
+                    if (this.form.title.trim()) {
+                        this.form.link = this.autoGenerateMusicLink(this.form.title);
+                        this.showCopyToast('Link auto-generated');
+                        this.$nextTick(() => lucide.createIcons());
+                    }
+                },
 
-                    performDelete() {
-                        if (this.itemToDelete) {
-                            this.modals.delete = false;
-                            setTimeout(() => {
-                                const tabData = this.data[this.activeTab];
-                                if (tabData && tabData.some(i => i.id === this.itemToDelete)) {
-                                    this.data[this.activeTab] = tabData.filter(i => i.id !== this.itemToDelete);
-                                    this.persist();
-                                }
-                                this.itemToDelete = null;
-                            }, this.ANIMATION_DURATION);
-                        }
-                    },
+                confirmDelete(id) {
+                    this.itemToDelete = id;
+                    this.modals.delete = true;
+                },
 
-                    toggleFavorite(id) {
-                        const item = (this.data[this.activeTab] || []).find(i => i.id === id);
-                        if (item && this.activeTab !== 'secure-notes') {
-                            item.isFavorite = !item.isFavorite;
-                            this.persist();
-                        }
-                    },
-
-                    toggleDone(id) {
-                        const item = (this.data[this.activeTab] || []).find(i => i.id === id);
-                        if (item && this.activeTab !== 'secure-notes') {
-                            item.isDone = !item.isDone;
-                            this.persist();
-                        }
-                    },
-
-                    openNewTabModal() {
-                        this.newTabName = '';
-                        this.newTabType = 'normal';
-                        this.modals.tab = true;
-                        this.newTabError = '';
-                    },
-
-                    createNewTab() {
-                        const newName = this.newTabName.trim().toLowerCase().replace(/\s+/g, '-');
-                        this.newTabError = '';
-
-                        if (!newName) {
-                            this.newTabError = 'Please enter a name for the new tab.';
-                            return;
-                        }
-                        if (newName === 'secure-notes' || newName === 'cards') {
-                            this.newTabError = `"${newName}" is a reserved tab name.`;
-                            return;
-                        }
-
-                        if (this.tabs.includes(newName)) {
-                            this.newTabError = `A tab named "${this.newTabName.trim()}" already exists.`;
-                            return;
-                        }
-
-                        // Insert before secure-notes and cards
-                        const secureIndex = this.tabs.indexOf('secure-notes');
-                        this.tabs.splice(secureIndex, 0, newName);
-                        this.data[newName] = [];
-                        this.tabMetadata[newName] = this.newTabType;
-                        this.activeTab = newName;
-                        this.currentView = 'tab';
-
-                        this.persist();
-                        this.modals.tab = false;
-
-                        this.$nextTick(() => {
-                            const scroller = this.$refs.tabScroller;
-                            if (scroller) {
-                                scroller.scrollTo({ left: scroller.scrollWidth, behavior: 'smooth' });
-                            }
-                        });
-                    },
-
-                    openEditTabModal() {
-                        this.editTabName = this.toTitleCase(this.currentContextTab);
-                        this.modals.editTab = true;
-                    },
-
-                    saveTabRename() {
-                        const oldName = this.currentContextTab;
-                        const newName = this.editTabName.trim().toLowerCase().replace(/\s+/g, '-');
-
-                        if (newName && newName !== oldName && !this.tabs.includes(newName)) {
-                            const index = this.tabs.indexOf(oldName);
-                            if (index !== -1) {
-                                this.data[newName] = this.data[oldName];
-                                delete this.data[oldName];
-
-                                this.tabMetadata[newName] = this.tabMetadata[oldName];
-                                delete this.tabMetadata[oldName];
-
-                                this.tabs[index] = newName;
-                                this.activeTab = newName;
-
-                                if (this.defaultTabID === oldName) {
-                                    this.defaultTabID = newName;
-                                }
-
-                                this.persist();
-                                this.$nextTick(() => {
-                                    this.scrollTabIntoView(newName);
-                                    lucide.createIcons();
-                                });
-                            }
-                        }
-                        this.modals.editTab = false;
-                        this.currentContextTab = null;
-                    },
-
-                    confirmDeleteTab(tab) {
-                        this.tabToDelete = tab;
-                        this.modals.deleteTab = true;
-                    },
-
-                    performTabDelete() {
-                        if (this.tabToDelete) {
-                            const index = this.tabs.indexOf(this.tabToDelete);
-                            if (index !== -1) {
-                                this.tabs.splice(index, 1);
-                                delete this.data[this.tabToDelete];
-                                delete this.tabMetadata[this.tabToDelete];
-
-                                if (this.activeTab === this.tabToDelete) {
-                                    this.activeTab = this.defaultTabID;
-                                }
-
+                performDelete() {
+                    if (this.itemToDelete) {
+                        this.modals.delete = false;
+                        setTimeout(() => {
+                            const tabData = this.data[this.activeTab];
+                            if (tabData && tabData.some(i => i.id === this.itemToDelete)) {
+                                this.data[this.activeTab] = tabData.filter(i => i.id !== this.itemToDelete);
                                 this.persist();
                             }
-                            this.modals.deleteTab = false;
-                            this.tabToDelete = null;
-                            this.currentContextTab = null;
-                        }
-                    },
+                            this.itemToDelete = null;
+                        }, this.ANIMATION_DURATION);
+                    }
+                },
 
-                    setDefaultTab(tab) {
-                        if (tab !== 'secure-notes' && tab !== 'cards') {
-                            this.defaultTabID = tab;
-                            this.persist();
-                            this.showCopyToast(this.toTitleCase(tab) + ' set as default tab');
-                        }
-                    },
-
-                    formatExpiryInput(value) {
-                        let cleaned = value.replace(/\D/g, '');
-                        if (cleaned.length > 2) {
-                            cleaned = cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
-                        }
-                        if (cleaned.length === 5 && this.$refs.cvvInput) {
-                            this.$nextTick(() => this.$refs.cvvInput.focus());
-                        }
-                        return cleaned.slice(0, 5);
-                    },
-                    formatExpiryDisplay(expiry) {
-                        if (!expiry) return 'N/A';
-                        const cleaned = expiry.replace(/\D/g, '');
-                        if (cleaned.length === 4) {
-                            return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
-                        }
-                        return expiry;
-                    },
-
-                    formatCardNumberFull(number) {
-                        if (!number) return 'N/A';
-                        const cleaned = number.replace(/\s/g, '');
-                        return cleaned.match(/.{1,4}/g).join(' ');
-                    },
-
-                    copyToClipboard(text, fieldName = 'Item') {
-                        if (!navigator.clipboard) {
-                            const textarea = document.createElement('textarea');
-                            textarea.value = text;
-                            document.body.appendChild(textarea);
-                            textarea.select();
-                            document.execCommand('copy');
-                            document.body.removeChild(textarea);
-                        } else {
-                            navigator.clipboard.writeText(text).then(() => {
-                                this.showCopyToast(fieldName + ' copied!');
-                            }).catch(err => {
-                                console.error('Could not copy text: ', err);
-                                alert('Failed to copy. Please try manually.');
-                            });
-                        }
-                    },
-
-                    showCopyToast(message) {
-                        this.copyMessage = message;
-                        clearTimeout(this.copyTimer);
-                        this.copyTimer = setTimeout(() => {
-                            this.copyMessage = null;
-                        }, 1500);
-                    },
-
-                    getCardGradient(color) {
-                        if (!color) return 'background-color: #6b7280;';
-
-                        const adjustColor = (hex, factor) => {
-                            if (!hex || hex.length < 7) return hex;
-                            let colorString = hex.startsWith('#') ? hex.slice(1) : hex;
-
-                            if (colorString.length !== 6) return hex;
-
-                            let num = parseInt(colorString, 16);
-                            let r = (num >> 16);
-                            let g = (num >> 8 & 0x00FF);
-                            let b = (num & 0x0000FF);
-
-                            r = Math.round(Math.min(255, Math.max(0, r * (1 + factor))));
-                            g = Math.round(Math.min(255, Math.max(0, g * (1 + factor))));
-                            b = Math.round(Math.min(255, Math.max(0, b * (1 + factor))));
-
-                            return '#' + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
-                        };
-
-                        const darker = adjustColor(color, -0.2);
-
-                        return `background: linear-gradient(135deg, ${color}, ${darker});`;
-                    },
-
-                    toTitleCase(str) {
-                        if (!str) return '';
-                        str = str.replace(/-/g, ' ');
-                        return str.toLowerCase().split(' ').map((word) => {
-                            return (word.charAt(0).toUpperCase() + word.slice(1));
-                        }).join(' ');
-                    },
-
-                    isTodoTab(tab) {
-                        return this.tabMetadata[tab] === 'todo';
-                    },
-
-                    autoGenerateMusicLink(title) {
-                        if (!title) return '';
-                        const query = encodeURIComponent(title.trim());
-
-                        if (this.musicAppPreference === 'spotify') {
-                            return `https://open.spotify.com/search/${query}`;
-                        } else if (this.musicAppPreference === 'apple_music') {
-                            return `https://music.apple.com/search?term=${query}`;
-                        } else {
-                            return `https://music.youtube.com/search?q=${query}`;
-                        }
-                    },
-
-                    getLinkIcon(link) {
-                        if (!link) return `<i data-lucide="link" class="w-4 h-4 icon-link"></i>`;
-
-                        if (link.includes('open.spotify.com/search') || link.includes('spotify:')) {
-                            return `<i data-lucide="music" class="w-4 h-4 icon-spotify" fill="currentColor"></i>`;
-                        } else if (link.includes('music.apple.com')) {
-                            return `<i data-lucide="apple" class="w-4 h-4 icon-apple" fill="currentColor"></i>`;
-                        } else if (link.includes('youtube.com') || link.includes('music.youtube.com')) {
-                            return `<i data-lucide="youtube" class="w-4 h-4 icon-youtube" fill="currentColor"></i>`;
-                        } else {
-                            return `<i data-lucide="link" class="w-4 h-4 icon-link"></i>`;
-                        }
-                    },
-
-                    autoGenerateGoogleSearchLink(title) {
-                        if (!title) return '';
-                        return `https://www.google.com/search?q=${encodeURIComponent(title.trim())}`;
-                    },
-
-                    autoGenerateYouTubeSearchLink(title) {
-                        if (!title) return '';
-                        return `https://www.youtube.com/results?search_query=${encodeURIComponent(title.trim())}`;
-                    },
-
-                    getTitlePlaceholder() {
-                        if (this.isTodoTab(this.activeTab)) return 'e.g. Buy groceries';
-                        if (this.activeTab === 'secure-notes') return 'e.g. Netflix Password';
-                        return 'e.g. Item Title';
-                    },
-
-                    getLinkPlaceholder() {
-                        if (this.activeTab === 'music') return 'https:// or tap "Auto"';
-                        return 'https://... (Optional)';
-                    },
-
-                    getNoteLabel() {
-                        if (this.isTodoTab(this.activeTab)) return 'Extra Details (Optional)';
-                        if (this.activeTab === 'food') return 'Ingredients & Steps';
-                        if (this.activeTab === 'travel') return 'Location Details';
-                        if (this.activeTab === 'secure-notes') return 'Sensitive Information / Password Notes';
-                        return 'Notes / Details';
-                    },
-
-                    getNotePlaceholder() {
-                        if (this.isTodoTab(this.activeTab)) return 'Set a deadline, or add a store location.';
-                        if (this.activeTab === 'food') return '- 2 Cups Rice\n- Boil water...';
-                        if (this.activeTab === 'travel') return 'Best time to visit: October\nGoogle Map Coords...';
-                        if (this.activeTab === 'secure-notes') return 'Write your secure notes here.';
-                        return 'Add any extra details here...';
-                    },
-
-                    getTabElementID(tab) {
-                        return `tab-${tab}`;
-                    },
-
-                    scrollTabIntoView(tab, behavior = 'smooth', block = 'start') {
-                        const id = this.getTabElementID(tab);
-                        const element = document.getElementById(id);
-                        if (element) {
-                            element.scrollIntoView({
-                                behavior: behavior,
-                                block: block,
-                                inline: 'center'
-                            });
-                        }
-                    },
-
-                    toggleTabType(tab) {
-                        const currentType = this.tabMetadata[tab] ? this.tabMetadata[tab].type : 'normal';
-                        const newType = currentType === 'normal' ? 'todo' : 'normal';
-                        this.tabMetadata[tab] = { type: newType };
-                        this.modals.tabContext = false;
+                toggleFavorite(id) {
+                    const item = (this.data[this.activeTab] || []).find(i => i.id === id);
+                    if (item && this.activeTab !== 'secure-notes') {
+                        item.isFavorite = !item.isFavorite;
                         this.persist();
-                        this.showCopyToast(`Tab type changed to ${newType}!`);
-                    },
+                    }
+                },
 
-                    reloadApp() {
-                        if (this.waitingWorker) this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-                    },
+                toggleDone(id) {
+                    const item = (this.data[this.activeTab] || []).find(i => i.id === id);
+                    if (item && this.activeTab !== 'secure-notes') {
+                        item.isDone = !item.isDone;
+                        this.persist();
+                    }
+                },
 
-                    savePreferences() {
-                        let preferencesChanged = false;
+                openNewTabModal() {
+                    this.newTabName = '';
+                    this.newTabType = 'normal';
+                    this.modals.tab = true;
+                    this.newTabError = '';
+                },
 
-                        if (this.tempDefaultTabID !== this.defaultTabID) {
-                            this.defaultTabID = this.tempDefaultTabID;
-                            preferencesChanged = true;
+                createNewTab() {
+                    const newName = this.newTabName.trim().toLowerCase().replace(/\s+/g, '-');
+                    this.newTabError = '';
+
+                    if (!newName) {
+                        this.newTabError = 'Please enter a name for the new tab.';
+                        return;
+                    }
+                    if (newName === 'secure-notes' || newName === 'cards' || newName === 'voice') {
+                        this.newTabError = `"${newName}" is a reserved tab name.`;
+                        return;
+                    }
+
+                    if (this.tabs.includes(newName)) {
+                        this.newTabError = `A tab named "${this.newTabName.trim()}" already exists.`;
+                        return;
+                    }
+
+                    // Insert before secure-notes, cards, and voice tabs
+                    const voiceIndex = this.tabs.indexOf('voice');
+                    const secureIndex = this.tabs.indexOf('secure-notes');
+                    const insertIndex = Math.min(voiceIndex, secureIndex);
+                    this.tabs.splice(insertIndex, 0, newName);
+                    this.data[newName] = [];
+                    this.tabMetadata[newName] = this.newTabType;
+                    this.activeTab = newName;
+                    this.currentView = 'tab';
+                    this.updateHistoryState(newName);
+
+                    this.persist();
+                    this.modals.tab = false;
+
+                    this.$nextTick(() => {
+                        const scroller = this.$refs.tabScroller;
+                        if (scroller) {
+                            scroller.scrollTo({ left: scroller.scrollWidth, behavior: 'smooth' });
                         }
+                    });
+                },
 
-                        if (this.tempMusicAppPreference !== this.musicAppPreference) {
-                            this.musicAppPreference = this.tempMusicAppPreference;
-                            preferencesChanged = true;
+                openEditTabModal() {
+                    this.editTabName = this.toTitleCase(this.currentContextTab);
+                    this.modals.editTab = true;
+                },
+
+                saveTabRename() {
+                    const oldName = this.currentContextTab;
+                    const newName = this.editTabName.trim().toLowerCase().replace(/\s+/g, '-');
+
+                    if (newName && newName !== oldName && !this.tabs.includes(newName)) {
+                        const index = this.tabs.indexOf(oldName);
+                        if (index !== -1) {
+                            this.data[newName] = this.data[oldName];
+                            delete this.data[oldName];
+
+                            this.tabMetadata[newName] = this.tabMetadata[oldName];
+                            delete this.tabMetadata[oldName];
+
+                            this.tabs[index] = newName;
+                            this.activeTab = newName;
+
+                            if (this.defaultTabID === oldName) {
+                                this.defaultTabID = newName;
+                            }
+
+                            this.persist();
+                            this.$nextTick(() => {
+                                this.scrollTabIntoView(newName);
+                                lucide.createIcons();
+                            });
                         }
+                    }
+                    this.modals.editTab = false;
+                    this.currentContextTab = null;
+                },
 
-                        if (this.tempDefaultView !== this.defaultView) {
-                            this.defaultView = this.tempDefaultView;
-                            localStorage.setItem('bd_default_view', this.defaultView);
-                            preferencesChanged = true;
+                confirmDeleteTab(tab) {
+                    this.tabToDelete = tab;
+                    this.modals.deleteTab = true;
+                },
 
-                            // If changing to tab view, update current view immediately
-                            if (this.defaultView === 'tab' && this.currentView === 'home') {
-                                this.currentView = 'tab';
+                performTabDelete() {
+                    if (this.tabToDelete) {
+                        const index = this.tabs.indexOf(this.tabToDelete);
+                        if (index !== -1) {
+                            this.tabs.splice(index, 1);
+                            delete this.data[this.tabToDelete];
+                            delete this.tabMetadata[this.tabToDelete];
+
+                            if (this.activeTab === this.tabToDelete) {
                                 this.activeTab = this.defaultTabID;
+                                this.updateHistoryState(this.defaultTabID);
                             }
-                        }
 
-                        if (preferencesChanged) {
                             this.persist();
-                            this.showCopyToast('Preferences saved successfully!');
-                        } else {
-                            this.showCopyToast('No changes to save.');
                         }
+                        this.modals.deleteTab = false;
+                        this.tabToDelete = null;
+                        this.currentContextTab = null;
+                    }
+                },
 
-                        this.modals.settings = false;
-                    },
-                }
+                setDefaultTab(tab) {
+                    if (tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice') {
+                        this.defaultTabID = tab;
+                        this.persist();
+                        this.showCopyToast(this.toTitleCase(tab) + ' set as default tab');
+                    }
+                },
+
+                formatExpiryInput(value) {
+                    let cleaned = value.replace(/\D/g, '');
+                    if (cleaned.length > 2) {
+                        cleaned = cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
+                    }
+                    if (cleaned.length === 5 && this.$refs.cvvInput) {
+                        this.$nextTick(() => this.$refs.cvvInput.focus());
+                    }
+                    return cleaned.slice(0, 5);
+                },
+                formatExpiryDisplay(expiry) {
+                    if (!expiry) return 'N/A';
+                    const cleaned = expiry.replace(/\D/g, '');
+                    if (cleaned.length === 4) {
+                        return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
+                    }
+                    return expiry;
+                },
+
+                formatCardNumberFull(number) {
+                    if (!number) return 'N/A';
+                    const cleaned = number.replace(/\s/g, '');
+                    return cleaned.match(/.{1,4}/g).join(' ');
+                },
+
+                copyToClipboard(text, fieldName = 'Item') {
+                    if (!navigator.clipboard) {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = text;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                    } else {
+                        navigator.clipboard.writeText(text).then(() => {
+                            this.showCopyToast(fieldName + ' copied!');
+                        }).catch(err => {
+                            console.error('Could not copy text: ', err);
+                            alert('Failed to copy. Please try manually.');
+                        });
+                    }
+                },
+
+                showCopyToast(message) {
+                    this.copyMessage = message;
+                    clearTimeout(this.copyTimer);
+                    this.copyTimer = setTimeout(() => {
+                        this.copyMessage = null;
+                    }, 1500);
+                },
+
+                getCardGradient(color) {
+                    if (!color) return 'background-color: #6b7280;';
+
+                    const adjustColor = (hex, factor) => {
+                        if (!hex || hex.length < 7) return hex;
+                        let colorString = hex.startsWith('#') ? hex.slice(1) : hex;
+
+                        if (colorString.length !== 6) return hex;
+
+                        let num = parseInt(colorString, 16);
+                        let r = (num >> 16);
+                        let g = (num >> 8 & 0x00FF);
+                        let b = (num & 0x0000FF);
+
+                        r = Math.round(Math.min(255, Math.max(0, r * (1 + factor))));
+                        g = Math.round(Math.min(255, Math.max(0, g * (1 + factor))));
+                        b = Math.round(Math.min(255, Math.max(0, b * (1 + factor))));
+
+                        return '#' + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
+                    };
+
+                    const darker = adjustColor(color, -0.2);
+
+                    return `background: linear-gradient(135deg, ${color}, ${darker});`;
+                },
+
+                toTitleCase(str) {
+                    if (!str) return '';
+                    str = str.replace(/-/g, ' ');
+                    return str.toLowerCase().split(' ').map((word) => {
+                        return (word.charAt(0).toUpperCase() + word.slice(1));
+                    }).join(' ');
+                },
+
+                isTodoTab(tab) {
+                    return this.tabMetadata[tab] === 'todo';
+                },
+
+                autoGenerateMusicLink(title) {
+                    if (!title) return '';
+                    const query = encodeURIComponent(title.trim());
+
+                    if (this.musicAppPreference === 'spotify') {
+                        return `https://open.spotify.com/search/${query}`;
+                    } else if (this.musicAppPreference === 'apple_music') {
+                        return `https://music.apple.com/search?term=${query}`;
+                    } else {
+                        return `https://music.youtube.com/search?q=${query}`;
+                    }
+                },
+
+                getLinkIcon(link) {
+                    if (!link) return `<i data-lucide="link" class="w-4 h-4 icon-link"></i>`;
+
+                    if (link.includes('open.spotify.com/search') || link.includes('spotify:')) {
+                        return `<i data-lucide="music" class="w-4 h-4 icon-spotify" fill="currentColor"></i>`;
+                    } else if (link.includes('music.apple.com')) {
+                        return `<i data-lucide="apple" class="w-4 h-4 icon-apple" fill="currentColor"></i>`;
+                    } else if (link.includes('youtube.com') || link.includes('music.youtube.com')) {
+                        return `<i data-lucide="youtube" class="w-4 h-4 icon-youtube" fill="currentColor"></i>`;
+                    } else {
+                        return `<i data-lucide="link" class="w-4 h-4 icon-link"></i>`;
+                    }
+                },
+
+                autoGenerateGoogleSearchLink(title) {
+                    if (!title) return '';
+                    return `https://www.google.com/search?q=${encodeURIComponent(title.trim())}`;
+                },
+
+                autoGenerateYouTubeSearchLink(title) {
+                    if (!title) return '';
+                    return `https://www.youtube.com/results?search_query=${encodeURIComponent(title.trim())}`;
+                },
+
+                getTitlePlaceholder() {
+                    if (this.isTodoTab(this.activeTab)) return 'e.g. Buy groceries';
+                    if (this.activeTab === 'secure-notes') return 'e.g. Netflix Password';
+                    if (this.activeTab === 'voice') return '';
+                    return 'e.g. Item Title';
+                },
+
+                getLinkPlaceholder() {
+                    if (this.activeTab === 'music') return 'https:// or tap "Auto"';
+                    return 'https://... (Optional)';
+                },
+
+                getNoteLabel() {
+                    if (this.isTodoTab(this.activeTab)) return 'Extra Details (Optional)';
+                    if (this.activeTab === 'food') return 'Ingredients & Steps';
+                    if (this.activeTab === 'travel') return 'Location Details';
+                    if (this.activeTab === 'secure-notes') return 'Sensitive Information / Password Notes';
+                    if (this.activeTab === 'voice') return 'Voice Note';
+                    return 'Notes / Details';
+                },
+
+                getNotePlaceholder() {
+                    if (this.isTodoTab(this.activeTab)) return 'Set a deadline, or add a store location.';
+                    if (this.activeTab === 'food') return '- 2 Cups Rice\n- Boil water...';
+                    if (this.activeTab === 'travel') return 'Best time to visit: October\nGoogle Map Coords...';
+                    if (this.activeTab === 'secure-notes') return 'Write your secure notes here.';
+                    if (this.activeTab === 'voice') return 'Your transcribed voice note will appear here...';
+                    return 'Add any extra details here...';
+                },
+
+                getTabElementID(tab) {
+                    return `tab-${tab}`;
+                },
+
+                scrollTabIntoView(tab, behavior = 'smooth', block = 'start') {
+                    const id = this.getTabElementID(tab);
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.scrollIntoView({
+                            behavior: behavior,
+                            block: block,
+                            inline: 'center'
+                        });
+                    }
+                },
+
+                toggleTabType(tab) {
+                    const currentType = this.tabMetadata[tab] ? this.tabMetadata[tab].type : 'normal';
+                    const newType = currentType === 'normal' ? 'todo' : 'normal';
+                    this.tabMetadata[tab] = { type: newType };
+                    this.modals.tabContext = false;
+                    this.persist();
+                    this.showCopyToast(`Tab type changed to ${newType}!`);
+                },
+
+                reloadApp() {
+                    if (this.waitingWorker) this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+                },
+
+                savePreferences() {
+                    let preferencesChanged = false;
+
+                    if (this.tempDefaultTabID !== this.defaultTabID) {
+                        this.defaultTabID = this.tempDefaultTabID;
+                        preferencesChanged = true;
+                    }
+
+                    if (this.tempMusicAppPreference !== this.musicAppPreference) {
+                        this.musicAppPreference = this.tempMusicAppPreference;
+                        preferencesChanged = true;
+                    }
+
+                    if (this.tempDefaultView !== this.defaultView) {
+                        this.defaultView = this.tempDefaultView;
+                        localStorage.setItem('bd_default_view', this.defaultView);
+                        preferencesChanged = true;
+
+                        if (this.defaultView === 'tab' && this.currentView === 'home') {
+                            this.currentView = 'tab';
+                            this.activeTab = this.defaultTabID;
+                            this.updateHistoryState(this.defaultTabID);
+                        }
+                    }
+
+                    if (this.tempVoiceLanguage !== this.voiceLanguage) {
+                        this.voiceLanguage = this.tempVoiceLanguage;
+                        preferencesChanged = true;
+                    }
+
+                    if (this.tempAutoSaveVoiceNotes !== this.autoSaveVoiceNotes) {
+                        this.autoSaveVoiceNotes = this.tempAutoSaveVoiceNotes;
+                        preferencesChanged = true;
+                    }
+
+                    if (preferencesChanged) {
+                        this.persist();
+                        this.showCopyToast('Preferences saved successfully!');
+                    } else {
+                        this.showCopyToast('No changes to save.');
+                    }
+
+                    this.modals.settings = false;
+                },
             }
-        </script>
+        }
+    </script>
 </body>
 
 </html>
