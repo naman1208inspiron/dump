@@ -114,6 +114,34 @@
         .animate-slide-in-right {
             animation: slide-in-from-right 0.3s ease-out;
         }
+
+        /* Animation for home dashboard */
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fade-in-up 0.3s ease-out;
+        }
+
+        /* Home dashboard grid item */
+        .home-grid-item {
+            aspect-ratio: 1 / 1;
+        }
+
+        /* Ensure proper height calculation for home dashboard */
+        .home-dashboard-container {
+            height: calc(100vh - 64px);
+            /* 64px is the header height */
+        }
     </style>
 </head>
 
@@ -124,7 +152,10 @@
     <header
         class="bg-white dark:bg-darkcard dark:border-gray-700 p-4 shadow-sm flex justify-between items-center z-20 border-b border-gray-100 transition-colors">
         <div class="flex items-center gap-2">
-            <h1 class="text-xl font-bold tracking-tight text-blue-600 dark:text-blue-400">Pipto</h1>
+            <button @click="goToHome()" class="flex items-center gap-2 cursor-pointer">
+                <h1 class="text-xl font-bold tracking-tight text-blue-600 dark:text-blue-400">Pipto</h1>
+                <i x-show="currentView !== 'home'" data-lucide="home" class="w-4 h-4 text-blue-500"></i>
+            </button>
             <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-300 px-2 py-0.5 rounded-full"
                 x-text="'v' + version"></span>
         </div>
@@ -149,283 +180,333 @@
         </div>
     </header>
 
-    <div class="bg-white dark:bg-darkcard shadow-sm pt-2 pb-0 z-10 transition-colors" x-show="activeTab !== 'secure'">
-        <div class="relative flex items-center h-[50px]">
+    <!-- HOME DASHBOARD -->
+    <div x-show="currentView === 'home'" x-transition:enter.duration.300
+        class="home-dashboard-container flex flex-col animate-fade-in-up">
 
-            <div class="flex overflow-x-auto no-scrollbar gap-4 pb-0 pl-4 tab-scroller-fixed h-full flex-1"
-                x-ref="tabScroller">
-                <div class="flex items-end space-x-4">
-                    <template x-for="tab in tabs" :key="tab">
-                        <template x-if="tab !== 'secure'">
-                            <button :x-ref="'tab-' + tab"
-                                @click="activeTab = tab; scrollTabIntoView(tab, 'smooth', 'center')"
-                                @touchstart.passive="longPressStart($event, tab)"
-                                @touchend.passive="longPressEnd($event, tab)"
-                                @contextmenu.prevent="openTabContextMenu(tab, $event)"
-                                class="pb-3 border-b-2 text-sm font-medium transition-all whitespace-nowrap px-1 select-none"
-                                :class="activeTab === tab ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400' : 'border-transparent text-gray-400 dark:text-gray-500'"
-                                x-text="toTitleCase(tab)" x-transition:leave.duration.300>
-                            </button>
-                        </template>
+        <!-- Scrollable Grid Area -->
+        <div class="flex-1 overflow-y-auto p-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-full max-w-2xl mx-auto">
+                <template x-for="tab in tabs" :key="tab">
+                    <template x-if="tab !== 'secure-notes' && tab !== 'cards'">
+                        <button @click="switchToTab(tab)" @touchstart.passive="homeLongPressStart($event, tab)"
+                            @touchend.passive="homeLongPressEnd($event, tab)"
+                            @contextmenu.prevent="openTabContextMenu(tab, $event)"
+                            class="bg-white dark:bg-darkcard p-4 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center gap-2 transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 group home-grid-item">
+                            <div
+                                class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-800/30 transition-colors">
+                                <i :data-lucide="getTabIcon(tab)" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <span class="font-bold text-gray-800 dark:text-gray-100 text-lg"
+                                x-text="toTitleCase(tab)"></span>
+                            <span class="text-[15px] text-gray-500 dark:text-gray-400">
+                                <span x-text="getTabCount(tab)"></span> items
+                            </span>
+                        </button>
                     </template>
-                </div>
+                </template>
             </div>
+        </div>
 
-            <div
-                class="absolute right-0 top-0 bottom-0 bg-white dark:bg-darkcard pl-4 pr-4 border-l border-gray-100 dark:border-gray-700 flex items-center z-20">
-                <button @click="openNewTabModal()" class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
-                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+        <!-- Fixed Bottom Row - Reduced Height -->
+        <div
+            class="flex-shrink-0 p-1.5 bg-gradient-to-t from-white via-white to-white/95 dark:from-darkbg dark:via-darkbg dark:to-darkbg/95 backdrop-blur-sm border-t border-gray-100 dark:border-gray-700">
+            <div class="grid grid-cols-3 gap-3 max-w-4xl mx-auto">
+                <!-- Secure Notes Tile -->
+                <button @click="switchToTab('secure-notes')"
+                    class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/20 hover:from-yellow-100 hover:to-yellow-200 dark:hover:from-yellow-800/40 dark:hover:to-yellow-700/30 transition-all active:scale-95 group border border-yellow-100 dark:border-yellow-800/30 shadow-sm">
+                    <i data-lucide="lock"
+                        class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Secure Notes</span>
+                    <span class="text-[15px] text-yellow-600 dark:text-yellow-400 mt-0.5"
+                        x-text="secureNotes.length"></span>
+                </button>
+
+                <!-- Cards Tile -->
+                <button @click="switchToTab('cards')"
+                    class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-800/40 dark:hover:to-blue-700/30 transition-all active:scale-95 group border border-blue-100 dark:border-blue-800/30 shadow-sm">
+                    <i data-lucide="credit-card"
+                        class="w-5 h-5 text-blue-600 dark:text-blue-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Cards</span>
+                    <span class="text-[15px] text-blue-600 dark:text-blue-400 mt-0.5" x-text="cards.length"></span>
+                </button>
+
+                <!-- New Tab Tile -->
+                <button @click="openNewTabModal()"
+                    class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 hover:from-green-100 hover:to-green-200 dark:hover:from-green-800/40 dark:hover:to-green-700/30 transition-all active:scale-95 group border border-green-100 dark:border-green-800/30 shadow-sm">
+                    <i data-lucide="plus-circle"
+                        class="w-5 h-5 text-green-600 dark:text-green-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <span class="font-bold text-sm text-gray-800 dark:text-gray-100">New Tab</span>
+                    <span class="text-[15px] text-green-600 dark:text-green-400 mt-0.5">+</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <main class="flex-1 overflow-y-auto p-4 pb-28" @touchstart.passive="touchStart($event)"
-        @touchend.passive="touchEnd($event)">
+    <!-- TAB VIEW -->
+    <div x-show="currentView === 'tab'" x-transition:enter.duration.300>
+        <div class="bg-white dark:bg-darkcard shadow-sm pt-2 pb-0 z-10 transition-colors"
+            x-show="activeTab !== 'secure-notes' && activeTab !== 'cards'">
+            <div class="relative flex items-center h-[50px]">
 
-        <div x-show="activeTab === 'secure' && secureView === 'notes'"
-            class="text-center bg-gray-100 dark:bg-gray-800 p-4 rounded-xl mb-4 border border-gray-200 dark:border-gray-700">
-            <p class="text-gray-700 dark:text-gray-300 font-bold flex justify-center items-center gap-2">
-                <i data-lucide="lock" class="w-5 h-5 text-yellow-500"></i> Secure Notes Active
-            </p>
-        </div>
-
-        <div x-show="activeTab === 'secure' && secureView === 'cards'" x-transition:enter.duration.300
-            class="flex flex-col h-full -mt-4 animate-slide-in-right">
-            <div class="grid gap-4 mt-4">
-                <div class="flex justify-between items-center py-3 px-1">
-                    <button @click="secureView = 'notes'"
-                        class="text-gray-500 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 flex items-center gap-1 transition-colors">
-                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                        <!-- <span class="font-bold text-sm">Back to Notes</span> -->
-                    </button>
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Secure Cards</h2>
-                    <div class="w-5 h-5"></div>
+                <div class="flex overflow-x-auto no-scrollbar gap-4 pb-0 pl-4 tab-scroller-fixed h-full flex-1"
+                    x-ref="tabScroller">
+                    <div class="flex items-end space-x-4">
+                        <template x-for="tab in tabs" :key="tab">
+                            <template x-if="tab !== 'secure-notes' && tab !== 'cards'">
+                                <button :x-ref="'tab-' + tab" :id="getTabElementID(tab)"
+                                    @click="if (!longPressActive) { activeTab = tab; scrollTabIntoView(tab, 'smooth', 'center'); }"
+                                    @touchstart.passive="longPressStart($event, tab)"
+                                    @touchend.passive="longPressEnd($event, tab)"
+                                    @contextmenu.prevent="openTabContextMenu(tab, $event)"
+                                    class="pb-3 border-b-2 text-sm font-medium transition-all whitespace-nowrap px-1 select-none"
+                                    :class="activeTab === tab ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400' : 'border-transparent text-gray-400 dark:text-gray-500'"
+                                    x-text="toTitleCase(tab)" x-transition:leave.duration.300>
+                                </button>
+                            </template>
+                        </template>
+                    </div>
                 </div>
 
-                <template x-for="card in cards" :key="card.id">
-                    <div @click="openEditCardModal(card)"
-                        class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 cursor-pointer transition-transform hover:scale-[1.01] relative overflow-hidden group">
-                        <div class="absolute inset-0 rounded-xl -z-0 transform transition-transform group-hover:scale-105"
-                            :style="getCardGradient(card.color)">
-                        </div>
+                <div
+                    class="absolute right-0 top-0 bottom-0 bg-white dark:bg-darkcard pl-4 pr-4 border-l border-gray-100 dark:border-gray-700 flex items-center z-20">
+                    <button @click="openNewTabModal()"
+                        class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
 
-                        <div class="relative z-10 text-white">
-                            <div class="flex justify-between items-center">
-                                <span class="font-semibold text-lg" x-text="card.title || 'Untitled Card'"></span>
-                                <i data-lucide="credit-card" class="w-6 h-6"></i>
+        <main class="flex-1 overflow-y-auto p-4 pb-28" @touchstart.passive="touchStart($event)"
+            @touchend.passive="touchEnd($event)">
+
+            <!-- Secure Notes Header -->
+            <div x-show="activeTab === 'secure-notes'"
+                class="text-center bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl mb-4 border border-yellow-100 dark:border-yellow-800/30">
+                <p class="text-gray-700 dark:text-gray-300 font-bold flex justify-center items-center gap-2">
+                    <i data-lucide="lock" class="w-5 h-5 text-yellow-600"></i> Secure Notes
+                </p>
+            </div>
+
+            <!-- Cards Header -->
+            <div x-show="activeTab === 'cards'" class="flex flex-col h-full -mt-4 animate-slide-in-right">
+                <div class="grid gap-4 mt-4">
+                    <div class="flex justify-between items-center py-3 px-1">
+                        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Secure Cards</h2>
+                    </div>
+
+                    <template x-for="card in cards" :key="card.id">
+                        <div @click="openEditCardModal(card)"
+                            class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 cursor-pointer transition-transform hover:scale-[1.01] relative overflow-hidden group">
+                            <div class="absolute inset-0 rounded-xl -z-0 transform transition-transform group-hover:scale-105"
+                                :style="getCardGradient(card.color)">
                             </div>
 
-                            <div
-                                class="mt-6 font-mono text-xl sm:text-2xl tracking-widest break-all flex items-center gap-2">
-                                <span x-text="formatCardNumberFull(card.number)"></span>
-                                <button @click.stop="copyToClipboard(card.number, 'Card Number')"
-                                    class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                    <i data-lucide="copy" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-
-                            <div class="flex justify-between mt-4 text-sm">
-                                <div x-show="card.holder" class="flex items-center gap-2">
-                                    <div>
-                                        <span class="text-xs opacity-70 block">Card Holder</span>
-                                        <span class="font-medium uppercase" x-text="card.holder"></span>
-                                    </div>
-                                    <button @click.stop="copyToClipboard(card.holder, 'Card Holder')"
-                                        class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                        <i data-lucide="copy" class="w-3 h-3"></i>
-                                    </button>
+                            <div class="relative z-10 text-white">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-lg" x-text="card.title || 'Untitled Card'"></span>
+                                    <i data-lucide="credit-card" class="w-6 h-6"></i>
                                 </div>
 
-                                <div x-show="card.expiry" class="flex items-center gap-2">
-                                    <div>
-                                        <span class="text-xs opacity-70 block">Expires</span>
-                                        <span class="font-medium" x-text="formatExpiryDisplay(card.expiry)"></span>
-                                    </div>
-                                    <button @click.stop="copyToClipboard(card.expiry, 'Expiry Date')"
-                                        class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                        <i data-lucide="copy" class="w-3 h-3"></i>
-                                    </button>
-                                </div>
-
-                                <div x-show="card.cvv" class="flex items-center gap-2">
-                                    <div>
-                                        <span class="text-xs opacity-70 block">CVV</span>
-                                        <span class="font-medium" x-text="card.cvv"></span>
-                                    </div>
-                                    <button @click.stop="copyToClipboard(card.cvv, 'CVV')"
-                                        class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                        <i data-lucide="copy" class="w-3 h-3"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div x-show="card.note" class="mt-4 text-xs">
                                 <div
-                                    class="flex items-start justify-between bg-white/10 p-3 rounded-lg border border-white/20">
-                                    <p class="opacity-80 whitespace-pre-line break-words mr-2" x-text="card.note"></p>
-                                    <button @click.stop="copyToClipboard(card.note, 'Note')"
-                                        class="p-1 flex-shrink-0 text-gray-200 hover:text-white active:scale-95 transition-transform">
+                                    class="mt-6 font-mono text-xl sm:text-2xl tracking-widest break-all flex items-center gap-2">
+                                    <span x-text="formatCardNumberFull(card.number)"></span>
+                                    <button @click.stop="copyToClipboard(card.number, 'Card Number')"
+                                        class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
+                                        <i data-lucide="copy" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+
+                                <div class="flex justify-between mt-4 text-sm">
+                                    <div x-show="card.holder" class="flex items-center gap-2">
+                                        <div>
+                                            <span class="text-xs opacity-70 block">Card Holder</span>
+                                            <span class="font-medium uppercase" x-text="card.holder"></span>
+                                        </div>
+                                        <button @click.stop="copyToClipboard(card.holder, 'Card Holder')"
+                                            class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
+                                            <i data-lucide="copy" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
+
+                                    <div x-show="card.expiry" class="flex items-center gap-2">
+                                        <div>
+                                            <span class="text-xs opacity-70 block">Expires</span>
+                                            <span class="font-medium" x-text="formatExpiryDisplay(card.expiry)"></span>
+                                        </div>
+                                        <button @click.stop="copyToClipboard(card.expiry, 'Expiry Date')"
+                                            class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
+                                            <i data-lucide="copy" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
+
+                                    <div x-show="card.cvv" class="flex items-center gap-2">
+                                        <div>
+                                            <span class="text-xs opacity-70 block">CVV</span>
+                                            <span class="font-medium" x-text="card.cvv"></span>
+                                        </div>
+                                        <button @click.stop="copyToClipboard(card.cvv, 'CVV')"
+                                            class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
+                                            <i data-lucide="copy" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div x-show="card.note" class="mt-4 text-xs">
+                                    <div
+                                        class="flex items-start justify-between bg-white/10 p-3 rounded-lg border border-white/20">
+                                        <p class="opacity-80 whitespace-pre-line break-words mr-2" x-text="card.note">
+                                        </p>
+                                        <button @click.stop="copyToClipboard(card.note, 'Note')"
+                                            class="p-1 flex-shrink-0 text-gray-200 hover:text-white active:scale-95 transition-transform">
+                                            <i data-lucide="copy" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end mt-4">
+                                    <button @click.stop="confirmDeleteCard(card.id)"
+                                        class="text-red-300 hover:text-red-100 p-1 transition-colors">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <div x-show="cards.length === 0"
+                        class="flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 mt-10">
+                        <i data-lucide="credit-card" class="w-16 h-16 mb-4 opacity-50"></i>
+                        <p>No cards saved.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="sortedItems.length === 0 && activeTab !== 'secure-notes' && activeTab !== 'cards'">
+                <div class="flex flex-col items-center justify-center mt-20 text-gray-300 dark:text-gray-600">
+                    <i data-lucide="inbox" class="w-16 h-16 mb-4 opacity-50"></i>
+                    <p>No items in <span class="font-bold text-gray-400 dark:text-gray-500"
+                            x-text="activeTab === 'secure-notes' ? 'Secure Notes' : toTitleCase(activeTab)"></span></p>
+                </div>
+            </div>
+
+            <div class="grid gap-4" x-show="activeTab !== 'cards'">
+                <template x-for="item in sortedItems" :key="item.id">
+                    <div class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative group transition-all hover:shadow-md"
+                        :class="{ 'opacity-50 dark:opacity-40': item.isDone && activeTab !== 'secure-notes' }"
+                        x-transition:leave.opacity.duration.300>
+
+                        <a :href="item.link" target="_blank" @click.stop
+                            x-show="!isTodoTab(activeTab) && activeTab !== 'secure-notes' && item.link"
+                            class="absolute top-3 right-3 p-2 rounded-full transition-colors z-10 text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-800/50">
+                            <i :data-lucide="activeTab === 'music' ? 'music' : 'link'" class="w-5 h-5"></i>
+                        </a>
+
+                        <template x-if="isTodoTab(activeTab)">
+                            <div class="flex items-start gap-4" @click="openEditItemModal(item)">
+                                <div class="mt-1">
+                                    <input type="checkbox" :checked="item.isDone"
+                                        class="form-checkbox h-6 w-6 text-blue-600 bg-gray-200 dark:bg-gray-700 border-gray-300 rounded focus:ring-blue-500 cursor-pointer transition-colors"
+                                        @click.stop="toggleDone(item.id)">
+                                </div>
+                                <div class="flex-1 min-w-0 cursor-pointer">
+                                    <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg leading-snug"
+                                        x-text="item.title"
+                                        :class="{ 'line-through text-gray-400 dark:text-gray-500': item.isDone }"></h3>
+                                    <p x-show="item.note"
+                                        class="mt-1 text-sm text-gray-500 dark:text-gray-400 whitespace-pre-line"
+                                        x-text="item.note"></p>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="activeTab === 'secure-notes'">
+                            <div @click="openEditItemModal(item)" class="cursor-pointer">
+                                <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg pr-10 leading-tight"
+                                    x-text="item.title"></h3>
+                                <div x-show="item.note"
+                                    class="mt-3 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg whitespace-pre-line border border-gray-100 dark:border-gray-700 flex justify-between items-start">
+                                    <p class="whitespace-pre-line break-words mr-2" x-text="item.note"></p>
+                                    <button @click.stop="copyToClipboard(item.note, 'Secure Note')"
+                                        class="p-1 flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 active:scale-95 transition-transform">
                                         <i data-lucide="copy" class="w-3 h-3"></i>
                                     </button>
                                 </div>
                             </div>
+                        </template>
 
-                            <div class="flex justify-end mt-4">
-                                <button @click.stop="confirmDeleteCard(card.id)"
-                                    class="text-red-300 hover:text-red-100 p-1 transition-colors">
+                        <template x-if="!isTodoTab(activeTab) && activeTab !== 'secure-notes'">
+                            <div @click="openEditItemModal(item)" class="cursor-pointer">
+                                <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg pr-10 leading-tight"
+                                    x-text="item.title" :class="{ 'line-through': item.isDone }"></h3>
+
+                                <div class="mt-3 flex items-center gap-2">
+                                </div>
+
+                                <div x-show="item.note"
+                                    class="mt-3 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg whitespace-pre-line border border-gray-100 dark:border-gray-700"
+                                    x-text="item.note" :class="{ 'line-through': item.isDone }"></div>
+                            </div>
+                        </template>
+
+                        <div class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-between items-center"
+                            x-show="activeTab !== 'secure-notes'">
+                            <span class="text-[10px] text-gray-400 dark:text-gray-600"
+                                x-text="new Date(item.id).toLocaleDateString()"></span>
+
+                            <div class="flex items-center gap-3">
+                                <button @click.stop="toggleFavorite(item.id)"
+                                    x-show="!isTodoTab(activeTab) && activeTab !== 'secure-notes'"
+                                    class="p-1 rounded-full transition-colors active:scale-95"
+                                    :class="item.isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'">
+                                    <i data-lucide="heart" class="w-5 h-5"
+                                        :fill="item.isFavorite ? 'currentColor' : 'none'"></i>
+                                </button>
+                                <button @click.stop="toggleDone(item.id)"
+                                    class="text-xs font-bold transition-colors py-1 px-2 rounded-full"
+                                    x-show="!isTodoTab(activeTab)"
+                                    :class="item.isDone ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300 hover:text-blue-600'">
+                                    <i data-lucide="check-circle" class="w-3 h-3 inline-block mr-1"></i>
+                                    <span x-text="item.isDone ? 'UNDONE' : 'MARK DONE'"></span>
+                                </button>
+
+                                <button @click.stop="confirmDelete(item.id)"
+                                    class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </template>
-                <div x-show="cards.length === 0"
-                    class="flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 mt-10">
-                    <i data-lucide="credit-card" class="w-16 h-16 mb-4 opacity-50"></i>
-                    <p>No cards saved.</p>
-                </div>
-            </div>
-        </div>
 
-        <div x-show="sortedItems.length === 0 && activeTab !== 'secure'">
-            <div class="flex flex-col items-center justify-center mt-20 text-gray-300 dark:text-gray-600">
-                <i data-lucide="inbox" class="w-16 h-16 mb-4 opacity-50"></i>
-                <p>No items in <span class="font-bold text-gray-400 dark:text-gray-500"
-                        x-text="activeTab === 'secure' ? 'Secure Notes' : toTitleCase(activeTab)"></span></p>
-            </div>
-        </div>
-
-        <div class="grid gap-4" x-show="activeTab !== 'secure' || (activeTab === 'secure' && secureView === 'notes')">
-            <template x-for="item in sortedItems" :key="item.id">
-                <div class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative group transition-all hover:shadow-md"
-                    :class="{ 'opacity-50 dark:opacity-40': item.isDone && activeTab !== 'secure' }"
-                    x-transition:leave.opacity.duration.300>
-
-                    <a :href="item.link" target="_blank" @click.stop
-                        x-show="!isTodoTab(activeTab) && activeTab !== 'secure' && item.link"
-                        class="absolute top-3 right-3 p-2 rounded-full transition-colors z-10 text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-800/50">
-                        <i :data-lucide="activeTab === 'music' ? 'music' : 'link'" class="w-5 h-5"></i>
-                    </a>
-
-                    <template x-if="isTodoTab(activeTab)">
-                        <div class="flex items-start gap-4" @click="openEditItemModal(item)">
-                            <div class="mt-1">
-                                <input type="checkbox" :checked="item.isDone"
-                                    class="form-checkbox h-6 w-6 text-blue-600 bg-gray-200 dark:bg-gray-700 border-gray-300 rounded focus:ring-blue-500 cursor-pointer transition-colors"
-                                    @click.stop="toggleDone(item.id)">
-                            </div>
-                            <div class="flex-1 min-w-0 cursor-pointer">
-                                <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg leading-snug"
-                                    x-text="item.title"
-                                    :class="{ 'line-through text-gray-400 dark:text-gray-500': item.isDone }"></h3>
-                                <p x-show="item.note"
-                                    class="mt-1 text-sm text-gray-500 dark:text-gray-400 whitespace-pre-line"
-                                    x-text="item.note"></p>
-                                <!-- <template x-if="item.link">
-                                    <a :href="item.link" target="_blank" @click.stop
-                                        class="inline-flex items-center text-xs font-bold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 mt-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
-                                        <div x-html="getLinkIcon(item.link)"
-                                            class="w-4 h-4 mr-1.5 flex items-center justify-center"></div>
-                                        <span>Visit Link</span>
-                                    </a>
-                                </template> -->
-                            </div>
-                        </div>
-                    </template>
-
-                    <template x-if="activeTab === 'secure'">
-                        <div @click="openEditItemModal(item)" class="cursor-pointer">
-                            <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg pr-10 leading-tight"
-                                x-text="item.title"></h3>
-                            <div x-show="item.note"
-                                class="mt-3 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg whitespace-pre-line border border-gray-100 dark:border-gray-700 flex justify-between items-start">
-                                <p class="whitespace-pre-line break-words mr-2" x-text="item.note"></p>
-                                <button @click.stop="copyToClipboard(item.note, 'Secure Note')"
-                                    class="p-1 flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 active:scale-95 transition-transform">
-                                    <i data-lucide="copy" class="w-3 h-3"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-
-                    <template x-if="!isTodoTab(activeTab) && activeTab !== 'secure'">
-                        <div @click="openEditItemModal(item)" class="cursor-pointer">
-                            <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg pr-10 leading-tight"
-                                x-text="item.title" :class="{ 'line-through': item.isDone }"></h3>
-
-                            <div class="mt-3 flex items-center gap-2">
-                                <template x-if="item.link">
-                                    <!-- <a :href="item.link" target="_blank" @click.stop
-                                        class="inline-flex items-center text-xs font-bold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
-                                        <div x-html="getLinkIcon(item.link)"
-                                            class="w-4 h-4 mr-1.5 flex items-center justify-center"></div>
-                                        <span x-text="activeTab === 'music' ? 'Open Song' : 'Visit Link'"></span>
-                                    </a> -->
-                                </template>
-                            </div>
-
-                            <div x-show="item.note"
-                                class="mt-3 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg whitespace-pre-line border border-gray-100 dark:border-gray-700"
-                                x-text="item.note" :class="{ 'line-through': item.isDone }"></div>
-                        </div>
-                    </template>
-
-                    <div class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-between items-center"
-                        x-show="activeTab !== 'secure'">
-                        <span class="text-[10px] text-gray-400 dark:text-gray-600"
-                            x-text="new Date(item.id).toLocaleDateString()"></span>
-
-                        <div class="flex items-center gap-3">
-                            <button @click.stop="toggleFavorite(item.id)" 
-                                x-show="!isTodoTab(activeTab) && activeTab !== 'secure'"
-                                class="p-1 rounded-full transition-colors active:scale-95"
-                                :class="item.isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'">
-                                <i data-lucide="heart" class="w-5 h-5" :fill="item.isFavorite ? 'currentColor' : 'none'"></i>
-                            </button>
-                            <button @click.stop="toggleDone(item.id)"
-                                class="text-xs font-bold transition-colors py-1 px-2 rounded-full"
-                                x-show="!isTodoTab(activeTab)"
-                                :class="item.isDone ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300 hover:text-blue-600'">
-                                <i data-lucide="check-circle" class="w-3 h-3 inline-block mr-1"></i>
-                                <span x-text="item.isDone ? 'UNDONE' : 'MARK DONE'"></span>
-                            </button>
-
+                        <div class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-end items-center"
+                            x-show="activeTab === 'secure-notes'">
                             <button @click.stop="confirmDelete(item.id)"
                                 class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
                         </div>
                     </div>
+                </template>
+            </div>
 
-                    <div class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-end items-center"
-                        x-show="activeTab === 'secure'">
-                        <button @click.stop="confirmDelete(item.id)"
-                            class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-            </template>
-        </div>
+            <div x-show="copyMessage" x-transition.opacity.duration.300
+                class="fixed bottom-32 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg shadow-xl z-[60] pointer-events-none">
+                <span x-text="copyMessage"></span>
+            </div>
+        </main>
+    </div>
 
-        <div x-show="copyMessage" x-transition.opacity.duration.300
-            class="fixed bottom-32 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg shadow-xl z-[60] pointer-events-none">
-            <span x-text="copyMessage"></span>
-        </div>
-    </main>
-
-    <button x-show="activeTab === 'secure'" @click="secureView = secureView === 'notes' ? 'cards' : 'notes'"
-        class="fixed bottom-24 right-6 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800"
-        :class="secureView === 'cards' ? 'bg-blue-600 hover:bg-blue-700 ring-blue-100 dark:ring-blue-900/50' : 'bg-yellow-600 hover:bg-yellow-700 ring-yellow-100 dark:ring-yellow-900/50'">
-        <i :data-lucide="secureView === 'cards' ? 'file-text' : 'credit-card'" class="w-6 h-6"></i>
+    <!-- Floating Action Buttons -->
+    <button x-show="currentView === 'tab' && activeTab === 'cards'" @click="openAddCardModal()"
+        class="fixed bottom-6 right-6 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800 bg-blue-600 hover:bg-blue-700">
+        <i data-lucide="plus" class="w-6 h-6"></i>
     </button>
 
-    <button @click="activeTab === 'secure' && secureView === 'cards' ? openAddCardModal() : openAddItemModal()"
+    <button x-show="currentView === 'tab' && activeTab !== 'cards'" @click="openAddItemModal()"
         class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800">
         <i data-lucide="plus" class="w-8 h-8"></i>
     </button>
 
+    <!-- MODALS (Keep all existing modals) -->
     <div x-show="modals.item"
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
         x-transition.opacity>
@@ -444,7 +525,7 @@
                         class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                         :placeholder="getTitlePlaceholder()">
                 </div>
-                <template x-if="activeTab !== 'secure' && !isTodoTab(activeTab)">
+                <template x-if="activeTab !== 'secure-notes' && !isTodoTab(activeTab)">
                     <div>
                         <label
                             class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Link</label>
@@ -596,7 +677,8 @@
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Tab Name</label>
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Tab
+                        Name</label>
                     <input type="text" x-model="newTabName" @keydown.enter.prevent="createNewTab()"
                         class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                         placeholder="e.g. Reading List">
@@ -690,14 +772,32 @@
                         class="w-6 h-6"></i></button>
             </div>
 
+            <!-- UPDATED: Default Launch View Settings - Inline Layout -->
             <div class="mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
-                <h3 class="font-bold text-lg mb-3">Default Tab</h3>
-                <select x-model="tempDefaultTabID" @change="persist()"
-                    class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-                    <template x-for="tab in tabs.filter(t => t !== 'secure')">
-                        <option :value="tab" x-text="toTitleCase(tab)"></option>
-                    </template>
-                </select>
+                <h3 class="font-bold text-lg mb-3">Default Launch View</h3>
+                <div class="flex items-center gap-6 mb-3">
+                    <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
+                        <input type="radio" x-model="tempDefaultView" value="home" name="default-view"
+                            class="form-radio h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
+                        Home Dashboard
+                    </label>
+                    <label class="flex items-center text-sm font-medium dark:text-white cursor-pointer">
+                        <input type="radio" x-model="tempDefaultView" value="tab" name="default-view"
+                            class="form-radio h-4 w-4 text-blue-600 dark:bg-gray-700 border-gray-300 focus:ring-blue-500 mr-2">
+                        Specific Tab
+                    </label>
+                </div>
+
+                <div x-show="tempDefaultView === 'tab'" class="mt-3">
+                    <select x-model="tempDefaultTabID"
+                        class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                        <template x-for="tab in tabs">
+                            <template x-if="tab !== 'secure-notes' && tab !== 'cards'">
+                                <option :value="tab" x-text="toTitleCase(tab)"></option>
+                            </template>
+                        </template>
+                    </select>
+                </div>
             </div>
 
             <div class="mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
@@ -712,983 +812,1073 @@
             </div>
 
             <button @click="savePreferences()"
-                :disabled="tempDefaultTabID === defaultTabID && tempMusicAppPreference === musicAppPreference"
+                :disabled="tempDefaultTabID === defaultTabID && tempMusicAppPreference === musicAppPreference && tempDefaultView === defaultView"
                 class="w-full mt-6 py-3.5 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform hover:bg-blue-700 disabled:opacity-50">
                 Save Changes
             </button>
-            
+
             <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-
-            <!-- <div class="mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
-                <h3 class="font-bold text-lg mb-3 text-red-500 dark:text-red-400">Danger Zone</h3>
-                <button @click="confirmDeleteAllData()"
-                    class="w-full py-2.5 bg-red-50 text-red-500 rounded-xl font-bold hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40">
-                    Delete All Data
-                </button>
-            </div> -->
-
-            <div class="flex justify-between items-center text-xs text-gray-400 dark:text-gray-600 pt-2">
-                <span>Version <span x-text="version"></span></span>
-                <span x-show="updateAvailable"
-                    class="text-blue-500 dark:text-blue-400 font-bold flex items-center gap-1">
-                    Update Available!
-                </span>
+                <div class="flex justify-between items-center text-xs text-gray-400 dark:text-gray-600 pt-2">
+                    <span>Version <span x-text="version"></span></span>
+                    <span x-show="updateAvailable"
+                        class="text-blue-500 dark:text-blue-400 font-bold flex items-center gap-1">
+                        Update Available!
+                    </span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div x-show="modals.deleteAll" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
-        x-transition.opacity>
-        <div
-            class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
+        <div x-show="modals.deleteAll" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+            x-transition.opacity>
             <div
-                class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="skull" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-lg font-bold mb-2 dark:text-white">Delete ALL App Data?</h3>
-            <p class="text-sm text-red-500 mb-6 font-bold">This includes all items, tabs, and preferences. THIS CANNOT
-                BE UNDONE.</p>
-            <div class="flex gap-3">
-                <button @click="modals.deleteAll = false"
-                    class="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-xl font-bold text-gray-600 dark:text-gray-300">Cancel</button>
-                <button @click="performDeleteAllData()"
-                    class="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-bold shadow-md hover:bg-red-600">DELETE
-                    ALL</button>
+                class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
+                <div
+                    class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="skull" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-bold mb-2 dark:text-white">Delete ALL App Data?</h3>
+                <p class="text-sm text-red-500 mb-6 font-bold">This includes all items, tabs, and preferences. THIS
+                    CANNOT
+                    BE UNDONE.</p>
+                <div class="flex gap-3">
+                    <button @click="modals.deleteAll = false"
+                        class="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-xl font-bold text-gray-600 dark:text-gray-300">Cancel</button>
+                    <button @click="performDeleteAllData()"
+                        class="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-bold shadow-md hover:bg-red-600">DELETE
+                        ALL</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div x-show="modals.update" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
-        x-transition.opacity>
-        <div
-            class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
+        <div x-show="modals.update" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+            x-transition.opacity>
             <div
-                class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="cloud-download" class="w-6 h-6"></i>
+                class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
+                <div
+                    class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="cloud-download" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-bold mb-2 dark:text-white">App Update Ready!</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">A new version is available. Restart the app to
+                    apply the update.</p>
+                <button @click="reloadApp()"
+                    class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-500">Update</button>
             </div>
-            <h3 class="text-lg font-bold mb-2 dark:text-white">App Update Ready!</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">A new version is available. Restart the app to
-                apply the update.</p>
-            <button @click="reloadApp()"
-                class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-500">Update</button>
         </div>
-    </div>
 
-    <div x-show="modals.tabContext" x-cloak :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }"
-        @click.outside="modals.tabContext = false"
-        class="fixed bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 z-[60] text-sm animate-scale-in border border-gray-100 dark:border-gray-700">
-        <ul class="space-y-1 w-32">
-            <li>
-                <button @click="modals.tabContext = false; openEditTabModal()"
-                    class="w-full text-left px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                    <i data-lucide="pencil" class="w-4 h-4"></i>
-                    Rename
-                </button>
-            </li>
-            <li>
-                <button @click="modals.tabContext = false; confirmDeleteTab(currentContextTab)"
-                    class="w-full text-left px-3 py-2 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center gap-2">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    Delete
-                </button>
-            </li>
-            <hr class="border-gray-100 dark:border-gray-700 my-1">
-            <li>
-                <button @click="modals.tabContext = false; setDefaultTab(currentContextTab)"
-                    class="w-full text-left px-3 py-2 rounded-md text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 flex items-center gap-2">
-                    <i data-lucide="star" class="w-4 h-4"></i>
-                    Set Default
-                </button>
-            </li>
-        </ul>
-    </div>
+        <div x-show="modals.tabContext" x-cloak :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }"
+            @click.outside="modals.tabContext = false"
+            class="fixed bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 z-[60] text-sm animate-scale-in border border-gray-100 dark:border-gray-700">
+            <ul class="space-y-1 w-32">
+                <li>
+                    <button @click="modals.tabContext = false; openEditTabModal()"
+                        class="w-full text-left px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                        Rename
+                    </button>
+                </li>
+                <li>
+                    <button @click="modals.tabContext = false; confirmDeleteTab(currentContextTab)"
+                        class="w-full text-left px-3 py-2 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center gap-2">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        Delete
+                    </button>
+                </li>
+            </ul>
+        </div>
 
-    <script>
-        function app() {
-            return {
-                version: '3.5.3', // UPDATED DISPLAY VERSION
-                activeTab: localStorage.getItem('bd_default_tab') || 'food', // FIX: Initialize activeTab from storage
-                tabs: ['food', 'travel', 'movies', 'music', 'secure'],
-                data: {},
-                musicAppPreference: 'youtube_music',
-                oldMusicAppPreference: 'youtube_music',
-                tabMetadata: {},
-                defaultTabID: localStorage.getItem('bd_default_tab') || 'food',
-                darkMode: false,
-                newTabError: '',
-                // NEW: Secure View State
-                secureView: 'notes', // 'notes' or 'cards'
-                tempDefaultTabID: 'food',
-                tempMusicAppPreference: 'youtube_music',
-                // Swipe State
-                touchstartX: 0,
-                touchendX: 0,
-                swipeThreshold: 75,
-                // Long Press State
-                longPressTimer: null,
-                longPressDuration: 500, // ms
-                currentContextTab: null,
-                contextMenuX: 0,
-                contextMenuY: 0,
-                // Copy Toast State
-                copyMessage: null,
-                copyTimer: null, // For toast timer
-                // Modals State: UPDATED to use cardItem
-                modals: {
-                    item: false,
-                    tab: false,
-                    editTab: false,
-                    delete: false,
-                    deleteTab: false,
-                    tabContext: false,
-                    settings: false,
-                    cardItem: false,
-                    deleteAll: false,
-                    update: false
-                },
-                updateAvailable: false,
-                waitingWorker: null,
-                // Form Data: Item/Note
-                form: {
-                    id: null,
-                    title: '',
-                    link: '',
-                    note: '',
-                    isFavorite: false,
-                    isDone: false,
-                    type: 'note'
-                },
-                editingItem: false,
-                // Form Data: Card
-                cardForm: {
-                    id: null,
-                    title: '',
-                    number: '',
-                    holder: '',
-                    expiry: '',
-                    cvv: '',
-                    color: '#2563eb',
-                    type: 'card',
-                    note: ''
-                },
-                editingCard: false,
-                newTabName: '',
-                newTabType: 'normal',
-                editTabName: '',
-                itemToDelete: null,
-                tabToDelete: null,
-                ANIMATION_DURATION: 300,
+        <script>
+            function app() {
+                return {
+                    version: '3.7.0', // Updated version for UI/UX improvements
 
-                init() {
-                    // 1. Initialize Theme
-                    const savedTheme = localStorage.getItem('bd_theme');
-                    if (savedTheme) {
-                        this.darkMode = savedTheme === 'dark';
-                    } else {
-                        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                            this.darkMode = true;
-                        }
-                    }
+                    // New state for Home Dashboard
+                    currentView: 'home', // Will be set in init()
+                    defaultView: localStorage.getItem('bd_default_view') || 'home', // 'home' or 'tab'
+                    tempDefaultView: localStorage.getItem('bd_default_view') || 'home',
 
-                    // 2. Load Data and Preferences
-                    const sData = localStorage.getItem('bd_data');
-                    const sTabs = localStorage.getItem('bd_tabs');
-                    const sMusicApp = localStorage.getItem('bd_music_app');
-                    const sTabMeta = localStorage.getItem('bd_tab_metadata');
-
-                    this.data = sData ? JSON.parse(sData) : {};
-                    this.tabs = sTabs ? JSON.parse(sTabs) : ['food', 'travel', 'movies', 'music', 'secure'];
-                    this.tabMetadata = sTabMeta ? JSON.parse(sTabMeta) : {};
-
-                    if (sMusicApp) {
-                        this.musicAppPreference = sMusicApp;
-                        this.oldMusicAppPreference = sMusicApp;
-                    }
-
-                    this.migrateOldData();
-
-                    if (!this.tabs.includes(this.activeTab)) {
-                        this.activeTab = this.defaultTabID;
-                    }
-
-                    // 3. Alpine.js Watchers
-                    this.$watch('activeTab', (newTab) => {
-                        // Reset secure view when changing tabs
-                        if (newTab !== 'secure') {
-                            this.secureView = 'notes';
-                        }
-                        this.$nextTick(() => {
-                            lucide.createIcons();
-                        });
-                    });
-                    this.$watch('darkMode', () => {
-                        this.$nextTick(() => lucide.createIcons());
-                    });
-
-                    // 4. Service Worker
-                    if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.register('sw.js').then(reg => {
-                            reg.addEventListener('waiting', () => {
-                                this.updateAvailable = true;
-                                this.waitingWorker = reg.waiting;
-                            });
-                        });
-                        navigator.serviceWorker.addEventListener('controllerchange', () => {
-                            window.location.reload();
-                        });
-                    }
-
-                    this.$nextTick(() => lucide.createIcons());
-                },
-
-                // --- PERSISTENCE AND MIGRATION ---
-                migrateOldData() {
-                    // Migration logic for old data (not relevant to current request, keeping structure)
-                },
-
-                updateExistingMusicLinks() {
-                    // Update all existing items in the 'music' tab to use the new music app preference
-                    const musicData = this.data['music'] || [];
-                    this.data['music'] = musicData.map(item => {
-                        let isAutoLink = false;
-                        const oldApp = this.oldMusicAppPreference;
-                        const newApp = this.musicAppPreference;
-
-                        if (oldApp !== newApp) {
-                            // Check if the link was likely an auto-generated search link
-                            if (item.link && (item.link.includes('spotify.com/0') || item.link.includes('apple.com/us/search') || item.link.includes('youtube.com/search'))) {
-                                isAutoLink = true;
-                            }
-                        }
-
-                        if (item.title && isAutoLink) {
-                            item.link = this.autoGenerateMusicLink(item.title);
-                        }
-                        return item;
-                    });
-                },
-
-                updateExistingMusicLinks() {
-                    const musicList = this.data['music'] || [];
-                    this.data['music'] = musicList.map(item => {
-                        // Logic to check for old auto-generated links
-                        const isAutoLink = item.link && (
-                            item.link.includes('music.youtube.com/search?q=') ||
-                            item.link.includes('http://googleusercontent.com/spotify.com/') ||
-                            item.link.includes('music.apple.com/search?term=') ||
-                            item.link.includes('google.com/search?q=')
-                        );
-                        if (item.title && isAutoLink) {
-                            item.link = this.autoGenerateMusicLink(item.title);
-                        }
-                        return item;
-                    });
-                },
-
-                persist() {
-                    if (this.oldMusicAppPreference !== this.musicAppPreference) {
-                        this.updateExistingMusicLinks();
-                        this.oldMusicAppPreference = this.musicAppPreference;
-                    }
-                    localStorage.setItem('bd_data', JSON.stringify(this.data));
-                    localStorage.setItem('bd_tabs', JSON.stringify(this.tabs));
-                    localStorage.setItem('bd_music_app', this.musicAppPreference);
-                    localStorage.setItem('bd_default_tab', this.defaultTabID);
-                    localStorage.setItem('bd_tab_metadata', JSON.stringify(this.tabMetadata));
-                    localStorage.setItem('bd_theme', this.darkMode ? 'dark' : 'light');
-                },
-
-                // --- NAVIGATION / UI ---
-                scrollTabIntoView(tab, behavior = 'smooth', block = 'center') {
-                    const tabElement = this.$refs[`tab-${tab}`];
-                    if (tabElement) {
-                        tabElement.scrollIntoView({ behavior: behavior, inline: block });
-                    }
-                },
-
-                touchStart(e) {
-                    this.touchstartX = e.changedTouches[0].screenX;
-                },
-
-                touchEnd(e) {
-                    this.touchendX = e.changedTouches[0].screenX;
-                    this.handleSwipe();
-                },
-
-                handleSwipe() {
-                    if (this.modals.item || this.modals.cardItem || this.modals.settings || this.modals.tabContext || this.activeTab === 'secure') return;
-                    if (this.touchendX < this.touchstartX - this.swipeThreshold) {
-                        this.changeTab('next');
-                    }
-                    if (this.touchendX > this.touchstartX + this.swipeThreshold) {
-                        this.changeTab('prev');
-                    }
-                },
-
-                changeTab(direction) {
-                    const visibleTabs = this.tabs.filter(t => t !== 'secure');
-                    let currentIndex = visibleTabs.indexOf(this.activeTab);
-                    let nextIndex;
-
-                    if (direction === 'next') {
-                        nextIndex = (currentIndex + 1) % visibleTabs.length;
-                    } else if (direction === 'prev') {
-                        nextIndex = (currentIndex - 1 + visibleTabs.length) % visibleTabs.length;
-                    }
-                    this.activeTab = visibleTabs[nextIndex];
-                    this.scrollTabIntoView(this.activeTab, 'smooth', 'center');
-                },
-
-                // --- LONG PRESS & CONTEXT MENU ---
-                longPressStart(e, tab) {
-                    if (tab === 'secure') return;
-                    this.longPressTimer = setTimeout(() => {
-                        this.openTabContextMenu(tab, e);
-                    }, this.longPressDuration);
-                },
-
-                longPressEnd(e, tab) {
-                    clearTimeout(this.longPressTimer);
-                    this.longPressTimer = null;
-                },
-
-                openTabContextMenu(tab, event) {
-                    if (tab === 'secure') return;
-                    this.currentContextTab = tab;
-                    const targetRect = event.currentTarget.getBoundingClientRect();
-                    let x = targetRect.left;
-                    let y = targetRect.bottom + 10;
-
-                    // Adjust position if it goes off screen
-                    const viewportWidth = window.innerWidth;
-                    const menuWidthEstimate = 200;
-                    if (x + menuWidthEstimate > viewportWidth) {
-                        x = viewportWidth - menuWidthEstimate - 10;
-                    }
-                    // For contextmenu event, use event.clientX/Y if available
-                    if (event.clientX && event.clientY) {
-                        x = event.clientX;
-                        y = event.clientY;
-                    }
-
-                    this.contextMenuX = x;
-                    this.contextMenuY = y;
-                    this.modals.tabContext = true;
-                },
-
-                // --- THEME & SETTINGS ---
-                toggleTheme() {
-                    this.darkMode = !this.darkMode;
-                    localStorage.setItem('bd_theme', this.darkMode ? 'dark' : 'light');
-                },
-
-                openSettingsModal() {
-                    // Load current saved preferences into temporary state
-                    // FIX: Ensure temp variables reflect current saved settings on open
-                    this.tempDefaultTabID = this.defaultTabID;
-                    this.tempMusicAppPreference = this.musicAppPreference;
-                    
-                    this.modals.settings = true;
-                    this.$nextTick(() => lucide.createIcons());
-                },
-
-                openSecureNotesSettings() {
-                    // Toggle between secure and default tab, resetting the sub-view
-                    if (this.activeTab === 'secure') {
-                        this.activeTab = this.defaultTabID;
-                    } else {
-                        this.activeTab = 'secure';
-                        this.secureView = 'notes'; // Default to notes when entering secure
-                    }
-                },
-
-                confirmDeleteAllData() {
-                    this.modals.settings = false;
-                    this.modals.deleteAll = true;
-                },
-
-                performDeleteAllData() {
-                    localStorage.removeItem('bd_data');
-                    localStorage.removeItem('bd_tabs');
-                    localStorage.removeItem('bd_music_app');
-                    localStorage.removeItem('bd_default_tab');
-                    localStorage.removeItem('bd_tab_metadata');
-                    // Keep theme preference
-                    window.location.reload();
-                },
-
-                reloadApp() {
-                    if (this.waitingWorker) this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-                },
-
-                // --- DATA GETTERS ---
-                get secureNotes() {
-                    return (this.data['secure'] || []).filter(item => item.type !== 'card');
-                },
-
-                get cards() {
-                    return (this.data['secure'] || []).filter(item => item.type === 'card').sort((a, b) => b.id - a.id);
-                },
-
-                getItemType(id) {
-                    if (!this.data[this.activeTab]) return 'note';
-                    const item = this.data[this.activeTab].find(i => i.id === id);
-                    return item ? item.type : 'note';
-                },
-
-                get sortedItems() {
-                    let items = this.data[this.activeTab] || [];
-
-                    if (this.activeTab === 'secure') {
-                        return items.filter(item => item.type !== 'card').sort((a, b) => b.id - a.id);
-                    }
-
-                    // --- UPDATED SORTING LOGIC ---
-                    return items.sort((a, b) => {
-                        const isTodo = this.isTodoTab(this.activeTab);
-
-                        // 1. Sort by Done Status
-                        // This single check handles both scenarios:
-                        // - Non-Todo (User Request): Done goes to the bottom (1 means a goes after b). Done overrides favorite.
-                        // - Todo: Undone goes to the top, Done goes to the bottom.
-                        if (a.isDone !== b.isDone) {
-                            return a.isDone ? 1 : -1;
-                        }
-
-                        // 2. Sort by Favorite Status (only if done status is the same)
-                        // Favorite items go to the top for both Todo and non-Todo tabs.
-                        if (a.isFavorite !== b.isFavorite) {
-                            return a.isFavorite ? -1 : 1;
-                        }
-
-                        // 3. Default sort: Newest first (largest ID/timestamp comes first)
-                        return b.id - a.id;
-                    });
-                },
-
-                // --- CARD ACTIONS ---
-                openAddCardModal() {
-                    this.editingCard = false;
-                    this.cardForm = {
-                        id: Date.now(),
-                        title: '',
-                        number: '',
-                        holder: '',
-                        expiry: '',
-                        cvv: '',
-                        color: '#2563eb',
-                        type: 'card', // Important for filtering
-                        note: ''
-                    };
-                    this.modals.cardItem = true;
-                },
-
-                openEditCardModal(card) {
-                    this.editingCard = true;
-                    this.cardForm = {
-                        id: card.id,
-                        title: card.title,
-                        number: card.number,
-                        holder: card.holder,
-                        // Fix was incomplete here
-                        expiry: this.formatExpiryDisplay(card.expiry),
-                        cvv: card.cvv,
-                        type: 'card',
-                        note: card.note
-                    };
-                    this.modals.cardItem = true;
-                },
-
-                saveCard() {
-                    if (!this.cardForm.number) return;
-
-                    // Basic validation/cleaning
-                    this.cardForm.number = this.cardForm.number.replace(/\s/g, '');
-                    this.cardForm.expiry = this.cardForm.expiry.replace('/', '').slice(0, 4);
-                    this.cardForm.cvv = this.cardForm.cvv.slice(0, 4);
-
-                    let secureData = this.data['secure'] || [];
-
-                    if (this.editingCard) {
-                        const index = secureData.findIndex(i => i.id === this.cardForm.id);
-                        if (index !== -1) {
-                            secureData[index] = { ...this.cardForm };
-                        }
-                    } else {
-                        secureData.unshift(this.cardForm);
-                    }
-
-                    this.data['secure'] = secureData;
-                    this.persist();
-                    this.modals.cardItem = false;
-                    this.$nextTick(() => lucide.createIcons());
-                },
-
-                confirmDeleteCard(id) {
-                    this.itemToDelete = id;
-                    this.modals.delete = true;
-                },
-
-
-                // --- ITEM ACTIONS (NOTES/NORMAL) ---
-                openAddItemModal() {
-                    this.editingItem = false;
-                    this.form = {
-                        id: Date.now(),
+                    // Existing states
+                    activeTab: 'food', // Will be set in init()
+                    longPressActive: false,
+                    homeLongPressActive: false, // New: For home dashboard long press
+                    longPressTimer: null,
+                    homeLongPressTimer: null, // New: For home dashboard
+                    longPressDuration: 500,
+                    tabs: ['food', 'travel', 'movies', 'music', 'secure-notes', 'cards'],
+                    data: {},
+                    musicAppPreference: 'youtube_music',
+                    oldMusicAppPreference: 'youtube_music',
+                    tabMetadata: {},
+                    defaultTabID: localStorage.getItem('bd_default_tab') || 'food',
+                    darkMode: false,
+                    newTabError: '',
+                    tempDefaultTabID: 'food',
+                    tempMusicAppPreference: 'youtube_music',
+                    touchstartX: 0,
+                    touchendX: 0,
+                    swipeThreshold: 75,
+                    currentContextTab: null,
+                    contextMenuX: 0,
+                    contextMenuY: 0,
+                    copyMessage: null,
+                    copyTimer: null,
+                    modals: {
+                        item: false,
+                        tab: false,
+                        editTab: false,
+                        delete: false,
+                        deleteTab: false,
+                        tabContext: false,
+                        settings: false,
+                        cardItem: false,
+                        deleteAll: false,
+                        update: false
+                    },
+                    updateAvailable: false,
+                    waitingWorker: null,
+                    form: {
+                        id: null,
                         title: '',
                         link: '',
                         note: '',
                         isFavorite: false,
                         isDone: false,
                         type: 'note'
-                    };
-                    this.modals.item = true;
-                },
+                    },
+                    editingItem: false,
+                    cardForm: {
+                        id: null,
+                        title: '',
+                        number: '',
+                        holder: '',
+                        expiry: '',
+                        cvv: '',
+                        color: '#2563eb',
+                        type: 'card',
+                        note: ''
+                    },
+                    editingCard: false,
+                    newTabName: '',
+                    newTabType: 'normal',
+                    editTabName: '',
+                    itemToDelete: null,
+                    tabToDelete: null,
+                    ANIMATION_DURATION: 300,
 
-                openEditItemModal(item) {
-                    if (item.type === 'card' && this.activeTab === 'secure') {
-                        // Redirect to card edit if a card item is clicked
-                        this.openEditCardModal(item);
-                        return;
-                    }
-                    this.editingItem = true;
-                    // Ensure 'type' is set for existing notes from older versions
-                    this.form = { ...item, type: item.type || 'note' };
-                    this.modals.item = true;
-                },
-
-                saveItem() {
-                    if (!this.form.title) return;
-                    let list = this.data[this.activeTab] || [];
-
-                    // --- AUTO-LINK GENERATION LOGIC ---
-                    // If the link is empty/only whitespace for a non-secure, non-todo tab, auto-generate a link.
-                    if (this.activeTab !== 'secure' && !this.isTodoTab(this.activeTab) && (!this.form.link || !this.form.link.trim()) && this.form.title.trim()) {
-                        if (this.activeTab === 'food') {
-                            // Food tab -> YouTube link
-                            this.form.link = this.autoGenerateYouTubeSearchLink(this.form.title);
-                        } else if (this.activeTab !== 'music') {
-                            // All other non-music, non-secure tabs -> Google Search link
-                            this.form.link = this.autoGenerateGoogleSearchLink(this.form.title);
-                        }
-                    }
-                    // --- END AUTO-LINK GENERATION LOGIC ---
-
-                    // Default values for new/saved secure notes
-                    if (this.activeTab === 'secure') {
-                        this.form.link = '';
-                        this.form.isDone = false;
-                        this.form.isFavorite = false;
-                        this.form.type = 'note'; // Ensure it's marked as a note
-                    }
-                    if (this.editingItem) {
-                        const index = list.findIndex(i => i.id === this.form.id);
-                        if (index !== -1) {
-                            const oldItem = list[index];
-
-                            // Music link logic: if title changed and link was auto-generated, re-generate it
-                            const wasAutoLink = oldItem.link && (
-                                oldItem.link.includes('music.youtube.com/search?q=') ||
-                                oldItem.link.includes('open.spotify.com/search') || // Check for standard Spotify link
-                                oldItem.link.includes('music.apple.com/search?term=')
-                            );
-
-                            if (this.activeTab !== 'secure' && oldItem.title !== this.form.title && !this.form.lin) {
-                                this.form.link = this.autoGenerateMusicLink(this.form.title);
+                    init() {
+                        // 1. Initialize Theme
+                        const savedTheme = localStorage.getItem('bd_theme');
+                        if (savedTheme) {
+                            this.darkMode = savedTheme === 'dark';
+                        } else {
+                            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                                this.darkMode = true;
                             }
-
-                            list[index] = { ...this.form };
                         }
-                    } else {
-                        // For new items in the music tab, ensure link is set if none provided
-                        if (!this.form.link && this.activeTab !== 'secure') {
-                            this.form.link = this.autoGenerateMusicLink(this.form.title);
+
+                        // 2. Load Data and Preferences
+                        const sData = localStorage.getItem('bd_data');
+                        const sTabs = localStorage.getItem('bd_tabs');
+                        const sMusicApp = localStorage.getItem('bd_music_app');
+                        const sTabMeta = localStorage.getItem('bd_tab_metadata');
+
+                        this.data = sData ? JSON.parse(sData) : {};
+                        this.tabs = sTabs ? JSON.parse(sTabs) : ['food', 'travel', 'movies', 'music', 'secure-notes', 'cards'];
+                        this.tabMetadata = sTabMeta ? JSON.parse(sTabMeta) : {};
+
+                        // Migrate old secure data to new structure
+                        this.migrateSecureData();
+
+                        if (sMusicApp) {
+                            this.musicAppPreference = sMusicApp;
+                            this.oldMusicAppPreference = sMusicApp;
                         }
-                        list.unshift(this.form);
-                    }
-                    this.data[this.activeTab] = list; // Ensure data is updated
-                    this.persist();
-                    this.modals.item = false;
-                    this.$nextTick(() => lucide.createIcons());
-                },
 
-                // NEW HELPER: Generate link on button click (Music Tab only)
-                generateLinkForMusic() {
-                    if (this.form.title.trim()) {
-                        this.form.link = this.autoGenerateMusicLink(this.form.title);
-                        this.showCopyToast('Link auto-generated');
-                        this.$nextTick(() => lucide.createIcons());
-                    }
-                },
+                        this.migrateOldData();
 
-                confirmDelete(id) {
-                    this.itemToDelete = id;
-                    this.modals.delete = true;
-                },
+                        // 3. Load view preferences
+                        const sDefaultView = localStorage.getItem('bd_default_view');
+                        if (sDefaultView) {
+                            this.defaultView = sDefaultView;
+                            this.tempDefaultView = sDefaultView;
+                        }
 
-                performDelete() {
-                    if (this.itemToDelete) {
-                        this.modals.delete = false;
-                        setTimeout(() => {
-                            const tabData = this.data[this.activeTab];
-                            if (tabData && tabData.some(i => i.id === this.itemToDelete)) {
-                                this.data[this.activeTab] = tabData.filter(i => i.id !== this.itemToDelete);
-                                this.persist();
+                        // FIXED: Robust Default View Logic
+                        // 4. Set initial view based on default preference
+                        if (this.defaultView === 'tab') {
+                            // If default is specific tab, open that tab directly
+                            this.currentView = 'tab';
+                            this.activeTab = this.defaultTabID;
+                        } else {
+                            // Otherwise show home dashboard
+                            this.currentView = 'home';
+                            // Load last active tab from localStorage if exists
+                            const lastActiveTab = localStorage.getItem('bd_last_active_tab');
+                            if (lastActiveTab && this.tabs.includes(lastActiveTab)) {
+                                this.activeTab = lastActiveTab;
                             }
-                            this.itemToDelete = null;
-                        }, this.ANIMATION_DURATION);
-                    }
-                },
-
-                toggleFavorite(id) {
-                    const item = (this.data[this.activeTab] || []).find(i => i.id === id);
-                    if (item && this.activeTab !== 'secure') {
-                        item.isFavorite = !item.isFavorite;
-                        this.persist();
-                    }
-                },
-
-                toggleDone(id) {
-                    const item = (this.data[this.activeTab] || []).find(i => i.id === id);
-                    if (item && this.activeTab !== 'secure') {
-                        item.isDone = !item.isDone;
-                        this.persist();
-                    }
-                },
-
-                // --- TAB ACTIONS ---
-                openNewTabModal() {
-                    this.newTabName = '';
-                    this.newTabType = 'normal';
-                    this.modals.tab = true;
-                    this.newTabError = ''; // NEW: Clear any old error when opening the modal
-                },
-
-                createNewTab() {
-                    const newName = this.newTabName.trim().toLowerCase().replace(/\s+/g, '-');
-                    this.newTabError = ''; // Clear previous error attempt
-
-                    // 1. Check for invalid or reserved names
-                    if (!newName) {
-                        this.newTabError = 'Please enter a name for the new tab.';
-                        return;
-                    }
-                    if (newName === 'secure') {
-                        this.newTabError = '"secure" is a reserved tab name.';
-                        return;
-                    }
-
-                    // 2. NEW: Check for duplicate name
-                    if (this.tabs.includes(newName)) {
-                        // Set the error message using the user's original input for better readability
-                        this.newTabError = `A tab named "${this.newTabName.trim()}" already exists.`;
-                        return; // Stop the function execution
-                    }
-
-                    // If we reach here, the tab is valid and unique: perform creation
-                    const secureIndex = this.tabs.indexOf('secure');
-                    this.tabs.splice(secureIndex, 0, newName);
-                    this.data[newName] = [];
-                    this.tabMetadata[newName] = this.newTabType;
-                    this.activeTab = newName;
-
-                    this.persist();
-                    this.modals.tab = false;
-
-                    this.$nextTick(() => {
-                        const scroller = this.$refs.tabScroller;
-                        if (scroller) {
-                            scroller.scrollTo({ left: scroller.scrollWidth, behavior: 'smooth' });
                         }
-                    });
-                },
 
-                openEditTabModal() {
-                    this.editTabName = this.toTitleCase(this.currentContextTab);
-                    this.modals.editTab = true;
-                },
+                        // 5. Ensure active tab exists
+                        if (!this.tabs.includes(this.activeTab)) {
+                            this.activeTab = this.defaultTabID;
+                        }
 
-                saveTabRename() {
-                    const oldName = this.currentContextTab;
-                    const newName = this.editTabName.trim().toLowerCase().replace(/\s+/g, '-');
-
-                    if (newName && newName !== oldName && !this.tabs.includes(newName)) {
-                        const index = this.tabs.indexOf(oldName);
-                        if (index !== -1) {
-                            this.data[newName] = this.data[oldName];
-                            delete this.data[oldName];
-
-                            this.tabMetadata[newName] = this.tabMetadata[oldName];
-                            delete this.tabMetadata[oldName];
-
-                            this.tabs[index] = newName;
-                            this.activeTab = newName;
-
-                            if (this.defaultTabID === oldName) {
-                                this.defaultTabID = newName;
+                        // 6. Alpine.js Watchers
+                        this.$watch('activeTab', (newTab) => {
+                            // Save last active tab for when returning to tab view
+                            if (this.currentView === 'tab') {
+                                localStorage.setItem('bd_last_active_tab', newTab);
                             }
-
-                            this.persist();
                             this.$nextTick(() => {
-                                this.scrollTabIntoView(newName);
                                 lucide.createIcons();
                             });
+                        });
+                        this.$watch('darkMode', () => {
+                            this.$nextTick(() => lucide.createIcons());
+                        });
+
+                        // 7. Service Worker
+                        if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker.register('sw.js').then(reg => {
+                                reg.addEventListener('waiting', () => {
+                                    this.updateAvailable = true;
+                                    this.waitingWorker = reg.waiting;
+                                });
+                            });
+                            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                                window.location.reload();
+                            });
                         }
-                    }
-                    this.modals.editTab = false;
-                    this.currentContextTab = null;
-                },
 
-                confirmDeleteTab(tab) {
-                    this.tabToDelete = tab;
-                    this.modals.deleteTab = true;
-                },
+                        this.$nextTick(() => lucide.createIcons());
+                    },
 
-                performTabDelete() {
-                    if (this.tabToDelete) {
-                        const index = this.tabs.indexOf(this.tabToDelete);
-                        if (index !== -1) {
-                            this.tabs.splice(index, 1);
-                            delete this.data[this.tabToDelete];
-                            delete this.tabMetadata[this.tabToDelete];
+                    // UPDATED: Improved long press handling for both home and tab view
+                    homeLongPressStart(event, tab) {
+                        this.homeLongPressActive = false;
+                        clearTimeout(this.homeLongPressTimer);
 
-                            if (this.activeTab === this.tabToDelete) {
-                                this.activeTab = this.defaultTabID; // Switch to the default tab
+                        this.homeLongPressTimer = setTimeout(() => {
+                            this.homeLongPressActive = true;
+                            this.openTabContextMenu(tab, event);
+                        }, this.longPressDuration);
+                    },
+
+                    homeLongPressEnd(event, tab) {
+                        clearTimeout(this.homeLongPressTimer);
+
+                        if (this.homeLongPressActive) {
+                            // Prevent normal click action after long press
+                            event.preventDefault();
+                            return;
+                        }
+                    },
+
+                    longPressStart(event, tab) {
+                        this.longPressActive = false;
+                        clearTimeout(this.longPressTimer);
+
+                        this.longPressTimer = setTimeout(() => {
+                            this.longPressActive = true;
+                            this.openTabContextMenu(tab, event);
+                        }, this.longPressDuration);
+                    },
+
+                    longPressEnd(event, tab) {
+                        clearTimeout(this.longPressTimer);
+
+                        if (this.longPressActive) {
+                            // Prevent normal click action after long press
+                            event.preventDefault();
+                            return;
+                        }
+                    },
+
+                    // UPDATED: Improved context menu positioning
+                    openTabContextMenu(tab, event) {
+                        if (tab === 'secure-notes' || tab === 'cards') return;
+                        this.currentContextTab = tab;
+
+                        // Get coordinates from touch or mouse event
+                        let clientX, clientY;
+                        if (event.touches && event.touches.length > 0) {
+                            clientX = event.touches[0].clientX;
+                            clientY = event.touches[0].clientY;
+                        } else if (event.changedTouches && event.changedTouches.length > 0) {
+                            clientX = event.changedTouches[0].clientX;
+                            clientY = event.changedTouches[0].clientY;
+                        } else {
+                            clientX = event.clientX;
+                            clientY = event.clientY;
+                        }
+
+                        // Ensure coordinates are valid
+                        if (clientX === undefined || clientY === undefined) {
+                            const targetRect = event.currentTarget.getBoundingClientRect();
+                            clientX = targetRect.left + (targetRect.width / 2);
+                            clientY = targetRect.bottom + 10;
+                        }
+
+                        const viewportWidth = window.innerWidth;
+                        const menuWidthEstimate = 200;
+                        let x = clientX;
+                        let y = clientY;
+
+                        if (x + menuWidthEstimate > viewportWidth) {
+                            x = viewportWidth - menuWidthEstimate - 10;
+                        }
+
+                        this.contextMenuX = x;
+                        this.contextMenuY = y;
+                        this.modals.tabContext = true;
+                    },
+
+                    // NEW: Function to get tab count (only un-done for todo tabs)
+                    getTabCount(tab) {
+                        const items = this.data[tab] || [];
+                        if (this.isTodoTab(tab)) {
+                            // For todo tabs, count only un-done items
+                            return items.filter(item => !item.isDone).length;
+                        }
+                        // For non-todo tabs, count all items
+                        return items.length;
+                    },
+
+                    // NEW: Home Dashboard Navigation Functions
+                    goToHome() {
+                        this.currentView = 'home';
+                        localStorage.setItem('bd_current_view', 'home');
+                        this.$nextTick(() => {
+                            lucide.createIcons();
+                        });
+                    },
+
+                    switchToTab(tab) {
+                        this.currentView = 'tab';
+                        this.activeTab = tab;
+                        localStorage.setItem('bd_current_view', 'tab');
+                        localStorage.setItem('bd_last_active_tab', tab);
+                        this.$nextTick(() => {
+                            if (tab !== 'secure-notes' && tab !== 'cards') {
+                                this.scrollTabIntoView(tab, 'smooth', 'center');
+                            }
+                            lucide.createIcons();
+                        });
+                    },
+
+                    // Helper function for tab icons
+                    getTabIcon(tab) {
+                        const iconMap = {
+                            'food': 'utensils',
+                            'travel': 'map-pin',
+                            'movies': 'film',
+                            'music': 'music',
+                            'secure-notes': 'lock',
+                            'cards': 'credit-card',
+                            'books': 'book',
+                            'reading': 'book-open',
+                            'shopping': 'shopping-cart',
+                            'work': 'briefcase',
+                            'health': 'heart',
+                            'fitness': 'dumbbell',
+                            'ideas': 'lightbulb',
+                            'projects': 'folder-kanban'
+                        };
+                        return iconMap[tab] || 'folder';
+                    },
+
+                    // --- EXISTING FUNCTIONS (Keep all existing functionality) ---
+                    migrateOldData() {
+                        // Migration logic remains the same
+                    },
+
+                    migrateSecureData() {
+                        // If old 'secure' data exists, migrate to new structure
+                        if (this.data['secure']) {
+                            const secureData = this.data['secure'];
+
+                            // Separate notes and cards
+                            const secureNotes = secureData.filter(item => item.type !== 'card');
+                            const cards = secureData.filter(item => item.type === 'card');
+
+                            // Assign to new keys
+                            this.data['secure-notes'] = secureNotes;
+                            this.data['cards'] = cards;
+
+                            // Remove old secure key
+                            delete this.data['secure'];
+
+                            // Update tabs if needed
+                            const secureIndex = this.tabs.indexOf('secure');
+                            if (secureIndex !== -1) {
+                                this.tabs.splice(secureIndex, 1, 'secure-notes', 'cards');
                             }
 
+                            // Persist changes
                             this.persist();
                         }
-                        this.modals.deleteTab = false;
-                        this.tabToDelete = null;
-                        this.currentContextTab = null;
-                    }
-                },
+                    },
 
-                setDefaultTab(tab) {
-                    if (tab !== 'secure') {
-                        this.defaultTabID = tab;
-                        this.persist();
-                        this.showCopyToast(this.toTitleCase(tab) + ' set as default tab');
-                    }
-                },
+                    updateExistingMusicLinks() {
+                        const musicData = this.data['music'] || [];
+                        this.data['music'] = musicData.map(item => {
+                            let isAutoLink = false;
+                            const oldApp = this.oldMusicAppPreference;
+                            const newApp = this.musicAppPreference;
 
-                // --- CARD HELPERS ---
-                formatExpiryInput(value) {
-                    let cleaned = value.replace(/\D/g, ''); // Remove non-digits
-                    if (cleaned.length > 2) {
-                        cleaned = cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
-                    }
-                    // Focus change logic
-                    if (cleaned.length === 5 && this.$refs.cvvInput) {
-                        this.$nextTick(() => this.$refs.cvvInput.focus());
-                    }
-                    return cleaned.slice(0, 5);
-                },
-                formatExpiryDisplay(expiry) {
-                    if (!expiry) return 'N/A';
-                    // Remove non-digits from the stored value
-                    const cleaned = expiry.replace(/\D/g, '');
-                    // If the result is 4 digits (MMYY), re-add the slash for display
-                    if (cleaned.length === 4) {
-                        return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
-                    }
-                    // Otherwise, return the original (handles MM/YY and other formats)
-                    return expiry;
-                },
+                            if (oldApp !== newApp) {
+                                if (item.link && (item.link.includes('spotify.com/0') || item.link.includes('apple.com/us/search') || item.link.includes('youtube.com/search'))) {
+                                    isAutoLink = true;
+                                }
+                            }
 
-                // NEW: Full Card Number Formatter
-                formatCardNumberFull(number) {
-                    if (!number) return 'N/A';
-                    const cleaned = number.replace(/\s/g, '');
-                    return cleaned.match(/.{1,4}/g).join(' '); // Group by 4 digits
-                },
-
-                // UPDATED: Copy to Clipboard function
-                copyToClipboard(text, fieldName = 'Item') {
-                    if (!navigator.clipboard) {
-                        // Fallback for older browsers
-                        const textarea = document.createElement('textarea');
-                        textarea.value = text;
-                        document.body.appendChild(textarea);
-                        textarea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textarea);
-                    } else {
-                        navigator.clipboard.writeText(text).then(() => {
-                            this.showCopyToast(fieldName + ' copied!');
-                        }).catch(err => {
-                            console.error('Could not copy text: ', err);
-                            alert('Failed to copy. Please try manually.');
+                            if (item.title && isAutoLink) {
+                                item.link = this.autoGenerateMusicLink(item.title);
+                            }
+                            return item;
                         });
-                    }
-                },
+                    },
 
-                showCopyToast(message) {
-                    this.copyMessage = message;
-                    clearTimeout(this.copyTimer);
-                    this.copyTimer = setTimeout(() => {
-                        this.copyMessage = null;
-                    }, 1500);
-                },
+                    persist() {
+                        if (this.oldMusicAppPreference !== this.musicAppPreference) {
+                            this.updateExistingMusicLinks();
+                            this.oldMusicAppPreference = this.musicAppPreference;
+                        }
+                        localStorage.setItem('bd_data', JSON.stringify(this.data));
+                        localStorage.setItem('bd_tabs', JSON.stringify(this.tabs));
+                        localStorage.setItem('bd_music_app', this.musicAppPreference);
+                        localStorage.setItem('bd_default_tab', this.defaultTabID);
+                        localStorage.setItem('bd_tab_metadata', JSON.stringify(this.tabMetadata));
+                        localStorage.setItem('bd_theme', this.darkMode ? 'dark' : 'light');
+                        localStorage.setItem('bd_current_view', this.currentView);
+                        localStorage.setItem('bd_default_view', this.defaultView);
+                    },
 
-                // Card Gradient Generator (FIXED: Simplified and robust color adjustment)
-                getCardGradient(color) {
-                    if (!color) return 'background-color: #6b7280;';
+                    scrollTabIntoView(tab, behavior = 'smooth', block = 'center') {
+                        const tabElement = this.$refs[`tab-${tab}`];
+                        if (tabElement) {
+                            tabElement.scrollIntoView({ behavior: behavior, inline: block });
+                        }
+                    },
 
-                    // Simple Color Adjustment logic for robustness
-                    const adjustColor = (hex, factor) => {
-                        if (!hex || hex.length < 7) return hex;
-                        let colorString = hex.startsWith('#') ? hex.slice(1) : hex;
+                    touchStart(e) {
+                        this.touchstartX = e.changedTouches[0].screenX;
+                    },
 
-                        // Check for valid hex length
-                        if (colorString.length !== 6) return hex;
+                    touchEnd(e) {
+                        this.touchendX = e.changedTouches[0].screenX;
+                        this.handleSwipe();
+                    },
 
-                        let num = parseInt(colorString, 16);
-                        let r = (num >> 16);
-                        let g = (num >> 8 & 0x00FF);
-                        let b = (num & 0x0000FF);
+                    handleSwipe() {
+                        if (this.modals.item || this.modals.cardItem || this.modals.settings || this.modals.tabContext || this.activeTab === 'secure-notes' || this.activeTab === 'cards') return;
+                        if (this.touchendX < this.touchstartX - this.swipeThreshold) {
+                            this.changeTab('next');
+                        }
+                        if (this.touchendX > this.touchstartX + this.swipeThreshold) {
+                            this.changeTab('prev');
+                        }
+                    },
 
-                        // Simple darkening logic: multiply by (1 + factor) where factor is negative
-                        r = Math.round(Math.min(255, Math.max(0, r * (1 + factor))));
-                        g = Math.round(Math.min(255, Math.max(0, g * (1 + factor))));
-                        b = Math.round(Math.min(255, Math.max(0, b * (1 + factor))));
+                    changeTab(direction) {
+                        const visibleTabs = this.tabs.filter(t => t !== 'secure-notes' && t !== 'cards');
+                        let currentIndex = visibleTabs.indexOf(this.activeTab);
+                        let nextIndex;
 
-                        // Convert back to hex, ensuring 6 digits
-                        return '#' + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
-                    };
+                        if (direction === 'next') {
+                            nextIndex = (currentIndex + 1) % visibleTabs.length;
+                        } else if (direction === 'prev') {
+                            nextIndex = (currentIndex - 1 + visibleTabs.length) % visibleTabs.length;
+                        }
+                        this.activeTab = visibleTabs[nextIndex];
+                        this.scrollTabIntoView(this.activeTab, 'smooth', 'center');
+                    },
 
-                    const darker = adjustColor(color, -0.2); // 20% darker
+                    toggleTheme() {
+                        this.darkMode = !this.darkMode;
+                        localStorage.setItem('bd_theme', this.darkMode ? 'dark' : 'light');
+                    },
 
-                    return `background: linear-gradient(135deg, ${color}, ${darker});`;
-                },
+                    openSettingsModal() {
+                        this.tempDefaultTabID = this.defaultTabID;
+                        this.tempMusicAppPreference = this.musicAppPreference;
+                        this.tempDefaultView = this.defaultView;
+                        this.modals.settings = true;
+                        this.$nextTick(() => lucide.createIcons());
+                    },
 
-                // --- UTILITY FUNCTIONS ---
-                toTitleCase(str) {
-                    if (!str) return '';
-                    str = str.replace(/-/g, ' '); // Replace hyphens with spaces for better title casing
-                    return str.toLowerCase().split(' ').map((word) => {
-                        return (word.charAt(0).toUpperCase() + word.slice(1));
-                    }).join(' ');
-                },
+                    openSecureNotesSettings() {
+                        // Now just switches to secure-notes tab
+                        this.currentView = 'tab';
+                        this.activeTab = 'secure-notes';
+                        localStorage.setItem('bd_current_view', 'tab');
+                        this.$nextTick(() => lucide.createIcons());
+                    },
 
-                isTodoTab(tab) {
-                    return this.tabMetadata[tab] === 'todo';
-                },
+                    confirmDeleteAllData() {
+                        this.modals.settings = false;
+                        this.modals.deleteAll = true;
+                    },
 
-                // Function for music link generation based on preference (FIXED SPOTIFY LINK)
-                autoGenerateMusicLink(title) {
-                    if (!title) return '';
-                    const query = encodeURIComponent(title.trim());
+                    performDeleteAllData() {
+                        localStorage.removeItem('bd_data');
+                        localStorage.removeItem('bd_tabs');
+                        localStorage.removeItem('bd_music_app');
+                        localStorage.removeItem('bd_default_tab');
+                        localStorage.removeItem('bd_tab_metadata');
+                        localStorage.removeItem('bd_current_view');
+                        localStorage.removeItem('bd_default_view');
+                        localStorage.removeItem('bd_last_active_tab');
+                        window.location.reload();
+                    },
 
-                    // Check musicAppPreference to select the correct link format
-                    if (this.musicAppPreference === 'spotify') {
-                        // Correct Spotify search link for web
-                        return `https://open.spotify.com/search/${query}`;
-                    } else if (this.musicAppPreference === 'apple_music') {
-                        return `https://music.apple.com/search?term=${query}`;
-                    } else {
-                        // Default to youtube_music
-                        return `https://music.youtube.com/search?q=${query}`;
-                    }
-                },
+                    reloadApp() {
+                        if (this.waitingWorker) this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+                    },
 
-                // UPDATED: Link Icon Generator (FIXED ICONS)
-                getLinkIcon(link) {
-                    if (!link) return `<i data-lucide="link" class="w-4 h-4 icon-link"></i>`;
+                    get secureNotes() {
+                        return (this.data['secure-notes'] || []).filter(item => item.type !== 'card');
+                    },
 
-                    // Check for standard Spotify link format
-                    if (link.includes('open.spotify.com/search') || link.includes('spotify:')) {
-                        // Using 'music' icon for Spotify
-                        return `<i data-lucide="music" class="w-4 h-4 icon-spotify" fill="currentColor"></i>`;
-                    } else if (link.includes('music.apple.com')) {
-                        return `<i data-lucide="apple" class="w-4 h-4 icon-apple" fill="currentColor"></i>`;
-                    } else if (link.includes('youtube.com') || link.includes('music.youtube.com')) {
-                        // Added music.youtube.com for better recognition
-                        return `<i data-lucide="youtube" class="w-4 h-4 icon-youtube" fill="currentColor"></i>`;
-                    } else {
-                        return `<i data-lucide="link" class="w-4 h-4 icon-link"></i>`;
-                    }
-                },
+                    get cards() {
+                        return (this.data['cards'] || []).sort((a, b) => b.id - a.id);
+                    },
 
-                // --- NEW LINK GENERATION HELPERS (for non-music tabs) ---
-                autoGenerateGoogleSearchLink(title) {
-                    if (!title) return '';
-                    return `https://www.google.com/search?q=${encodeURIComponent(title.trim())}`;
-                },
+                    getItemType(id) {
+                        if (!this.data[this.activeTab]) return 'note';
+                        const item = this.data[this.activeTab].find(i => i.id === id);
+                        return item ? item.type : 'note';
+                    },
 
-                autoGenerateYouTubeSearchLink(title) {
-                    if (!title) return '';
-                    return `https://www.youtube.com/results?search_query=${encodeURIComponent(title.trim())}`;
-                },
+                    get sortedItems() {
+                        let items = this.data[this.activeTab] || [];
 
-                // --- HINT TEXTS ---
-                getTitlePlaceholder() {
-                    if (this.isTodoTab(this.activeTab)) return 'e.g. Buy groceries';
-                    if (this.activeTab === 'secure') return 'e.g. Netflix Password';
-                    return 'e.g. Item Title';
-                },
+                        if (this.activeTab === 'secure-notes') {
+                            return items.filter(item => item.type !== 'card').sort((a, b) => b.id - a.id);
+                        }
 
-                getLinkPlaceholder() {
-                    if (this.activeTab === 'music') return 'https:// or tap "Auto"';
-                    return 'https://... (Optional)';
-                },
+                        return items.sort((a, b) => {
+                            const isTodo = this.isTodoTab(this.activeTab);
 
-                getNoteLabel() {
-                    if (this.isTodoTab(this.activeTab)) return 'Extra Details (Optional)';
-                    if (this.activeTab === 'food') return 'Ingredients & Steps';
-                    if (this.activeTab === 'travel') return 'Location Details';
-                    if (this.activeTab === 'secure') return 'Sensitive Information / Password Notes';
-                    return 'Notes / Details';
-                },
+                            if (a.isDone !== b.isDone) {
+                                return a.isDone ? 1 : -1;
+                            }
 
-                getNotePlaceholder() {
-                    if (this.isTodoTab(this.activeTab)) return 'Set a deadline, or add a store location.';
-                    if (this.activeTab === 'food') return '- 2 Cups Rice\n- Boil water...';
-                    if (this.activeTab === 'travel') return 'Best time to visit: October\nGoogle Map Coords...';
-                    if (this.activeTab === 'secure') return 'Write your secure notes here.';
-                    return 'Add any extra details here...';
-                },
+                            if (a.isFavorite !== b.isFavorite) {
+                                return a.isFavorite ? -1 : 1;
+                            }
 
-                toggleTabType(tab) {
-                    const currentType = this.tabMetadata[tab] ? this.tabMetadata[tab].type : 'normal';
-                    const newType = currentType === 'normal' ? 'todo' : 'normal';
-                    this.tabMetadata[tab] = { type: newType };
-                    this.modals.tabContext = false;
-                    this.persist();
-                    this.showCopyToast(`Tab type changed to ${newType}!`);
-                },
+                            return b.id - a.id;
+                        });
+                    },
 
-                reloadApp() {
-                    if (this.waitingWorker) this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-                },
+                    openAddCardModal() {
+                        this.editingCard = false;
+                        this.cardForm = {
+                            id: Date.now(),
+                            title: '',
+                            number: '',
+                            holder: '',
+                            expiry: '',
+                            cvv: '',
+                            color: '#2563eb',
+                            type: 'card',
+                            note: ''
+                        };
+                        this.modals.cardItem = true;
+                    },
 
-                // --- APP SETTINGS ACTIONS ---
-                savePreferences() {
-                    // Update the actual preference variables from the temporary ones
-                    let preferencesChanged = false;
+                    openEditCardModal(card) {
+                        this.editingCard = true;
+                        this.cardForm = {
+                            id: card.id,
+                            title: card.title,
+                            number: card.number,
+                            holder: card.holder,
+                            expiry: this.formatExpiryDisplay(card.expiry),
+                            cvv: card.cvv,
+                            type: 'card',
+                            note: card.note
+                        };
+                        this.modals.cardItem = true;
+                    },
 
-                    if (this.tempDefaultTabID !== this.defaultTabID) {
-                        this.defaultTabID = this.tempDefaultTabID;
-                        preferencesChanged = true;
-                    }
+                    saveCard() {
+                        if (!this.cardForm.number) return;
 
-                    if (this.tempMusicAppPreference !== this.musicAppPreference) {
-                        this.musicAppPreference = this.tempMusicAppPreference;
-                        preferencesChanged = true;
-                    }
+                        this.cardForm.number = this.cardForm.number.replace(/\s/g, '');
+                        this.cardForm.expiry = this.cardForm.expiry.replace('/', '').slice(0, 4);
+                        this.cardForm.cvv = this.cardForm.cvv.slice(0, 4);
 
-                    if (preferencesChanged) {
+                        let cardData = this.data['cards'] || [];
+
+                        if (this.editingCard) {
+                            const index = cardData.findIndex(i => i.id === this.cardForm.id);
+                            if (index !== -1) {
+                                cardData[index] = { ...this.cardForm };
+                            }
+                        } else {
+                            cardData.unshift(this.cardForm);
+                        }
+
+                        this.data['cards'] = cardData;
                         this.persist();
-                        this.showCopyToast('Preferences saved successfully!');
-                    } else {
-                         this.showCopyToast('No changes to save.');
-                    }
-                    
-                    this.modals.settings = false;
-                },
+                        this.modals.cardItem = false;
+                        this.$nextTick(() => lucide.createIcons());
+                    },
+
+                    confirmDeleteCard(id) {
+                        this.itemToDelete = id;
+                        this.modals.delete = true;
+                    },
+
+                    openAddItemModal() {
+                        this.editingItem = false;
+                        this.form = {
+                            id: Date.now(),
+                            title: '',
+                            link: '',
+                            note: '',
+                            isFavorite: false,
+                            isDone: false,
+                            type: 'note'
+                        };
+                        this.modals.item = true;
+                    },
+
+                    openEditItemModal(item) {
+                        if (item.type === 'card' && this.activeTab === 'cards') {
+                            this.openEditCardModal(item);
+                            return;
+                        }
+                        this.editingItem = true;
+                        this.form = { ...item, type: item.type || 'note' };
+                        this.modals.item = true;
+                    },
+
+                    saveItem() {
+                        if (!this.form.title) return;
+                        let list = this.data[this.activeTab] || [];
+
+                        if (this.activeTab !== 'secure-notes' && !this.isTodoTab(this.activeTab) && (!this.form.link || !this.form.link.trim()) && this.form.title.trim()) {
+                            if (this.activeTab === 'food') {
+                                this.form.link = this.autoGenerateYouTubeSearchLink(this.form.title);
+                            } else if (this.activeTab !== 'music') {
+                                this.form.link = this.autoGenerateGoogleSearchLink(this.form.title);
+                            }
+                        }
+
+                        if (this.activeTab === 'secure-notes') {
+                            this.form.link = '';
+                            this.form.isDone = false;
+                            this.form.isFavorite = false;
+                            this.form.type = 'note';
+                        }
+                        if (this.editingItem) {
+                            const index = list.findIndex(i => i.id === this.form.id);
+                            if (index !== -1) {
+                                const oldItem = list[index];
+
+                                const wasAutoLink = oldItem.link && (
+                                    oldItem.link.includes('music.youtube.com/search?q=') ||
+                                    oldItem.link.includes('open.spotify.com/search') ||
+                                    oldItem.link.includes('music.apple.com/search?term=')
+                                );
+
+                                if (this.activeTab !== 'secure-notes' && oldItem.title !== this.form.title && !this.form.lin) {
+                                    this.form.link = this.autoGenerateMusicLink(this.form.title);
+                                }
+
+                                list[index] = { ...this.form };
+                            }
+                        } else {
+                            if (!this.form.link && this.activeTab !== 'secure-notes') {
+                                this.form.link = this.autoGenerateMusicLink(this.form.title);
+                            }
+                            list.unshift(this.form);
+                        }
+                        this.data[this.activeTab] = list;
+                        this.persist();
+                        this.modals.item = false;
+                        this.$nextTick(() => lucide.createIcons());
+                    },
+
+                    generateLinkForMusic() {
+                        if (this.form.title.trim()) {
+                            this.form.link = this.autoGenerateMusicLink(this.form.title);
+                            this.showCopyToast('Link auto-generated');
+                            this.$nextTick(() => lucide.createIcons());
+                        }
+                    },
+
+                    confirmDelete(id) {
+                        this.itemToDelete = id;
+                        this.modals.delete = true;
+                    },
+
+                    performDelete() {
+                        if (this.itemToDelete) {
+                            this.modals.delete = false;
+                            setTimeout(() => {
+                                const tabData = this.data[this.activeTab];
+                                if (tabData && tabData.some(i => i.id === this.itemToDelete)) {
+                                    this.data[this.activeTab] = tabData.filter(i => i.id !== this.itemToDelete);
+                                    this.persist();
+                                }
+                                this.itemToDelete = null;
+                            }, this.ANIMATION_DURATION);
+                        }
+                    },
+
+                    toggleFavorite(id) {
+                        const item = (this.data[this.activeTab] || []).find(i => i.id === id);
+                        if (item && this.activeTab !== 'secure-notes') {
+                            item.isFavorite = !item.isFavorite;
+                            this.persist();
+                        }
+                    },
+
+                    toggleDone(id) {
+                        const item = (this.data[this.activeTab] || []).find(i => i.id === id);
+                        if (item && this.activeTab !== 'secure-notes') {
+                            item.isDone = !item.isDone;
+                            this.persist();
+                        }
+                    },
+
+                    openNewTabModal() {
+                        this.newTabName = '';
+                        this.newTabType = 'normal';
+                        this.modals.tab = true;
+                        this.newTabError = '';
+                    },
+
+                    createNewTab() {
+                        const newName = this.newTabName.trim().toLowerCase().replace(/\s+/g, '-');
+                        this.newTabError = '';
+
+                        if (!newName) {
+                            this.newTabError = 'Please enter a name for the new tab.';
+                            return;
+                        }
+                        if (newName === 'secure-notes' || newName === 'cards') {
+                            this.newTabError = `"${newName}" is a reserved tab name.`;
+                            return;
+                        }
+
+                        if (this.tabs.includes(newName)) {
+                            this.newTabError = `A tab named "${this.newTabName.trim()}" already exists.`;
+                            return;
+                        }
+
+                        // Insert before secure-notes and cards
+                        const secureIndex = this.tabs.indexOf('secure-notes');
+                        this.tabs.splice(secureIndex, 0, newName);
+                        this.data[newName] = [];
+                        this.tabMetadata[newName] = this.newTabType;
+                        this.activeTab = newName;
+                        this.currentView = 'tab';
+
+                        this.persist();
+                        this.modals.tab = false;
+
+                        this.$nextTick(() => {
+                            const scroller = this.$refs.tabScroller;
+                            if (scroller) {
+                                scroller.scrollTo({ left: scroller.scrollWidth, behavior: 'smooth' });
+                            }
+                        });
+                    },
+
+                    openEditTabModal() {
+                        this.editTabName = this.toTitleCase(this.currentContextTab);
+                        this.modals.editTab = true;
+                    },
+
+                    saveTabRename() {
+                        const oldName = this.currentContextTab;
+                        const newName = this.editTabName.trim().toLowerCase().replace(/\s+/g, '-');
+
+                        if (newName && newName !== oldName && !this.tabs.includes(newName)) {
+                            const index = this.tabs.indexOf(oldName);
+                            if (index !== -1) {
+                                this.data[newName] = this.data[oldName];
+                                delete this.data[oldName];
+
+                                this.tabMetadata[newName] = this.tabMetadata[oldName];
+                                delete this.tabMetadata[oldName];
+
+                                this.tabs[index] = newName;
+                                this.activeTab = newName;
+
+                                if (this.defaultTabID === oldName) {
+                                    this.defaultTabID = newName;
+                                }
+
+                                this.persist();
+                                this.$nextTick(() => {
+                                    this.scrollTabIntoView(newName);
+                                    lucide.createIcons();
+                                });
+                            }
+                        }
+                        this.modals.editTab = false;
+                        this.currentContextTab = null;
+                    },
+
+                    confirmDeleteTab(tab) {
+                        this.tabToDelete = tab;
+                        this.modals.deleteTab = true;
+                    },
+
+                    performTabDelete() {
+                        if (this.tabToDelete) {
+                            const index = this.tabs.indexOf(this.tabToDelete);
+                            if (index !== -1) {
+                                this.tabs.splice(index, 1);
+                                delete this.data[this.tabToDelete];
+                                delete this.tabMetadata[this.tabToDelete];
+
+                                if (this.activeTab === this.tabToDelete) {
+                                    this.activeTab = this.defaultTabID;
+                                }
+
+                                this.persist();
+                            }
+                            this.modals.deleteTab = false;
+                            this.tabToDelete = null;
+                            this.currentContextTab = null;
+                        }
+                    },
+
+                    setDefaultTab(tab) {
+                        if (tab !== 'secure-notes' && tab !== 'cards') {
+                            this.defaultTabID = tab;
+                            this.persist();
+                            this.showCopyToast(this.toTitleCase(tab) + ' set as default tab');
+                        }
+                    },
+
+                    formatExpiryInput(value) {
+                        let cleaned = value.replace(/\D/g, '');
+                        if (cleaned.length > 2) {
+                            cleaned = cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
+                        }
+                        if (cleaned.length === 5 && this.$refs.cvvInput) {
+                            this.$nextTick(() => this.$refs.cvvInput.focus());
+                        }
+                        return cleaned.slice(0, 5);
+                    },
+                    formatExpiryDisplay(expiry) {
+                        if (!expiry) return 'N/A';
+                        const cleaned = expiry.replace(/\D/g, '');
+                        if (cleaned.length === 4) {
+                            return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
+                        }
+                        return expiry;
+                    },
+
+                    formatCardNumberFull(number) {
+                        if (!number) return 'N/A';
+                        const cleaned = number.replace(/\s/g, '');
+                        return cleaned.match(/.{1,4}/g).join(' ');
+                    },
+
+                    copyToClipboard(text, fieldName = 'Item') {
+                        if (!navigator.clipboard) {
+                            const textarea = document.createElement('textarea');
+                            textarea.value = text;
+                            document.body.appendChild(textarea);
+                            textarea.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(textarea);
+                        } else {
+                            navigator.clipboard.writeText(text).then(() => {
+                                this.showCopyToast(fieldName + ' copied!');
+                            }).catch(err => {
+                                console.error('Could not copy text: ', err);
+                                alert('Failed to copy. Please try manually.');
+                            });
+                        }
+                    },
+
+                    showCopyToast(message) {
+                        this.copyMessage = message;
+                        clearTimeout(this.copyTimer);
+                        this.copyTimer = setTimeout(() => {
+                            this.copyMessage = null;
+                        }, 1500);
+                    },
+
+                    getCardGradient(color) {
+                        if (!color) return 'background-color: #6b7280;';
+
+                        const adjustColor = (hex, factor) => {
+                            if (!hex || hex.length < 7) return hex;
+                            let colorString = hex.startsWith('#') ? hex.slice(1) : hex;
+
+                            if (colorString.length !== 6) return hex;
+
+                            let num = parseInt(colorString, 16);
+                            let r = (num >> 16);
+                            let g = (num >> 8 & 0x00FF);
+                            let b = (num & 0x0000FF);
+
+                            r = Math.round(Math.min(255, Math.max(0, r * (1 + factor))));
+                            g = Math.round(Math.min(255, Math.max(0, g * (1 + factor))));
+                            b = Math.round(Math.min(255, Math.max(0, b * (1 + factor))));
+
+                            return '#' + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
+                        };
+
+                        const darker = adjustColor(color, -0.2);
+
+                        return `background: linear-gradient(135deg, ${color}, ${darker});`;
+                    },
+
+                    toTitleCase(str) {
+                        if (!str) return '';
+                        str = str.replace(/-/g, ' ');
+                        return str.toLowerCase().split(' ').map((word) => {
+                            return (word.charAt(0).toUpperCase() + word.slice(1));
+                        }).join(' ');
+                    },
+
+                    isTodoTab(tab) {
+                        return this.tabMetadata[tab] === 'todo';
+                    },
+
+                    autoGenerateMusicLink(title) {
+                        if (!title) return '';
+                        const query = encodeURIComponent(title.trim());
+
+                        if (this.musicAppPreference === 'spotify') {
+                            return `https://open.spotify.com/search/${query}`;
+                        } else if (this.musicAppPreference === 'apple_music') {
+                            return `https://music.apple.com/search?term=${query}`;
+                        } else {
+                            return `https://music.youtube.com/search?q=${query}`;
+                        }
+                    },
+
+                    getLinkIcon(link) {
+                        if (!link) return `<i data-lucide="link" class="w-4 h-4 icon-link"></i>`;
+
+                        if (link.includes('open.spotify.com/search') || link.includes('spotify:')) {
+                            return `<i data-lucide="music" class="w-4 h-4 icon-spotify" fill="currentColor"></i>`;
+                        } else if (link.includes('music.apple.com')) {
+                            return `<i data-lucide="apple" class="w-4 h-4 icon-apple" fill="currentColor"></i>`;
+                        } else if (link.includes('youtube.com') || link.includes('music.youtube.com')) {
+                            return `<i data-lucide="youtube" class="w-4 h-4 icon-youtube" fill="currentColor"></i>`;
+                        } else {
+                            return `<i data-lucide="link" class="w-4 h-4 icon-link"></i>`;
+                        }
+                    },
+
+                    autoGenerateGoogleSearchLink(title) {
+                        if (!title) return '';
+                        return `https://www.google.com/search?q=${encodeURIComponent(title.trim())}`;
+                    },
+
+                    autoGenerateYouTubeSearchLink(title) {
+                        if (!title) return '';
+                        return `https://www.youtube.com/results?search_query=${encodeURIComponent(title.trim())}`;
+                    },
+
+                    getTitlePlaceholder() {
+                        if (this.isTodoTab(this.activeTab)) return 'e.g. Buy groceries';
+                        if (this.activeTab === 'secure-notes') return 'e.g. Netflix Password';
+                        return 'e.g. Item Title';
+                    },
+
+                    getLinkPlaceholder() {
+                        if (this.activeTab === 'music') return 'https:// or tap "Auto"';
+                        return 'https://... (Optional)';
+                    },
+
+                    getNoteLabel() {
+                        if (this.isTodoTab(this.activeTab)) return 'Extra Details (Optional)';
+                        if (this.activeTab === 'food') return 'Ingredients & Steps';
+                        if (this.activeTab === 'travel') return 'Location Details';
+                        if (this.activeTab === 'secure-notes') return 'Sensitive Information / Password Notes';
+                        return 'Notes / Details';
+                    },
+
+                    getNotePlaceholder() {
+                        if (this.isTodoTab(this.activeTab)) return 'Set a deadline, or add a store location.';
+                        if (this.activeTab === 'food') return '- 2 Cups Rice\n- Boil water...';
+                        if (this.activeTab === 'travel') return 'Best time to visit: October\nGoogle Map Coords...';
+                        if (this.activeTab === 'secure-notes') return 'Write your secure notes here.';
+                        return 'Add any extra details here...';
+                    },
+
+                    getTabElementID(tab) {
+                        return `tab-${tab}`;
+                    },
+
+                    scrollTabIntoView(tab, behavior = 'smooth', block = 'start') {
+                        const id = this.getTabElementID(tab);
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.scrollIntoView({
+                                behavior: behavior,
+                                block: block,
+                                inline: 'center'
+                            });
+                        }
+                    },
+
+                    toggleTabType(tab) {
+                        const currentType = this.tabMetadata[tab] ? this.tabMetadata[tab].type : 'normal';
+                        const newType = currentType === 'normal' ? 'todo' : 'normal';
+                        this.tabMetadata[tab] = { type: newType };
+                        this.modals.tabContext = false;
+                        this.persist();
+                        this.showCopyToast(`Tab type changed to ${newType}!`);
+                    },
+
+                    reloadApp() {
+                        if (this.waitingWorker) this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+                    },
+
+                    savePreferences() {
+                        let preferencesChanged = false;
+
+                        if (this.tempDefaultTabID !== this.defaultTabID) {
+                            this.defaultTabID = this.tempDefaultTabID;
+                            preferencesChanged = true;
+                        }
+
+                        if (this.tempMusicAppPreference !== this.musicAppPreference) {
+                            this.musicAppPreference = this.tempMusicAppPreference;
+                            preferencesChanged = true;
+                        }
+
+                        if (this.tempDefaultView !== this.defaultView) {
+                            this.defaultView = this.tempDefaultView;
+                            localStorage.setItem('bd_default_view', this.defaultView);
+                            preferencesChanged = true;
+
+                            // If changing to tab view, update current view immediately
+                            if (this.defaultView === 'tab' && this.currentView === 'home') {
+                                this.currentView = 'tab';
+                                this.activeTab = this.defaultTabID;
+                            }
+                        }
+
+                        if (preferencesChanged) {
+                            this.persist();
+                            this.showCopyToast('Preferences saved successfully!');
+                        } else {
+                            this.showCopyToast('No changes to save.');
+                        }
+
+                        this.modals.settings = false;
+                    },
+                }
             }
-        }
-    </script>
+        </script>
 </body>
 
 </html>
