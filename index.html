@@ -303,7 +303,8 @@
         </div>
 
         <!-- FIX 1: Fixed positioning for bottom tab -->
-        <div class="flex-shrink-0 p-3 bg-gradient-to-t from-white via-white to-white/95 dark:from-darkbg dark:via-darkbg dark:to-darkbg/95 backdrop-blur-sm border-t border-gray-100 dark:border-gray-700 sticky bottom-0">
+        <div
+            class="flex-shrink-0 p-3 bg-gradient-to-t from-white via-white to-white/95 dark:from-darkbg dark:via-darkbg dark:to-darkbg/95 backdrop-blur-sm border-t border-gray-100 dark:border-gray-700 sticky bottom-0">
             <div class="grid grid-cols-4 gap-3 max-w-4xl mx-auto">
                 <button @click="switchToTab('voice')"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-voice-50 to-voice-100 dark:from-voice-900/30 dark:to-voice-800/20 hover:from-voice-100 hover:to-voice-200 dark:hover:from-voice-800/40 dark:hover:to-voice-700/30 transition-all active:scale-95 group border border-voice-100 dark:border-voice-800/30 shadow-sm">
@@ -1030,7 +1031,8 @@
         x-transition.opacity>
         <div
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl shadow-xl dark:border dark:border-gray-700 flex flex-col max-h-[80vh]">
-            <div class="flex justify-between items-center p-6 pb-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
+            <div
+                class="flex justify-between items-center p-6 pb-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
                 <h2 class="text-xl font-bold dark:text-white">App Settings</h2>
                 <button @click="modals.settings = false" class="text-gray-400">
                     <i data-lucide="x" class="w-6 h-6"></i>
@@ -1107,7 +1109,7 @@
                     </div>
                 </div>
 
-                
+
 
                 <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
                     <h3 class="font-bold text-md mb-2">Music Link Preference</h3>
@@ -1117,7 +1119,8 @@
                         <option value="spotify">Spotify</option>
                         <option value="apple_music">Apple Music</option>
                     </select>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Applies to all new items in the Music tab.</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Applies to all new items in the Music tab.
+                    </p>
                 </div>
 
                 <!-- <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
@@ -1457,7 +1460,7 @@
                         this.recognition.continuous = true;
                         this.recognition.interimResults = true;
                         this.recognition.lang = this.voiceLanguage;
-                        
+
                         // Reset transcripts
                         this.finalTranscript = '';
                         this.interimTranscript = '';
@@ -1465,7 +1468,7 @@
                         this.recognition.onresult = (event) => {
                             let interimTranscript = '';
                             let newFinalTranscript = '';
-                            
+
                             // Process all results
                             for (let i = event.resultIndex; i < event.results.length; i++) {
                                 const transcript = event.results[i][0].transcript;
@@ -1484,14 +1487,14 @@
                                 // Remove duplicates by checking if the text already exists
                                 const newWords = newFinalTranscript.trim().split(' ');
                                 const existingWords = this.finalTranscript.trim().split(' ');
-                                
+
                                 // Only add words that don't already exist in the final transcript
-                                const uniqueNewWords = newWords.filter(word => 
-                                    !existingWords.some(existingWord => 
+                                const uniqueNewWords = newWords.filter(word =>
+                                    !existingWords.some(existingWord =>
                                         existingWord.toLowerCase() === word.toLowerCase()
                                     )
                                 );
-                                
+
                                 if (uniqueNewWords.length > 0) {
                                     this.finalTranscript += uniqueNewWords.join(' ') + ' ';
                                 }
@@ -1524,11 +1527,11 @@
 
                     // Remove extra spaces
                     text = text.replace(/\s+/g, ' ');
-                    
+
                     // Remove duplicate words or phrases (simple approach)
                     const words = text.split(' ');
                     const uniqueWords = [];
-                    
+
                     for (let i = 0; i < words.length; i++) {
                         // Skip if the same word appears consecutively
                         if (i === 0 || words[i] !== words[i - 1]) {
@@ -1540,7 +1543,7 @@
                             uniqueWords.push(words[i]);
                         }
                     }
-                    
+
                     text = uniqueWords.join(' ');
 
                     // Fix common punctuation issues
@@ -2006,8 +2009,8 @@
                         }
 
                         if (a.isFavorite !== b.isFavorite) {
-                                return a.isFavorite ? -1 : 1;
-                            }
+                            return a.isFavorite ? -1 : 1;
+                        }
 
                         return b.id - a.id;
                     });
@@ -2098,18 +2101,25 @@
                 },
 
                 saveItem() {
+                    console.log('saveItem called:', { tab: this.activeTab, editing: this.editingItem });
+
                     let list = this.data[this.activeTab] || [];
 
-                    // For voice notes, we only need the note text
+                    // FIXED VALIDATION:
                     if (this.activeTab === 'voice') {
-                        if (!this.form.note.trim()) return;
-                        // Voice notes don't need a title
-                        this.form.title = '';
-                    } else {
-                        if (!this.form.title.trim()) return;
+                        if (!this.form.note.trim()) {
+                            this.showCopyToast('Please enter a note');
+                            return;
+                        }
+                    } else if (this.activeTab !== 'secure-notes') {
+                        if (!this.form.title.trim()) {
+                            this.showCopyToast('Please enter a title');
+                            return;
+                        }
                     }
 
-                    if (this.activeTab !== 'secure-notes' && !this.isTodoTab(this.activeTab) && activeTab !== 'voice' && (!this.form.link || !this.form.link.trim()) && this.form.title.trim()) {
+                    // BUG FIX 1: Changed activeTab → this.activeTab
+                    if (this.activeTab !== 'secure-notes' && !this.isTodoTab(this.activeTab) && this.activeTab !== 'voice' && (!this.form.link || !this.form.link.trim()) && this.form.title.trim()) {
                         if (this.activeTab === 'food') {
                             this.form.link = this.autoGenerateYouTubeSearchLink(this.form.title);
                         } else if (this.activeTab !== 'music') {
@@ -2144,18 +2154,23 @@
                                 this.form.link = this.autoGenerateMusicLink(this.form.title);
                             }
 
-                            list[index] = { ...this.form };
+                            // BUG FIX 3: Merge instead of replace
+                            list[index] = { ...oldItem, ...this.form };
                         }
                     } else {
+                        // BUG FIX 2: Add ID for new items
+                        this.form.id = Date.now();
+
                         if (!this.form.link && this.activeTab !== 'secure-notes' && this.activeTab !== 'voice') {
                             this.form.link = this.autoGenerateMusicLink(this.form.title);
                         }
                         list.unshift(this.form);
                     }
+
                     this.data[this.activeTab] = list;
                     this.persist();
                     this.modals.item = false;
-                    this.$nextTick(() => lucide.createIcons());
+                    this.showCopyToast(this.editingItem ? 'Item updated!' : 'Item saved!');
                 },
 
                 generateLinkForMusic() {
