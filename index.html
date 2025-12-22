@@ -8,6 +8,14 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2563eb">
 
+    <!-- Performance Optimizations -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -32,9 +40,8 @@
         }
     </script>
 
+    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
-
-    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         .no-scrollbar::-webkit-scrollbar {
@@ -243,34 +250,15 @@
         <div class="flex items-center gap-2">
             <button @click="goToHome()" class="flex items-center gap-2 cursor-pointer">
                 <h1 class="text-xl font-bold tracking-tight text-blue-600 dark:text-blue-400">Pipto - Your DumpYard</h1>
-                <i x-show="currentView !== 'home'" data-lucide="home" class="w-4 h-4 text-blue-500"></i>
+                <i x-show="currentView !== 'home'" class="fas fa-home text-blue-500 text-sm"></i>
             </button>
-            <!-- <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-300 px-2 py-0.5 rounded-full"
-                x-text="'v' + version"></span> -->
         </div>
 
         <div class="flex items-center gap-3">
-            <!-- <button @click="startVoiceInput()"
-                class="text-gray-400 hover:text-voice-600 dark:hover:text-voice-400 transition-transform active:scale-95">
-                <i data-lucide="mic" class="w-5 h-5"></i>
-            </button> -->
-
-            <!-- <button @click="openSecureNotesSettings()"
-                class="text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 transition-transform active:scale-95">
-                <i data-lucide="lock" class="w-5 h-5"
-                    :class="activeTab === 'secure' ? 'text-yellow-600 dark:text-yellow-400' : ''"></i>
-            </button> -->
-
             <button @click="openSettingsModal()"
                 class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-transform active:scale-95">
-                <i data-lucide="settings" class="w-5 h-5"></i>
+                <i class="fas fa-cog text-lg"></i>
             </button>
-
-            <!-- <button @click="toggleTheme()"
-                class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-transform active:scale-95">
-                <i x-show="darkMode" data-lucide="sun" class="w-5 h-5"></i>
-                <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5"></i>
-            </button> -->
         </div>
     </header>
 
@@ -288,9 +276,8 @@
                             class="bg-white dark:bg-darkcard p-3 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center gap-1 transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 group home-grid-item">
                             <div
                                 class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-800/30 transition-colors">
-                                <i :data-lucide="getTabIcon(tab)" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                                <i :class="getTabIcon(tab)" class="text-blue-600 dark:text-blue-400 text-lg"></i>
                             </div>
-                            <!-- FIX 3: Increased text size in tiles -->
                             <span class="font-bold text-gray-800 dark:text-gray-100 text-xl"
                                 x-text="toTitleCase(tab)"></span>
                             <span class="text-sm text-gray-500 dark:text-gray-400">
@@ -302,14 +289,12 @@
             </div>
         </div>
 
-        <!-- FIX 1: Fixed positioning for bottom tab -->
         <div
             class="flex-shrink-0 p-3 bg-gradient-to-t from-white via-white to-white/95 dark:from-darkbg dark:via-darkbg dark:to-darkbg/95 backdrop-blur-sm border-t border-gray-100 dark:border-gray-700 sticky bottom-0">
             <div class="grid grid-cols-4 gap-3 max-w-4xl mx-auto">
                 <button @click="switchToTab('voice')"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-voice-50 to-voice-100 dark:from-voice-900/30 dark:to-voice-800/20 hover:from-voice-100 hover:to-voice-200 dark:hover:from-voice-800/40 dark:hover:to-voice-700/30 transition-all active:scale-95 group border border-voice-100 dark:border-voice-800/30 shadow-sm">
-                    <i data-lucide="mic"
-                        class="w-5 h-5 text-voice-600 dark:text-voice-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <i class="fas fa-microphone text-voice-600 dark:text-voice-400 mb-1 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Voice</span>
                     <span class="text-xs text-voice-600 dark:text-voice-400 mt-0.5"
                         x-text="getTabCount('voice')"></span>
@@ -317,8 +302,7 @@
 
                 <button @click="switchToTab('secure-notes')"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/20 hover:from-yellow-100 hover:to-yellow-200 dark:hover:from-yellow-800/40 dark:hover:to-yellow-700/30 transition-all active:scale-95 group border border-yellow-100 dark:border-yellow-800/30 shadow-sm">
-                    <i data-lucide="lock"
-                        class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <i class="fas fa-lock text-yellow-600 dark:text-yellow-400 mb-1 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Secure</span>
                     <span class="text-xs text-yellow-600 dark:text-yellow-400 mt-0.5"
                         x-text="secureNotes.length"></span>
@@ -326,16 +310,14 @@
 
                 <button @click="switchToTab('cards')"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-800/40 dark:hover:to-blue-700/30 transition-all active:scale-95 group border border-blue-100 dark:border-blue-800/30 shadow-sm">
-                    <i data-lucide="credit-card"
-                        class="w-5 h-5 text-blue-600 dark:text-blue-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <i class="fas fa-credit-card text-blue-600 dark:text-blue-400 mb-1 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Cards</span>
                     <span class="text-xs text-blue-600 dark:text-blue-400 mt-0.5" x-text="cards.length"></span>
                 </button>
 
                 <button @click="openNewTabModal()"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 hover:from-green-100 hover:to-green-200 dark:hover:from-green-800/40 dark:hover:to-green-700/30 transition-all active:scale-95 group border border-green-100 dark:border-green-800/30 shadow-sm">
-                    <i data-lucide="plus-circle"
-                        class="w-5 h-5 text-green-600 dark:text-green-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <i class="fas fa-plus-circle text-green-600 dark:text-green-400 mb-1 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm text-gray-800 dark:text-gray-100">New Tab</span>
                     <span class="text-xs text-green-600 dark:text-green-400 mt-0.5">+</span>
                 </button>
@@ -372,7 +354,7 @@
                     class="absolute right-0 top-0 bottom-0 bg-white dark:bg-darkcard pl-4 pr-4 border-l border-gray-100 dark:border-gray-700 flex items-center z-20">
                     <button @click="openNewTabModal()"
                         class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
-                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        <i class="fas fa-plus-circle text-lg"></i>
                     </button>
                 </div>
             </div>
@@ -384,14 +366,14 @@
             <div x-show="activeTab === 'voice'"
                 class="text-center bg-voice-50 dark:bg-voice-900/20 p-4 rounded-xl mb-4 border border-voice-100 dark:border-voice-800/30">
                 <p class="text-gray-700 dark:text-gray-300 font-bold flex justify-center items-center gap-2">
-                    <i data-lucide="mic" class="w-5 h-5 text-voice-600"></i> Voice Notes
+                    <i class="fas fa-microphone text-voice-600"></i> Voice Notes
                 </p>
             </div>
 
             <div x-show="activeTab === 'secure-notes'"
                 class="text-center bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl mb-4 border border-yellow-100 dark:border-yellow-800/30">
                 <p class="text-gray-700 dark:text-gray-300 font-bold flex justify-center items-center gap-2">
-                    <i data-lucide="lock" class="w-5 h-5 text-yellow-600"></i> Secure Notes
+                    <i class="fas fa-lock text-yellow-600"></i> Secure Notes
                 </p>
             </div>
 
@@ -411,7 +393,7 @@
                             <div class="relative z-10 text-white">
                                 <div class="flex justify-between items-center">
                                     <span class="font-semibold text-lg" x-text="card.title || 'Untitled Card'"></span>
-                                    <i data-lucide="credit-card" class="w-6 h-6"></i>
+                                    <i class="fas fa-credit-card text-xl"></i>
                                 </div>
 
                                 <div
@@ -419,7 +401,7 @@
                                     <span x-text="formatCardNumberFull(card.number)"></span>
                                     <button @click.stop="copyToClipboard(card.number, 'Card Number')"
                                         class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                        <i data-lucide="copy" class="w-4 h-4"></i>
+                                        <i class="fas fa-copy text-sm"></i>
                                     </button>
                                 </div>
 
@@ -431,7 +413,7 @@
                                         </div>
                                         <button @click.stop="copyToClipboard(card.holder, 'Card Holder')"
                                             class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                            <i data-lucide="copy" class="w-3 h-3"></i>
+                                            <i class="fas fa-copy text-xs"></i>
                                         </button>
                                     </div>
 
@@ -442,7 +424,7 @@
                                         </div>
                                         <button @click.stop="copyToClipboard(card.expiry, 'Expiry Date')"
                                             class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                            <i data-lucide="copy" class="w-3 h-3"></i>
+                                            <i class="fas fa-copy text-xs"></i>
                                         </button>
                                     </div>
 
@@ -453,7 +435,7 @@
                                         </div>
                                         <button @click.stop="copyToClipboard(card.cvv, 'CVV')"
                                             class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                            <i data-lucide="copy" class="w-3 h-3"></i>
+                                            <i class="fas fa-copy text-xs"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -465,7 +447,7 @@
                                         </p>
                                         <button @click.stop="copyToClipboard(card.note, 'Note')"
                                             class="p-1 flex-shrink-0 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                            <i data-lucide="copy" class="w-3 h-3"></i>
+                                            <i class="fas fa-copy text-xs"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -473,7 +455,7 @@
                                 <div class="flex justify-end mt-4">
                                     <button @click.stop="confirmDeleteCard(card.id)"
                                         class="text-red-300 hover:text-red-100 p-1 transition-colors">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </div>
                             </div>
@@ -481,7 +463,7 @@
                     </template>
                     <div x-show="cards.length === 0"
                         class="flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 mt-10">
-                        <i data-lucide="credit-card" class="w-16 h-16 mb-4 opacity-50"></i>
+                        <i class="fas fa-credit-card text-6xl mb-4 opacity-50"></i>
                         <p>No cards saved.</p>
                     </div>
                 </div>
@@ -490,7 +472,7 @@
             <div
                 x-show="sortedItems.length === 0 && activeTab !== 'secure-notes' && activeTab !== 'cards' && activeTab !== 'voice'">
                 <div class="flex flex-col items-center justify-center mt-20 text-gray-300 dark:text-gray-600">
-                    <i data-lucide="inbox" class="w-16 h-16 mb-4 opacity-50"></i>
+                    <i class="fas fa-inbox text-6xl mb-4 opacity-50"></i>
                     <p>No items in <span class="font-bold text-gray-400 dark:text-gray-500"
                             x-text="activeTab === 'secure-notes' ? 'Secure Notes' : toTitleCase(activeTab)"></span></p>
                 </div>
@@ -517,20 +499,19 @@
                                 <button @click.stop="toggleFavorite(item.id)"
                                     class="p-1 rounded-full transition-colors active:scale-95"
                                     :class="item.isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'">
-                                    <i data-lucide="heart" class="w-5 h-5"
-                                        :fill="item.isFavorite ? 'currentColor' : 'none'"></i>
+                                    <i class="fas fa-heart" :class="item.isFavorite ? 'fas' : 'far'"></i>
                                 </button>
 
                                 <button @click.stop="toggleDone(item.id)"
                                     class="text-xs font-bold transition-colors py-1 px-2 rounded-full"
                                     :class="item.isDone ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300 hover:text-blue-600'">
-                                    <i data-lucide="check-circle" class="w-3 h-3 inline-block mr-1"></i>
+                                    <i class="fas fa-check-circle text-xs inline-block mr-1"></i>
                                     <span x-text="item.isDone ? 'UNDONE' : 'MARK DONE'"></span>
                                 </button>
 
                                 <button @click.stop="confirmDelete(item.id)"
                                     class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
@@ -541,7 +522,7 @@
                     class="flex flex-col items-center justify-center py-16 text-gray-300 dark:text-gray-600">
                     <div
                         class="w-20 h-20 rounded-full bg-voice-50 dark:bg-voice-900/20 flex items-center justify-center mb-4">
-                        <i data-lucide="mic" class="w-8 h-8 text-voice-400 dark:text-voice-500"></i>
+                        <i class="fas fa-microphone text-voice-400 dark:text-voice-500 text-2xl"></i>
                     </div>
                     <p class="text-lg font-medium text-gray-400 dark:text-gray-500 mb-2">No voice notes yet</p>
                     <p class="text-sm text-gray-400 dark:text-gray-600 text-center max-w-xs">
@@ -561,7 +542,7 @@
                         <a :href="item.link" target="_blank" @click.stop
                             x-show="!isTodoTab(activeTab) && activeTab !== 'secure-notes' && item.link"
                             class="absolute top-3 right-3 p-2 rounded-full transition-colors z-10 text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-800/50">
-                            <i :data-lucide="activeTab === 'music' ? 'music' : 'link'" class="w-5 h-5"></i>
+                            <i :class="activeTab === 'music' ? 'fas fa-music' : 'fas fa-link'" class="text-lg"></i>
                         </a>
 
                         <template x-if="isTodoTab(activeTab)">
@@ -606,20 +587,19 @@
                                     x-show="!isTodoTab(activeTab) && activeTab !== 'secure-notes'"
                                     class="p-1 rounded-full transition-colors active:scale-95"
                                     :class="item.isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'">
-                                    <i data-lucide="heart" class="w-5 h-5"
-                                        :fill="item.isFavorite ? 'currentColor' : 'none'"></i>
+                                    <i class="fas fa-heart" :class="item.isFavorite ? 'fas' : 'far'"></i>
                                 </button>
                                 <button @click.stop="toggleDone(item.id)"
                                     class="text-xs font-bold transition-colors py-1 px-2 rounded-full"
                                     x-show="!isTodoTab(activeTab)"
                                     :class="item.isDone ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300 hover:text-blue-600'">
-                                    <i data-lucide="check-circle" class="w-3 h-3 inline-block mr-1"></i>
+                                    <i class="fas fa-check-circle text-xs inline-block mr-1"></i>
                                     <span x-text="item.isDone ? 'UNDONE' : 'MARK DONE'"></span>
                                 </button>
 
                                 <button @click.stop="confirmDelete(item.id)"
                                     class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
@@ -641,7 +621,7 @@
                                 <p class="whitespace-pre-line break-words mr-2" x-text="item.note"></p>
                                 <button @click.stop="copyToClipboard(item.note, 'Secure Note')"
                                     class="p-1 flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 active:scale-95 transition-transform">
-                                    <i data-lucide="copy" class="w-3 h-3"></i>
+                                    <i class="fas fa-copy text-xs"></i>
                                 </button>
                             </div>
                         </div>
@@ -650,7 +630,7 @@
                             class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-end items-center">
                             <button @click.stop="confirmDelete(item.id)"
                                 class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
                     </div>
@@ -667,18 +647,18 @@
     <!-- Floating Action Buttons -->
     <button x-show="currentView === 'tab' && activeTab === 'cards'" @click="openAddCardModal()"
         class="fixed bottom-6 right-6 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800 bg-blue-600 hover:bg-blue-700">
-        <i data-lucide="plus" class="w-6 h-6"></i>
+        <i class="fas fa-plus text-xl"></i>
     </button>
 
     <!-- Voice Tab Floating Microphone -->
     <button x-show="currentView === 'tab' && activeTab === 'voice'" @click="startRecording()"
         class="fixed bottom-6 right-6 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800 bg-gradient-to-br from-voice-600 to-indigo-600 hover:from-voice-700 hover:to-indigo-700">
-        <i data-lucide="mic" class="w-6 h-6"></i>
+        <i class="fas fa-microphone text-xl"></i>
     </button>
 
     <button x-show="currentView === 'tab' && activeTab !== 'cards' && activeTab !== 'voice'" @click="openAddItemModal()"
         class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800">
-        <i data-lucide="plus" class="w-8 h-8"></i>
+        <i class="fas fa-plus text-xl"></i>
     </button>
 
     <!-- Minimal Voice Input Modal -->
@@ -694,7 +674,7 @@
                         <div class="absolute inset-0 rounded-full bg-red-100 dark:bg-red-900/30 pulse-ring"></div>
                         <div
                             class="w-16 h-16 bg-red-500 dark:bg-red-600 rounded-full flex items-center justify-center relative">
-                            <i data-lucide="mic" class="w-6 h-6 text-white"></i>
+                            <i class="fas fa-microphone text-white text-xl"></i>
                         </div>
                     </div>
 
@@ -715,7 +695,7 @@
                 <div x-show="!isRecording && !voiceText" class="flex flex-col items-center justify-center mb-6">
                     <div
                         class="w-20 h-20 rounded-full bg-voice-100 dark:bg-voice-900/30 flex items-center justify-center mb-4">
-                        <i data-lucide="mic" class="w-8 h-8 text-voice-600 dark:text-voice-400"></i>
+                        <i class="fas fa-microphone text-voice-600 dark:text-voice-400 text-2xl"></i>
                     </div>
                     <p class="text-gray-700 dark:text-gray-300 font-medium">Tap to start recording</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Speak clearly into your microphone</p>
@@ -733,7 +713,7 @@
 
                         <button x-show="voiceText && !isRecording" @click="voiceText = ''"
                             class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                            <i data-lucide="x" class="w-4 h-4"></i>
+                            <i class="fas fa-times text-sm"></i>
                         </button>
                     </div>
                 </div>
@@ -743,20 +723,20 @@
                     <!-- Start/Stop Recording Button -->
                     <button x-show="!isRecording" @click="startRecording()"
                         class="flex items-center justify-center gap-2 py-4 bg-voice-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-voice-700 active:scale-95 transition-transform w-full">
-                        <i data-lucide="mic" class="w-5 h-5"></i>
+                        <i class="fas fa-microphone"></i>
                         <span x-text="voiceText ? 'Record Again' : 'Start Recording'"></span>
                     </button>
 
                     <button x-show="isRecording" @click="stopRecording()"
                         class="flex items-center justify-center gap-2 py-4 bg-red-500 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-red-600 active:scale-95 transition-transform w-full">
-                        <i data-lucide="square" class="w-5 h-5"></i>
+                        <i class="fas fa-stop"></i>
                         Stop Recording
                     </button>
 
                     <!-- Save Button -->
                     <button x-show="voiceText && !isRecording" @click="saveVoiceNote()"
                         class="flex items-center justify-center gap-2 py-4 bg-green-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-green-700 active:scale-95 transition-transform w-full">
-                        <i data-lucide="save" class="w-5 h-5"></i>
+                        <i class="fas fa-save"></i>
                         Save Voice Note
                     </button>
                 </div>
@@ -778,8 +758,7 @@
             class="bg-white dark:bg-darkcard w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl animate-slide-up border dark:border-gray-700">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold dark:text-white" x-text="editingItem ? 'Edit Item' : 'Add New Item'"></h2>
-                <button @click="modals.item = false" class="text-gray-400"><i data-lucide="x"
-                        class="w-6 h-6"></i></button>
+                <button @click="modals.item = false" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
             </div>
 
             <div class="space-y-4">
@@ -830,8 +809,7 @@
 
             <div class="flex justify-between items-center p-6 pb-4 flex-shrink-0">
                 <h2 class="text-xl font-bold dark:text-white" x-text="editingCard ? 'Edit Card' : 'Add New Card'"></h2>
-                <button @click="modals.cardItem = false" class="text-gray-400"><i data-lucide="x"
-                        class="w-6 h-6"></i></button>
+                <button @click="modals.cardItem = false" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
             </div>
 
             <div class="overflow-y-auto px-6 flex-1">
@@ -914,7 +892,7 @@
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
             <div
                 class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                <i class="fas fa-exclamation-triangle text-xl"></i>
             </div>
             <h3 class="text-lg font-bold mb-2 dark:text-white"
                 x-text="itemToDelete && getItemType(itemToDelete) === 'card' ? 'Delete this card?' : 'Delete this item?'">
@@ -935,8 +913,7 @@
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 shadow-xl dark:border dark:border-gray-700">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold dark:text-white">Create New Tab</h2>
-                <button @click="modals.tab = false" class="text-gray-400"><i data-lucide="x"
-                        class="w-6 h-6"></i></button>
+                <button @click="modals.tab = false" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
             </div>
 
             <div class="space-y-4">
@@ -983,8 +960,7 @@
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 shadow-xl dark:border dark:border-gray-700">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold dark:text-white">Rename Tab</h2>
-                <button @click="modals.editTab = false" class="text-gray-400"><i data-lucide="x"
-                        class="w-6 h-6"></i></button>
+                <button @click="modals.editTab = false" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
             </div>
 
             <div class="space-y-4">
@@ -1012,7 +988,7 @@
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
             <div
                 class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                <i class="fas fa-exclamation-triangle text-xl"></i>
             </div>
             <h3 class="text-lg font-bold mb-2 dark:text-white">Delete the '<span
                     x-text="toTitleCase(currentContextTab)"></span>' tab?</h3>
@@ -1026,7 +1002,6 @@
         </div>
     </div>
 
-    <!-- FIX 4: Settings modal with scrollable content and fixed save button -->
     <div x-show="modals.settings" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
         x-transition.opacity>
         <div
@@ -1035,7 +1010,7 @@
                 class="flex justify-between items-center p-6 pb-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
                 <h2 class="text-xl font-bold dark:text-white">App Settings</h2>
                 <button @click="modals.settings = false" class="text-gray-400">
-                    <i data-lucide="x" class="w-6 h-6"></i>
+                    <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
 
@@ -1103,13 +1078,11 @@
                         </div>
                         <button @click="toggleTheme()"
                             class="p-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors active:scale-95">
-                            <i x-show="darkMode" data-lucide="sun" class="w-5 h-5 text-yellow-500"></i>
-                            <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5 text-blue-500"></i>
+                            <i x-show="darkMode" class="fas fa-sun text-yellow-500 text-lg"></i>
+                            <i x-show="!darkMode" class="fas fa-moon text-blue-500 text-lg"></i>
                         </button>
                     </div>
                 </div>
-
-
 
                 <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
                     <h3 class="font-bold text-md mb-2">Music Link Preference</h3>
@@ -1123,17 +1096,7 @@
                     </p>
                 </div>
 
-                <!-- <div class="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
-                    <h3 class="font-bold text-md mb-2 text-red-500">Danger Zone</h3>
-                    <button @click="confirmDeleteAllData()"
-                        class="w-full py-2 bg-red-500 text-white rounded-xl font-bold shadow-md hover:bg-red-600 text-sm">
-                        Delete All App Data
-                    </button>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">This will delete all your data including items,
-                        tabs, and preferences.</p>
-                </div> -->
-
-                <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <!-- <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700"> -->
                     <div class="flex justify-between items-center text-xs text-gray-400 dark:text-gray-600">
                         <span>Version <span x-text="version"></span></span>
                         <span x-show="updateAvailable"
@@ -1161,7 +1124,7 @@
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
             <div
                 class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="skull" class="w-6 h-6"></i>
+                <i class="fas fa-skull text-xl"></i>
             </div>
             <h3 class="text-lg font-bold mb-2 dark:text-white">Delete ALL App Data?</h3>
             <p class="text-sm text-red-500 mb-6 font-bold">This includes all items, tabs, and preferences. THIS
@@ -1183,7 +1146,7 @@
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
             <div
                 class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="cloud-download" class="w-6 h-6"></i>
+                <i class="fas fa-cloud-download-alt text-xl"></i>
             </div>
             <h3 class="text-lg font-bold mb-2 dark:text-white">App Update Ready!</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">A new version is available. Restart the app to
@@ -1200,14 +1163,14 @@
             <li>
                 <button @click="modals.tabContext = false; openEditTabModal()"
                     class="w-full text-left px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                    <i class="fas fa-pencil-alt text-sm"></i>
                     Rename
                 </button>
             </li>
             <li>
                 <button @click="modals.tabContext = false; confirmDeleteTab(currentContextTab)"
                     class="w-full text-left px-3 py-2 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center gap-2">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <i class="fas fa-trash-alt text-sm"></i>
                     Delete
                 </button>
             </li>
@@ -1217,7 +1180,7 @@
     <script>
         function app() {
             return {
-                version: '4.3.0',
+                version: '4.4.0',
 
                 // Voice Input State
                 isRecording: false,
@@ -1229,7 +1192,6 @@
                 autoSaveVoiceNotes: false,
                 tempVoiceLanguage: 'en-US',
                 tempAutoSaveVoiceNotes: false,
-                // FIX 2: Added for better voice transcription
                 finalTranscript: '',
                 interimTranscript: '',
 
@@ -1245,7 +1207,8 @@
                 longPressTimer: null,
                 homeLongPressTimer: null,
                 longPressDuration: 500,
-                tabs: ['food', 'travel', 'movies', 'music', 'voice', 'secure-notes', 'cards'],
+                // ADDED: web-series to default tabs
+                tabs: ['food', 'travel', 'movies', 'music', 'web-series', 'voice', 'secure-notes', 'cards'],
                 data: {},
                 musicAppPreference: 'youtube_music',
                 oldMusicAppPreference: 'youtube_music',
@@ -1325,12 +1288,17 @@
                     const sTabMeta = localStorage.getItem('bd_tab_metadata');
 
                     this.data = sData ? JSON.parse(sData) : {};
-                    this.tabs = sTabs ? JSON.parse(sTabs) : ['food', 'travel', 'movies', 'music', 'voice', 'secure-notes', 'cards'];
+                    this.tabs = sTabs ? JSON.parse(sTabs) : ['food', 'travel', 'movies', 'music', 'web-series', 'voice', 'secure-notes', 'cards'];
                     this.tabMetadata = sTabMeta ? JSON.parse(sTabMeta) : {};
 
                     // Initialize voice tab if it doesn't exist
                     if (!this.data['voice']) {
                         this.data['voice'] = [];
+                    }
+
+                    // Initialize web-series tab if it doesn't exist
+                    if (!this.data['web-series']) {
+                        this.data['web-series'] = [];
                     }
 
                     // Migrate old secure data to new structure
@@ -1363,19 +1331,29 @@
                         this.tempDefaultView = sDefaultView;
                     }
 
-                    // Robust Default View Logic
-                    if (this.defaultView === 'tab') {
+                    // IMPROVED: Fixed back button navigation
+                    // Set initial state based on URL hash
+                    const hash = window.location.hash.substring(1);
+                    if (hash && hash !== 'home' && this.tabs.includes(hash)) {
                         this.currentView = 'tab';
-                        this.activeTab = this.defaultTabID;
-                    } else {
+                        this.activeTab = hash;
+                        window.history.replaceState({ view: 'tab', tab: hash }, '', `#${hash}`);
+                    } else if (hash === 'home') {
                         this.currentView = 'home';
-                        const lastActiveTab = localStorage.getItem('bd_last_active_tab');
-                        if (lastActiveTab && this.tabs.includes(lastActiveTab)) {
-                            this.activeTab = lastActiveTab;
+                        window.history.replaceState({ view: 'home' }, '', '#home');
+                    } else {
+                        // Default view logic
+                        if (this.defaultView === 'tab') {
+                            this.currentView = 'tab';
+                            this.activeTab = this.defaultTabID;
+                            window.history.replaceState({ view: 'tab', tab: this.defaultTabID }, '', `#${this.defaultTabID}`);
+                        } else {
+                            this.currentView = 'home';
+                            window.history.replaceState({ view: 'home' }, '', '#home');
                         }
                     }
 
-                    // 5. Ensure active tab exists
+                    // Ensure active tab exists
                     if (!this.tabs.includes(this.activeTab)) {
                         this.activeTab = this.defaultTabID;
                     }
@@ -1390,14 +1368,10 @@
                     this.$watch('activeTab', (newTab) => {
                         if (this.currentView === 'tab') {
                             localStorage.setItem('bd_last_active_tab', newTab);
-                            this.updateHistoryState(newTab);
                         }
-                        this.$nextTick(() => {
-                            lucide.createIcons();
-                        });
                     });
                     this.$watch('darkMode', () => {
-                        this.$nextTick(() => lucide.createIcons());
+                        // No icon initialization needed for Font Awesome
                     });
 
                     // 9. Service Worker
@@ -1412,46 +1386,39 @@
                             window.location.reload();
                         });
                     }
-
-                    this.$nextTick(() => lucide.createIcons());
                 },
 
-                // NEW: History API for back button navigation
+                // IMPROVED: History API for back button navigation - FIXED
                 setupHistoryNavigation() {
-                    // Set initial history state
-                    if (!window.history.state || window.history.state.view !== this.currentView) {
-                        const state = { view: this.currentView };
-                        if (this.currentView === 'tab') {
-                            state.tab = this.activeTab;
-                            window.history.replaceState(state, '', `#${this.activeTab}`);
-                        } else {
-                            window.history.replaceState(state, '', '#home');
-                        }
-                    }
-
-                    // Handle back/forward navigation
                     window.addEventListener('popstate', (event) => {
-                        if (event.state && event.state.view === 'tab' && event.state.tab) {
-                            if (this.tabs.includes(event.state.tab)) {
+                        if (event.state) {
+                            if (event.state.view === 'tab' && event.state.tab && this.tabs.includes(event.state.tab)) {
                                 this.currentView = 'tab';
                                 this.activeTab = event.state.tab;
-                            } else {
+                            } else if (event.state.view === 'home') {
                                 this.goToHome();
                             }
                         } else {
-                            this.goToHome();
+                            // No state, check hash
+                            const hash = window.location.hash.substring(1);
+                            if (hash && hash !== 'home' && this.tabs.includes(hash)) {
+                                this.currentView = 'tab';
+                                this.activeTab = hash;
+                            } else {
+                                this.goToHome();
+                            }
                         }
                     });
                 },
 
-                // NEW: Update history state
+                // IMPROVED: Update history state
                 updateHistoryState(tab) {
                     if (this.currentView === 'tab') {
                         window.history.pushState({ view: 'tab', tab: tab }, '', `#${tab}`);
                     }
                 },
 
-                // FIX 2: Improved Speech Recognition initialization to fix duplication
+                // Enhanced Speech Recognition initialization
                 initializeSpeechRecognition() {
                     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -1473,7 +1440,6 @@
                             for (let i = event.resultIndex; i < event.results.length; i++) {
                                 const transcript = event.results[i][0].transcript;
                                 if (event.results[i].isFinal) {
-                                    // Only add new final results that aren't duplicates
                                     if (newFinalTranscript.indexOf(transcript) === -1) {
                                         newFinalTranscript += transcript + ' ';
                                     }
@@ -1484,11 +1450,9 @@
 
                             // Update final transcript with new unique final results
                             if (newFinalTranscript) {
-                                // Remove duplicates by checking if the text already exists
                                 const newWords = newFinalTranscript.trim().split(' ');
                                 const existingWords = this.finalTranscript.trim().split(' ');
 
-                                // Only add words that don't already exist in the final transcript
                                 const uniqueNewWords = newWords.filter(word =>
                                     !existingWords.some(existingWord =>
                                         existingWord.toLowerCase() === word.toLowerCase()
@@ -1521,23 +1485,20 @@
                     }
                 },
 
-                // FIX 2: Enhanced voice text cleaning to remove duplicates
+                // Enhanced voice text cleaning to remove duplicates
                 cleanVoiceText(text) {
                     if (!text) return '';
 
                     // Remove extra spaces
                     text = text.replace(/\s+/g, ' ');
 
-                    // Remove duplicate words or phrases (simple approach)
+                    // Remove duplicate words or phrases
                     const words = text.split(' ');
                     const uniqueWords = [];
 
                     for (let i = 0; i < words.length; i++) {
-                        // Skip if the same word appears consecutively
                         if (i === 0 || words[i] !== words[i - 1]) {
-                            // Also check for longer pattern repeats (like "hello hello")
                             if (i >= 2 && words[i] === words[i - 2] && words[i - 1] === words[i - 3]) {
-                                // Skip this duplicate pattern
                                 continue;
                             }
                             uniqueWords.push(words[i]);
@@ -1561,19 +1522,151 @@
                     return text.trim();
                 },
 
-                // NEW: Voice Input Functions - Direct recording in voice tab
+                // NEW: Enhanced voice command processing
+                processVoiceCommand(text) {
+                    const lowerText = text.toLowerCase();
+                    
+                    // Command patterns
+                    const patterns = [
+                        /add\s+(.+?)\s+(?:in|to)\s+(.+?)\s+tab/i,
+                        /add\s+(.+?)\s+to\s+(.+)/i,
+                        /create\s+(.+?)\s+in\s+(.+)/i,
+                        /put\s+(.+?)\s+in\s+(.+)/i
+                    ];
+
+                    let match = null;
+                    let itemName = '';
+                    let tabName = '';
+
+                    for (const pattern of patterns) {
+                        match = text.match(pattern);
+                        if (match) {
+                            itemName = match[1].trim();
+                            tabName = match[2].trim().toLowerCase().replace(/\s+/g, '-');
+                            break;
+                        }
+                    }
+
+                    if (!match) {
+                        // Try simple pattern: "add [item] in [tab]"
+                        const simpleMatch = text.match(/add\s+(.+?)\s+in\s+(.+)/i);
+                        if (simpleMatch) {
+                            itemName = simpleMatch[1].trim();
+                            tabName = simpleMatch[2].trim().toLowerCase().replace(/\s+/g, '-');
+                        }
+                    }
+
+                    if (itemName && tabName) {
+                        // Check if tab exists (with fuzzy matching)
+                        let existingTab = this.findTabByName(tabName);
+                        
+                        if (!existingTab) {
+                            // Create new tab
+                            this.createTabFromVoice(tabName);
+                            existingTab = tabName;
+                            this.showCopyToast(`Created new tab: ${this.toTitleCase(tabName)}`);
+                        }
+
+                        // Switch to the tab
+                        this.switchToTab(existingTab);
+
+                        // Add the item
+                        this.addItemFromVoice(itemName, existingTab);
+                        
+                        return true;
+                    }
+
+                    return false;
+                },
+
+                // Helper: Find tab by name (with fuzzy matching)
+                findTabByName(name) {
+                    // Exact match
+                    if (this.tabs.includes(name)) {
+                        return name;
+                    }
+
+                    // Fuzzy matching
+                    const normalizedSearch = name.replace(/-/g, ' ').replace(/s$/, '');
+                    
+                    for (const tab of this.tabs) {
+                        const normalizedTab = tab.replace(/-/g, ' ').replace(/s$/, '');
+                        
+                        // Check for close matches
+                        if (normalizedTab.includes(normalizedSearch) || normalizedSearch.includes(normalizedTab)) {
+                            return tab;
+                        }
+                        
+                        // Check for plural/singular variations
+                        if (normalizedTab === normalizedSearch + 's' || normalizedTab + 's' === normalizedSearch) {
+                            return tab;
+                        }
+                    }
+
+                    return null;
+                },
+
+                // Helper: Create tab from voice command
+                createTabFromVoice(tabName) {
+                    const normalizedName = tabName.toLowerCase().replace(/\s+/g, '-');
+                    
+                    if (!this.tabs.includes(normalizedName)) {
+                        // Insert before special tabs
+                        const voiceIndex = this.tabs.indexOf('voice');
+                        const secureIndex = this.tabs.indexOf('secure-notes');
+                        const insertIndex = Math.min(voiceIndex, secureIndex);
+                        
+                        this.tabs.splice(insertIndex, 0, normalizedName);
+                        this.data[normalizedName] = [];
+                        this.tabMetadata[normalizedName] = 'normal';
+                        
+                        this.persist();
+                    }
+                    
+                    return normalizedName;
+                },
+
+                // Helper: Add item from voice command
+                addItemFromVoice(itemName, tabName) {
+                    const itemId = Date.now();
+                    const item = {
+                        id: itemId,
+                        title: itemName,
+                        note: '',
+                        link: '',
+                        isFavorite: false,
+                        isDone: false,
+                        type: 'note'
+                    };
+
+                    // Generate appropriate link based on tab type
+                    if (tabName === 'food') {
+                        item.link = this.autoGenerateYouTubeSearchLink(itemName);
+                    } else if (tabName === 'music') {
+                        item.link = this.autoGenerateMusicLink(itemName);
+                    } else if (tabName === 'movies' || tabName === 'web-series') {
+                        item.link = `https://www.google.com/search?q=${encodeURIComponent(itemName + ' watch online')}`;
+                    } else if (tabName !== 'secure-notes' && tabName !== 'voice') {
+                        item.link = this.autoGenerateGoogleSearchLink(itemName);
+                    }
+
+                    let list = this.data[tabName] || [];
+                    list.unshift(item);
+                    this.data[tabName] = list;
+
+                    this.persist();
+                    this.showCopyToast(`Added "${itemName}" to ${this.toTitleCase(tabName)}`);
+                },
+
+                // Voice Input Functions
                 startVoiceInput() {
                     this.voiceText = '';
                     this.finalTranscript = '';
                     this.interimTranscript = '';
                     this.modals.voiceInput = true;
-                    this.$nextTick(() => {
-                        lucide.createIcons();
-                    });
                 },
 
                 startRecording() {
-                    // Direct recording from voice tab floating button
                     if (this.activeTab === 'voice' && this.currentView === 'tab') {
                         this.voiceText = '';
                         this.finalTranscript = '';
@@ -1581,7 +1674,6 @@
                         this.modals.voiceInput = true;
                         this.$nextTick(() => {
                             this.startActualRecording();
-                            lucide.createIcons();
                         });
                     } else {
                         this.startVoiceInput();
@@ -1644,11 +1736,6 @@
 
                     // Clean up the final text one more time
                     this.voiceText = this.cleanVoiceText(this.finalTranscript);
-
-                    // If auto-save is enabled and we have text, save immediately
-                    if (this.autoSaveVoiceNotes && this.voiceText.trim()) {
-                        setTimeout(() => this.saveVoiceNote(), 500);
-                    }
                 },
 
                 saveVoiceNote() {
@@ -1657,10 +1744,21 @@
                         return;
                     }
 
+                    // Check if this is a command
+                    if (this.processVoiceCommand(this.voiceText)) {
+                        // Command was processed, close modal
+                        this.modals.voiceInput = false;
+                        this.voiceText = '';
+                        this.finalTranscript = '';
+                        this.interimTranscript = '';
+                        return;
+                    }
+
+                    // Regular voice note saving
                     const noteId = Date.now();
                     const noteItem = {
                         id: noteId,
-                        title: '', // No title for voice notes
+                        title: '',
                         note: this.voiceText.trim(),
                         link: '',
                         isFavorite: false,
@@ -1682,11 +1780,9 @@
                     this.voiceText = '';
                     this.finalTranscript = '';
                     this.interimTranscript = '';
-
-                    this.$nextTick(() => lucide.createIcons());
                 },
 
-                // UPDATED: Improved long press handling
+                // Improved long press handling
                 homeLongPressStart(event, tab) {
                     this.homeLongPressActive = false;
                     clearTimeout(this.homeLongPressTimer);
@@ -1761,7 +1857,7 @@
                     this.modals.tabContext = true;
                 },
 
-                // UPDATED: Voice notes counter now only counts un-done items
+                // Voice notes counter now only counts un-done items
                 getTabCount(tab) {
                     const items = this.data[tab] || [];
                     if (this.isTodoTab(tab)) {
@@ -1773,45 +1869,46 @@
                     return items.length;
                 },
 
+                // FIXED: Improved back button navigation
                 goToHome() {
                     this.currentView = 'home';
-                    window.history.pushState({ view: 'home' }, '', '#home');
-                    this.$nextTick(() => {
-                        lucide.createIcons();
-                    });
+                    // Replace state instead of push to prevent multiple back clicks
+                    window.history.replaceState({ view: 'home' }, '', '#home');
                 },
 
                 switchToTab(tab) {
                     this.currentView = 'tab';
                     this.activeTab = tab;
+                    // Push new state for the tab
                     this.updateHistoryState(tab);
                     this.$nextTick(() => {
                         if (tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice') {
                             this.scrollTabIntoView(tab, 'smooth', 'center');
                         }
-                        lucide.createIcons();
                     });
                 },
 
+                // UPDATED: Font Awesome icons
                 getTabIcon(tab) {
                     const iconMap = {
-                        'food': 'utensils',
-                        'travel': 'map-pin',
-                        'movies': 'film',
-                        'music': 'music',
-                        'voice': 'mic',
-                        'secure-notes': 'lock',
-                        'cards': 'credit-card',
-                        'books': 'book',
-                        'reading': 'book-open',
-                        'shopping': 'shopping-cart',
-                        'work': 'briefcase',
-                        'health': 'heart',
-                        'fitness': 'dumbbell',
-                        'ideas': 'lightbulb',
-                        'projects': 'folder-kanban'
+                        'food': 'fas fa-utensils',
+                        'travel': 'fas fa-map-marker-alt',
+                        'movies': 'fas fa-film',
+                        'music': 'fas fa-music',
+                        'web-series': 'fas fa-tv',
+                        'voice': 'fas fa-microphone',
+                        'secure-notes': 'fas fa-lock',
+                        'cards': 'fas fa-credit-card',
+                        'books': 'fas fa-book',
+                        'reading': 'fas fa-book-open',
+                        'shopping': 'fas fa-shopping-cart',
+                        'work': 'fas fa-briefcase',
+                        'health': 'fas fa-heart',
+                        'fitness': 'fas fa-dumbbell',
+                        'ideas': 'fas fa-lightbulb',
+                        'projects': 'fas fa-folder'
                     };
-                    return iconMap[tab] || 'folder';
+                    return iconMap[tab] || 'fas fa-folder';
                 },
 
                 migrateOldData() {
@@ -1933,14 +2030,12 @@
                     this.tempVoiceLanguage = this.voiceLanguage;
                     this.tempAutoSaveVoiceNotes = this.autoSaveVoiceNotes;
                     this.modals.settings = true;
-                    this.$nextTick(() => lucide.createIcons());
                 },
 
                 openSecureNotesSettings() {
                     this.currentView = 'tab';
                     this.activeTab = 'secure-notes';
                     this.updateHistoryState('secure-notes');
-                    this.$nextTick(() => lucide.createIcons());
                 },
 
                 confirmDeleteAllData() {
@@ -2068,7 +2163,6 @@
                     this.data['cards'] = cardData;
                     this.persist();
                     this.modals.cardItem = false;
-                    this.$nextTick(() => lucide.createIcons());
                 },
 
                 confirmDeleteCard(id) {
@@ -2177,7 +2271,6 @@
                     if (this.form.title.trim()) {
                         this.form.link = this.autoGenerateMusicLink(this.form.title);
                         this.showCopyToast('Link auto-generated');
-                        this.$nextTick(() => lucide.createIcons());
                     }
                 },
 
@@ -2291,7 +2384,6 @@
                             this.persist();
                             this.$nextTick(() => {
                                 this.scrollTabIntoView(newName);
-                                lucide.createIcons();
                             });
                         }
                     }
@@ -2436,16 +2528,16 @@
                 },
 
                 getLinkIcon(link) {
-                    if (!link) return `<i data-lucide="link" class="w-4 h-4 icon-link"></i>`;
+                    if (!link) return `<i class="fas fa-link icon-link"></i>`;
 
                     if (link.includes('open.spotify.com/search') || link.includes('spotify:')) {
-                        return `<i data-lucide="music" class="w-4 h-4 icon-spotify" fill="currentColor"></i>`;
+                        return `<i class="fab fa-spotify icon-spotify"></i>`;
                     } else if (link.includes('music.apple.com')) {
-                        return `<i data-lucide="apple" class="w-4 h-4 icon-apple" fill="currentColor"></i>`;
+                        return `<i class="fab fa-apple icon-apple"></i>`;
                     } else if (link.includes('youtube.com') || link.includes('music.youtube.com')) {
-                        return `<i data-lucide="youtube" class="w-4 h-4 icon-youtube" fill="currentColor"></i>`;
+                        return `<i class="fab fa-youtube icon-youtube"></i>`;
                     } else {
-                        return `<i data-lucide="link" class="w-4 h-4 icon-link"></i>`;
+                        return `<i class="fas fa-link icon-link"></i>`;
                     }
                 },
 
@@ -2463,6 +2555,7 @@
                     if (this.isTodoTab(this.activeTab)) return 'e.g. Buy groceries';
                     if (this.activeTab === 'secure-notes') return 'e.g. Netflix Password';
                     if (this.activeTab === 'voice') return '';
+                    if (this.activeTab === 'web-series') return 'e.g. Stranger Things';
                     return 'e.g. Item Title';
                 },
 
@@ -2477,6 +2570,7 @@
                     if (this.activeTab === 'travel') return 'Location Details';
                     if (this.activeTab === 'secure-notes') return 'Sensitive Information / Password Notes';
                     if (this.activeTab === 'voice') return 'Voice Note';
+                    if (this.activeTab === 'web-series') return 'Series Details';
                     return 'Notes / Details';
                 },
 
@@ -2486,6 +2580,7 @@
                     if (this.activeTab === 'travel') return 'Best time to visit: October\nGoogle Map Coords...';
                     if (this.activeTab === 'secure-notes') return 'Write your secure notes here.';
                     if (this.activeTab === 'voice') return 'Your transcribed voice note will appear here...';
+                    if (this.activeTab === 'web-series') return 'Season 1 Episode 1\nAvailable on Netflix...';
                     return 'Add any extra details here...';
                 },
 
