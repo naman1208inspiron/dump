@@ -8,14 +8,6 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2563eb">
 
-    <!-- Performance Optimizations -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -40,8 +32,9 @@
         }
     </script>
 
-    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         .no-scrollbar::-webkit-scrollbar {
@@ -238,6 +231,25 @@
         .animate-slide-up {
             animation: slide-up 0.3s ease-out;
         }
+
+        /* Todo specific styles */
+        .todo-scaffold {
+            border-left: 2px dashed #d1d5db;
+            margin-left: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .dark .todo-scaffold {
+            border-left-color: #4b5563;
+        }
+
+        .todo-task-item {
+            transition: all 0.2s ease;
+        }
+
+        .todo-task-item:hover {
+            transform: translateX(4px);
+        }
     </style>
 </head>
 
@@ -250,14 +262,14 @@
         <div class="flex items-center gap-2">
             <button @click="goToHome()" class="flex items-center gap-2 cursor-pointer">
                 <h1 class="text-xl font-bold tracking-tight text-blue-600 dark:text-blue-400">Pipto - Your DumpYard</h1>
-                <i x-show="currentView !== 'home'" class="fas fa-home text-blue-500 text-sm"></i>
+                <i x-show="currentView !== 'home'" data-lucide="home" class="w-4 h-4 text-blue-500"></i>
             </button>
         </div>
 
         <div class="flex items-center gap-3">
             <button @click="openSettingsModal()"
                 class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-transform active:scale-95">
-                <i class="fas fa-cog text-lg"></i>
+                <i data-lucide="settings" class="w-5 h-5"></i>
             </button>
         </div>
     </header>
@@ -269,14 +281,14 @@
         <div class="flex-1 overflow-y-auto p-3">
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-full max-w-4xl mx-auto">
                 <template x-for="tab in tabs" :key="tab">
-                    <template x-if="tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice'">
+                    <template x-if="tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice' && tab !== 'todo'">
                         <button @click="switchToTab(tab)" @touchstart.passive="homeLongPressStart($event, tab)"
                             @touchend.passive="homeLongPressEnd($event, tab)"
                             @contextmenu.prevent="openTabContextMenu(tab, $event)"
                             class="bg-white dark:bg-darkcard p-3 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center gap-1 transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 group home-grid-item">
                             <div
                                 class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-800/30 transition-colors">
-                                <i :class="getTabIcon(tab)" class="text-blue-600 dark:text-blue-400 text-lg"></i>
+                                <i :data-lucide="getTabIcon(tab)" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
                             </div>
                             <span class="font-bold text-gray-800 dark:text-gray-100 text-xl"
                                 x-text="toTitleCase(tab)"></span>
@@ -286,15 +298,30 @@
                         </button>
                     </template>
                 </template>
+                
+                <!-- Todo Tab Button -->
+                <button @click="switchToTab('todo')" 
+                    class="bg-gradient-to-br from-purple-50 to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20 p-3 rounded-xl shadow border border-purple-100 dark:border-purple-800/30 flex flex-col items-center justify-center gap-1 transition-all hover:scale-[1.02] hover:shadow-md active:scale-95 group home-grid-item">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-indigo-200 dark:from-purple-800/30 dark:to-indigo-800/30 flex items-center justify-center group-hover:from-purple-200 group-hover:to-indigo-300 dark:group-hover:from-purple-700/40 dark:group-hover:to-indigo-700/40 transition-colors">
+                        <i data-lucide="check-square" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                    <span class="font-bold text-gray-800 dark:text-gray-100 text-xl">To-Do</span>
+                    <span class="text-sm text-purple-600 dark:text-purple-400">
+                        <span x-text="getTodoUndoneCount()"></span> pending
+                    </span>
+                </button>
             </div>
         </div>
 
+        <!-- Bottom Tab Bar -->
         <div
             class="flex-shrink-0 p-3 bg-gradient-to-t from-white via-white to-white/95 dark:from-darkbg dark:via-darkbg dark:to-darkbg/95 backdrop-blur-sm border-t border-gray-100 dark:border-gray-700 sticky bottom-0">
             <div class="grid grid-cols-4 gap-3 max-w-4xl mx-auto">
                 <button @click="switchToTab('voice')"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-voice-50 to-voice-100 dark:from-voice-900/30 dark:to-voice-800/20 hover:from-voice-100 hover:to-voice-200 dark:hover:from-voice-800/40 dark:hover:to-voice-700/30 transition-all active:scale-95 group border border-voice-100 dark:border-voice-800/30 shadow-sm">
-                    <i class="fas fa-microphone text-voice-600 dark:text-voice-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <i data-lucide="mic"
+                        class="w-5 h-5 text-voice-600 dark:text-voice-400 mb-1 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Voice</span>
                     <span class="text-xs text-voice-600 dark:text-voice-400 mt-0.5"
                         x-text="getTabCount('voice')"></span>
@@ -302,7 +329,8 @@
 
                 <button @click="switchToTab('secure-notes')"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/20 hover:from-yellow-100 hover:to-yellow-200 dark:hover:from-yellow-800/40 dark:hover:to-yellow-700/30 transition-all active:scale-95 group border border-yellow-100 dark:border-yellow-800/30 shadow-sm">
-                    <i class="fas fa-lock text-yellow-600 dark:text-yellow-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <i data-lucide="lock"
+                        class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mb-1 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Secure</span>
                     <span class="text-xs text-yellow-600 dark:text-yellow-400 mt-0.5"
                         x-text="secureNotes.length"></span>
@@ -310,14 +338,16 @@
 
                 <button @click="switchToTab('cards')"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-800/40 dark:hover:to-blue-700/30 transition-all active:scale-95 group border border-blue-100 dark:border-blue-800/30 shadow-sm">
-                    <i class="fas fa-credit-card text-blue-600 dark:text-blue-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <i data-lucide="credit-card"
+                        class="w-5 h-5 text-blue-600 dark:text-blue-400 mb-1 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Cards</span>
                     <span class="text-xs text-blue-600 dark:text-blue-400 mt-0.5" x-text="cards.length"></span>
                 </button>
 
                 <button @click="openNewTabModal()"
                     class="flex flex-col items-center justify-center p-3 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 hover:from-green-100 hover:to-green-200 dark:hover:from-green-800/40 dark:hover:to-green-700/30 transition-all active:scale-95 group border border-green-100 dark:border-green-800/30 shadow-sm">
-                    <i class="fas fa-plus-circle text-green-600 dark:text-green-400 mb-1 group-hover:scale-110 transition-transform"></i>
+                    <i data-lucide="plus-circle"
+                        class="w-5 h-5 text-green-600 dark:text-green-400 mb-1 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm text-gray-800 dark:text-gray-100">New Tab</span>
                     <span class="text-xs text-green-600 dark:text-green-400 mt-0.5">+</span>
                 </button>
@@ -328,14 +358,14 @@
     <!-- TAB VIEW -->
     <div x-show="currentView === 'tab'" x-transition:enter.duration.300>
         <div class="bg-white dark:bg-darkcard shadow-sm pt-2 pb-0 z-10 transition-colors"
-            x-show="activeTab !== 'secure-notes' && activeTab !== 'cards' && activeTab !== 'voice'">
+            x-show="activeTab !== 'secure-notes' && activeTab !== 'cards' && activeTab !== 'voice' && activeTab !== 'todo'">
             <div class="relative flex items-center h-[50px]">
 
                 <div class="flex overflow-x-auto no-scrollbar gap-4 pb-0 pl-4 tab-scroller-fixed h-full flex-1"
                     x-ref="tabScroller">
                     <div class="flex items-end space-x-4">
                         <template x-for="tab in tabs" :key="tab">
-                            <template x-if="tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice'">
+                            <template x-if="tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice' && tab !== 'todo'">
                                 <button :x-ref="'tab-' + tab" :id="getTabElementID(tab)"
                                     @click="if (!longPressActive) { activeTab = tab; scrollTabIntoView(tab, 'smooth', 'center'); }"
                                     @touchstart.passive="longPressStart($event, tab)"
@@ -354,7 +384,7 @@
                     class="absolute right-0 top-0 bottom-0 bg-white dark:bg-darkcard pl-4 pr-4 border-l border-gray-100 dark:border-gray-700 flex items-center z-20">
                     <button @click="openNewTabModal()"
                         class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
-                        <i class="fas fa-plus-circle text-lg"></i>
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
                     </button>
                 </div>
             </div>
@@ -363,17 +393,170 @@
         <main class="flex-1 overflow-y-auto p-4 pb-28" @touchstart.passive="touchStart($event)"
             @touchend.passive="touchEnd($event)">
 
+            <!-- Todo Tab Display -->
+            <div x-show="activeTab === 'todo'" class="flex flex-col h-full animate-slide-in-right">
+                <div class="flex justify-between items-center py-3 px-1">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">To-Do List</h2>
+                    <div class="flex items-center gap-2">
+                        <button @click="openTodoVoiceModal()"
+                            class="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-200 dark:hover:bg-purple-800/40 transition-colors">
+                            <i data-lucide="mic" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Today's Tasks -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-5 h-5 text-blue-500"></i>
+                            Today
+                            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                (<span x-text="getTodayTodoCount()"></span> tasks)
+                            </span>
+                        </h3>
+                        <button @click="openAddTodoModal()"
+                            class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add Task
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <template x-for="item in sortedTodoItems" :key="item.id">
+                            <template x-if="isToday(item.date)">
+                                <div class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 todo-task-item"
+                                    :class="{ 'opacity-60': item.isDone }">
+                                    <div class="flex items-start gap-3">
+                                        <button @click="toggleTodoDone(item.id)"
+                                            class="mt-1 flex-shrink-0">
+                                            <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
+                                                :class="item.isDone ? 'bg-green-500 border-green-500' : 'border-gray-300 dark:border-gray-600 hover:border-blue-500'">
+                                                <i x-show="item.isDone" data-lucide="check" class="w-3 h-3 text-white"></i>
+                                            </div>
+                                        </button>
+                                        
+                                        <div class="flex-1 min-w-0">
+                                            <h3 class="font-medium text-gray-800 dark:text-gray-100"
+                                                :class="{ 'line-through text-gray-400 dark:text-gray-500': item.isDone }"
+                                                x-text="item.title || 'Untitled Task'"></h3>
+                                            <p x-show="item.note" class="mt-1 text-sm text-gray-500 dark:text-gray-400"
+                                                x-text="item.note"></p>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-2">
+                                            <button @click.stop="toggleTodoFavorite(item.id)"
+                                                class="p-1 rounded-full transition-colors"
+                                                :class="item.isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'">
+                                                <i data-lucide="heart" class="w-4 h-4"
+                                                    :fill="item.isFavorite ? 'currentColor' : 'none'"></i>
+                                            </button>
+                                            <button @click.stop="confirmDeleteItem(item.id, 'todo')"
+                                                class="p-1 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                        
+                        <div x-show="getTodayTodoCount() === 0"
+                            class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-100 dark:border-gray-700 text-center">
+                            <i data-lucide="check-circle" class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3"></i>
+                            <p class="text-gray-500 dark:text-gray-400">No tasks for today. Add some tasks to get started!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Previous Days - Collapsible -->
+                <div x-show="getPreviousDaysTodoCount() > 0">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                            <i data-lucide="archive" class="w-5 h-5 text-gray-500"></i>
+                            Previous Days
+                            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                (<span x-text="getPreviousDaysTodoCount()"></span> tasks)
+                            </span>
+                        </h3>
+                        <button @click="showPreviousDays = !showPreviousDays"
+                            class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                            <i :data-lucide="showPreviousDays ? 'chevron-up' : 'chevron-down'" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    
+                    <div x-show="showPreviousDays" class="todo-scaffold space-y-3">
+                        <template x-for="item in sortedTodoItems" :key="item.id">
+                            <template x-if="!isToday(item.date)">
+                                <div class="bg-gray-50 dark:bg-gray-800/30 p-3 rounded-lg border border-gray-100 dark:border-gray-700 todo-task-item"
+                                    :class="{ 'opacity-60': item.isDone }">
+                                    <div class="flex items-start gap-3">
+                                        <div class="mt-1 flex-shrink-0">
+                                            <div class="w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center">
+                                                <i x-show="item.isDone" data-lucide="check" class="w-3 h-3 text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="text-xs text-gray-500 dark:text-gray-400"
+                                                    x-text="formatTodoDate(item.date)"></span>
+                                            </div>
+                                            <h3 class="font-medium text-gray-700 dark:text-gray-300"
+                                                :class="{ 'line-through text-gray-400': item.isDone }"
+                                                x-text="item.title || 'Untitled Task'"></h3>
+                                            <p x-show="item.note" class="mt-1 text-xs text-gray-500 dark:text-gray-400"
+                                                x-text="item.note"></p>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-1">
+                                            <button @click.stop="moveTodoToToday(item.id)"
+                                                class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded"
+                                                title="Move to Today">
+                                                Today
+                                            </button>
+                                            <button @click.stop="confirmDeleteItem(item.id, 'todo')"
+                                                class="p-1 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
+                                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+                
+                <div x-show="getTodoCount() === 0" class="text-center py-12">
+                    <div class="w-20 h-20 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="check-square" class="w-10 h-10 text-purple-500 dark:text-purple-400"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300 mb-2">No tasks yet</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">Start adding tasks to stay organized. Use voice input for quick entry!</p>
+                    <div class="flex justify-center gap-3">
+                        <button @click="openAddTodoModal()"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add Task
+                        </button>
+                        <button @click="openTodoVoiceModal()"
+                            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2">
+                            <i data-lucide="mic" class="w-4 h-4"></i> Voice Input
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Tab Display -->
             <div x-show="activeTab === 'voice'"
                 class="text-center bg-voice-50 dark:bg-voice-900/20 p-4 rounded-xl mb-4 border border-voice-100 dark:border-voice-800/30">
                 <p class="text-gray-700 dark:text-gray-300 font-bold flex justify-center items-center gap-2">
-                    <i class="fas fa-microphone text-voice-600"></i> Voice Notes
+                    <i data-lucide="mic" class="w-5 h-5 text-voice-600"></i> Voice Notes
                 </p>
             </div>
 
             <div x-show="activeTab === 'secure-notes'"
                 class="text-center bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl mb-4 border border-yellow-100 dark:border-yellow-800/30">
                 <p class="text-gray-700 dark:text-gray-300 font-bold flex justify-center items-center gap-2">
-                    <i class="fas fa-lock text-yellow-600"></i> Secure Notes
+                    <i data-lucide="lock" class="w-5 h-5 text-yellow-600"></i> Secure Notes
                 </p>
             </div>
 
@@ -393,7 +576,7 @@
                             <div class="relative z-10 text-white">
                                 <div class="flex justify-between items-center">
                                     <span class="font-semibold text-lg" x-text="card.title || 'Untitled Card'"></span>
-                                    <i class="fas fa-credit-card text-xl"></i>
+                                    <i data-lucide="credit-card" class="w-6 h-6"></i>
                                 </div>
 
                                 <div
@@ -401,7 +584,7 @@
                                     <span x-text="formatCardNumberFull(card.number)"></span>
                                     <button @click.stop="copyToClipboard(card.number, 'Card Number')"
                                         class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                        <i class="fas fa-copy text-sm"></i>
+                                        <i data-lucide="copy" class="w-4 h-4"></i>
                                     </button>
                                 </div>
 
@@ -413,7 +596,7 @@
                                         </div>
                                         <button @click.stop="copyToClipboard(card.holder, 'Card Holder')"
                                             class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                            <i class="fas fa-copy text-xs"></i>
+                                            <i data-lucide="copy" class="w-3 h-3"></i>
                                         </button>
                                     </div>
 
@@ -424,7 +607,7 @@
                                         </div>
                                         <button @click.stop="copyToClipboard(card.expiry, 'Expiry Date')"
                                             class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                            <i class="fas fa-copy text-xs"></i>
+                                            <i data-lucide="copy" class="w-3 h-3"></i>
                                         </button>
                                     </div>
 
@@ -435,7 +618,7 @@
                                         </div>
                                         <button @click.stop="copyToClipboard(card.cvv, 'CVV')"
                                             class="p-1 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                            <i class="fas fa-copy text-xs"></i>
+                                            <i data-lucide="copy" class="w-3 h-3"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -447,15 +630,15 @@
                                         </p>
                                         <button @click.stop="copyToClipboard(card.note, 'Note')"
                                             class="p-1 flex-shrink-0 text-gray-200 hover:text-white active:scale-95 transition-transform">
-                                            <i class="fas fa-copy text-xs"></i>
+                                            <i data-lucide="copy" class="w-3 h-3"></i>
                                         </button>
                                     </div>
                                 </div>
 
                                 <div class="flex justify-end mt-4">
-                                    <button @click.stop="confirmDeleteCard(card.id)"
+                                    <button @click.stop="confirmDeleteItem(card.id, 'cards')"
                                         class="text-red-300 hover:text-red-100 p-1 transition-colors">
-                                        <i class="fas fa-trash-alt"></i>
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     </button>
                                 </div>
                             </div>
@@ -463,18 +646,9 @@
                     </template>
                     <div x-show="cards.length === 0"
                         class="flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 mt-10">
-                        <i class="fas fa-credit-card text-6xl mb-4 opacity-50"></i>
+                        <i data-lucide="credit-card" class="w-16 h-16 mb-4 opacity-50"></i>
                         <p>No cards saved.</p>
                     </div>
-                </div>
-            </div>
-
-            <div
-                x-show="sortedItems.length === 0 && activeTab !== 'secure-notes' && activeTab !== 'cards' && activeTab !== 'voice'">
-                <div class="flex flex-col items-center justify-center mt-20 text-gray-300 dark:text-gray-600">
-                    <i class="fas fa-inbox text-6xl mb-4 opacity-50"></i>
-                    <p>No items in <span class="font-bold text-gray-400 dark:text-gray-500"
-                            x-text="activeTab === 'secure-notes' ? 'Secure Notes' : toTitleCase(activeTab)"></span></p>
                 </div>
             </div>
 
@@ -499,19 +673,20 @@
                                 <button @click.stop="toggleFavorite(item.id)"
                                     class="p-1 rounded-full transition-colors active:scale-95"
                                     :class="item.isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'">
-                                    <i class="fas fa-heart" :class="item.isFavorite ? 'fas' : 'far'"></i>
+                                    <i data-lucide="heart" class="w-5 h-5"
+                                        :fill="item.isFavorite ? 'currentColor' : 'none'"></i>
                                 </button>
 
                                 <button @click.stop="toggleDone(item.id)"
                                     class="text-xs font-bold transition-colors py-1 px-2 rounded-full"
                                     :class="item.isDone ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300 hover:text-blue-600'">
-                                    <i class="fas fa-check-circle text-xs inline-block mr-1"></i>
+                                    <i data-lucide="check-circle" class="w-3 h-3 inline-block mr-1"></i>
                                     <span x-text="item.isDone ? 'UNDONE' : 'MARK DONE'"></span>
                                 </button>
 
-                                <button @click.stop="confirmDelete(item.id)"
+                                <button @click.stop="confirmDeleteItem(item.id, activeTab)"
                                     class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
-                                    <i class="fas fa-trash-alt"></i>
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         </div>
@@ -522,7 +697,7 @@
                     class="flex flex-col items-center justify-center py-16 text-gray-300 dark:text-gray-600">
                     <div
                         class="w-20 h-20 rounded-full bg-voice-50 dark:bg-voice-900/20 flex items-center justify-center mb-4">
-                        <i class="fas fa-microphone text-voice-400 dark:text-voice-500 text-2xl"></i>
+                        <i data-lucide="mic" class="w-8 h-8 text-voice-400 dark:text-voice-500"></i>
                     </div>
                     <p class="text-lg font-medium text-gray-400 dark:text-gray-500 mb-2">No voice notes yet</p>
                     <p class="text-sm text-gray-400 dark:text-gray-600 text-center max-w-xs">
@@ -533,7 +708,7 @@
 
             <!-- Other Tabs Display -->
             <div class="grid gap-4"
-                x-show="activeTab !== 'cards' && activeTab !== 'voice' && activeTab !== 'secure-notes'">
+                x-show="activeTab !== 'cards' && activeTab !== 'voice' && activeTab !== 'secure-notes' && activeTab !== 'todo'">
                 <template x-for="item in sortedItems" :key="item.id">
                     <div class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative group transition-all hover:shadow-md"
                         :class="{ 'opacity-50 dark:opacity-40': item.isDone && activeTab !== 'secure-notes' }"
@@ -542,7 +717,7 @@
                         <a :href="item.link" target="_blank" @click.stop
                             x-show="!isTodoTab(activeTab) && activeTab !== 'secure-notes' && item.link"
                             class="absolute top-3 right-3 p-2 rounded-full transition-colors z-10 text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-800/50">
-                            <i :class="activeTab === 'music' ? 'fas fa-music' : 'fas fa-link'" class="text-lg"></i>
+                            <i :data-lucide="activeTab === 'music' ? 'music' : 'link'" class="w-5 h-5"></i>
                         </a>
 
                         <template x-if="isTodoTab(activeTab)">
@@ -587,19 +762,20 @@
                                     x-show="!isTodoTab(activeTab) && activeTab !== 'secure-notes'"
                                     class="p-1 rounded-full transition-colors active:scale-95"
                                     :class="item.isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'">
-                                    <i class="fas fa-heart" :class="item.isFavorite ? 'fas' : 'far'"></i>
+                                    <i data-lucide="heart" class="w-5 h-5"
+                                        :fill="item.isFavorite ? 'currentColor' : 'none'"></i>
                                 </button>
                                 <button @click.stop="toggleDone(item.id)"
                                     class="text-xs font-bold transition-colors py-1 px-2 rounded-full"
                                     x-show="!isTodoTab(activeTab)"
                                     :class="item.isDone ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300 hover:text-blue-600'">
-                                    <i class="fas fa-check-circle text-xs inline-block mr-1"></i>
+                                    <i data-lucide="check-circle" class="w-3 h-3 inline-block mr-1"></i>
                                     <span x-text="item.isDone ? 'UNDONE' : 'MARK DONE'"></span>
                                 </button>
 
-                                <button @click.stop="confirmDelete(item.id)"
+                                <button @click.stop="confirmDeleteItem(item.id, activeTab)"
                                     class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
-                                    <i class="fas fa-trash-alt"></i>
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         </div>
@@ -621,20 +797,28 @@
                                 <p class="whitespace-pre-line break-words mr-2" x-text="item.note"></p>
                                 <button @click.stop="copyToClipboard(item.note, 'Secure Note')"
                                     class="p-1 flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 active:scale-95 transition-transform">
-                                    <i class="fas fa-copy text-xs"></i>
+                                    <i data-lucide="copy" class="w-3 h-3"></i>
                                 </button>
                             </div>
                         </div>
 
                         <div
                             class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700 flex justify-end items-center">
-                            <button @click.stop="confirmDelete(item.id)"
+                            <button @click.stop="confirmDeleteItem(item.id, activeTab)"
                                 class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400">
-                                <i class="fas fa-trash-alt"></i>
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
                         </div>
                     </div>
                 </template>
+            </div>
+
+            <div x-show="sortedItems.length === 0 && activeTab !== 'secure-notes' && activeTab !== 'cards' && activeTab !== 'voice' && activeTab !== 'todo'">
+                <div class="flex flex-col items-center justify-center mt-20 text-gray-300 dark:text-gray-600">
+                    <i data-lucide="inbox" class="w-16 h-16 mb-4 opacity-50"></i>
+                    <p>No items in <span class="font-bold text-gray-400 dark:text-gray-500"
+                            x-text="activeTab === 'secure-notes' ? 'Secure Notes' : toTitleCase(activeTab)"></span></p>
+                </div>
             </div>
 
             <div x-show="copyMessage" x-transition.opacity.duration.300
@@ -647,19 +831,134 @@
     <!-- Floating Action Buttons -->
     <button x-show="currentView === 'tab' && activeTab === 'cards'" @click="openAddCardModal()"
         class="fixed bottom-6 right-6 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800 bg-blue-600 hover:bg-blue-700">
-        <i class="fas fa-plus text-xl"></i>
+        <i data-lucide="plus" class="w-6 h-6"></i>
     </button>
 
     <!-- Voice Tab Floating Microphone -->
     <button x-show="currentView === 'tab' && activeTab === 'voice'" @click="startRecording()"
         class="fixed bottom-6 right-6 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800 bg-gradient-to-br from-voice-600 to-indigo-600 hover:from-voice-700 hover:to-indigo-700">
-        <i class="fas fa-microphone text-xl"></i>
+        <i data-lucide="mic" class="w-6 h-6"></i>
     </button>
 
-    <button x-show="currentView === 'tab' && activeTab !== 'cards' && activeTab !== 'voice'" @click="openAddItemModal()"
-        class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800">
-        <i class="fas fa-plus text-xl"></i>
+    <!-- Todo Tab Floating Button -->
+    <button x-show="currentView === 'tab' && activeTab === 'todo'" @click="openAddTodoModal()"
+        class="fixed bottom-6 right-6 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800 bg-gradient-to-br from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700">
+        <i data-lucide="plus" class="w-6 h-6"></i>
     </button>
+
+    <button x-show="currentView === 'tab' && activeTab !== 'cards' && activeTab !== 'voice' && activeTab !== 'todo'" @click="openAddItemModal()"
+        class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 z-40 ring-2 ring-white dark:ring-gray-800">
+        <i data-lucide="plus" class="w-8 h-8"></i>
+    </button>
+
+    <!-- Todo Voice Input Modal -->
+    <div x-show="modals.todoVoiceInput"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end justify-center p-0" x-transition.opacity
+        @click.self="closeTodoVoiceModal()">
+        <div
+            class="bg-white dark:bg-darkcard w-full max-w-md rounded-t-2xl shadow-2xl animate-slide-up border dark:border-gray-700">
+            <div class="flex flex-col items-center p-6">
+                <div class="w-full mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">Add Multiple Tasks</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Say tasks separated by "and" or "then"</p>
+                </div>
+
+                <!-- Recording Indicator -->
+                <div x-show="isRecording" class="flex flex-col items-center justify-center mb-6">
+                    <div class="relative mb-4">
+                        <div class="absolute inset-0 rounded-full bg-purple-100 dark:bg-purple-900/30 pulse-ring"></div>
+                        <div
+                            class="w-16 h-16 bg-purple-500 dark:bg-purple-600 rounded-full flex items-center justify-center relative">
+                            <i data-lucide="mic" class="w-6 h-6 text-white"></i>
+                        </div>
+                    </div>
+
+                    <div class="waveform-minimal">
+                        <div class="waveform-bar-minimal"></div>
+                        <div class="waveform-bar-minimal"></div>
+                        <div class="waveform-bar-minimal"></div>
+                        <div class="waveform-bar-minimal"></div>
+                        <div class="waveform-bar-minimal"></div>
+                    </div>
+
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">
+                        <span class="font-bold text-purple-500" x-text="recordingTime"></span> seconds
+                    </p>
+                </div>
+
+                <!-- Ready to Record State -->
+                <div x-show="!isRecording && !todoVoiceText" class="flex flex-col items-center justify-center mb-6">
+                    <div
+                        class="w-20 h-20 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-4">
+                        <i data-lucide="mic" class="w-8 h-8 text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300 font-medium">Tap to start recording</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Example: "clean cycle and repair bike and go to temple"</p>
+                </div>
+
+                <!-- Transcript Display -->
+                <div x-show="todoVoiceText" class="w-full mb-6">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">
+                        Tasks will be split by "and" or "then"
+                    </label>
+                    <div class="relative">
+                        <textarea x-model="todoVoiceText" rows="4"
+                            class="w-full p-4 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none pr-10 text-sm"
+                            placeholder="Your tasks will appear here..." :readonly="isRecording"></textarea>
+
+                        <button x-show="todoVoiceText && !isRecording" @click="todoVoiceText = ''"
+                            class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Preview of split tasks -->
+                    <div x-show="todoVoiceText && !isRecording" class="mt-4">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">
+                            Preview (<span x-text="getTodoVoiceTaskCount()"></span> tasks)
+                        </label>
+                        <div class="space-y-2 max-h-40 overflow-y-auto p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                            <template x-for="(task, index) in splitTodoVoiceTasks()" :key="index">
+                                <div class="flex items-start gap-2 p-2 bg-white dark:bg-gray-700 rounded">
+                                    <span class="text-gray-400 dark:text-gray-500 text-sm" x-text="(index + 1) + '.'"></span>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300" x-text="task"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col w-full gap-3">
+                    <!-- Start/Stop Recording Button -->
+                    <button x-show="!isRecording" @click="startTodoRecording()"
+                        class="flex items-center justify-center gap-2 py-4 bg-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-purple-700 active:scale-95 transition-transform w-full">
+                        <i data-lucide="mic" class="w-5 h-5"></i>
+                        <span x-text="todoVoiceText ? 'Record Again' : 'Start Recording'"></span>
+                    </button>
+
+                    <button x-show="isRecording" @click="stopRecording()"
+                        class="flex items-center justify-center gap-2 py-4 bg-red-500 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-red-600 active:scale-95 transition-transform w-full">
+                        <i data-lucide="square" class="w-5 h-5"></i>
+                        Stop Recording
+                    </button>
+
+                    <!-- Save Button -->
+                    <button x-show="todoVoiceText && !isRecording" @click="saveTodoVoiceTasks()"
+                        class="flex items-center justify-center gap-2 py-4 bg-green-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-green-700 active:scale-95 transition-transform w-full">
+                        <i data-lucide="save" class="w-5 h-5"></i>
+                        Save <span x-text="getTodoVoiceTaskCount()"></span> Tasks
+                    </button>
+                </div>
+
+                <!-- Close Button -->
+                <button @click="closeTodoVoiceModal()"
+                    class="mt-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Minimal Voice Input Modal -->
     <div x-show="modals.voiceInput"
@@ -674,7 +973,7 @@
                         <div class="absolute inset-0 rounded-full bg-red-100 dark:bg-red-900/30 pulse-ring"></div>
                         <div
                             class="w-16 h-16 bg-red-500 dark:bg-red-600 rounded-full flex items-center justify-center relative">
-                            <i class="fas fa-microphone text-white text-xl"></i>
+                            <i data-lucide="mic" class="w-6 h-6 text-white"></i>
                         </div>
                     </div>
 
@@ -695,7 +994,7 @@
                 <div x-show="!isRecording && !voiceText" class="flex flex-col items-center justify-center mb-6">
                     <div
                         class="w-20 h-20 rounded-full bg-voice-100 dark:bg-voice-900/30 flex items-center justify-center mb-4">
-                        <i class="fas fa-microphone text-voice-600 dark:text-voice-400 text-2xl"></i>
+                        <i data-lucide="mic" class="w-8 h-8 text-voice-600 dark:text-voice-400"></i>
                     </div>
                     <p class="text-gray-700 dark:text-gray-300 font-medium">Tap to start recording</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Speak clearly into your microphone</p>
@@ -713,7 +1012,7 @@
 
                         <button x-show="voiceText && !isRecording" @click="voiceText = ''"
                             class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                            <i class="fas fa-times text-sm"></i>
+                            <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
                     </div>
                 </div>
@@ -723,20 +1022,20 @@
                     <!-- Start/Stop Recording Button -->
                     <button x-show="!isRecording" @click="startRecording()"
                         class="flex items-center justify-center gap-2 py-4 bg-voice-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-voice-700 active:scale-95 transition-transform w-full">
-                        <i class="fas fa-microphone"></i>
+                        <i data-lucide="mic" class="w-5 h-5"></i>
                         <span x-text="voiceText ? 'Record Again' : 'Start Recording'"></span>
                     </button>
 
                     <button x-show="isRecording" @click="stopRecording()"
                         class="flex items-center justify-center gap-2 py-4 bg-red-500 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-red-600 active:scale-95 transition-transform w-full">
-                        <i class="fas fa-stop"></i>
+                        <i data-lucide="square" class="w-5 h-5"></i>
                         Stop Recording
                     </button>
 
                     <!-- Save Button -->
                     <button x-show="voiceText && !isRecording" @click="saveVoiceNote()"
                         class="flex items-center justify-center gap-2 py-4 bg-green-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-green-700 active:scale-95 transition-transform w-full">
-                        <i class="fas fa-save"></i>
+                        <i data-lucide="save" class="w-5 h-5"></i>
                         Save Voice Note
                     </button>
                 </div>
@@ -758,7 +1057,8 @@
             class="bg-white dark:bg-darkcard w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl animate-slide-up border dark:border-gray-700">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold dark:text-white" x-text="editingItem ? 'Edit Item' : 'Add New Item'"></h2>
-                <button @click="modals.item = false" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
+                <button @click="modals.item = false" class="text-gray-400"><i data-lucide="x"
+                        class="w-6 h-6"></i></button>
             </div>
 
             <div class="space-y-4">
@@ -801,6 +1101,42 @@
         </div>
     </div>
 
+    <!-- Todo Item Modal -->
+    <div x-show="modals.todoItem"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+        x-transition.opacity>
+        <div
+            class="bg-white dark:bg-darkcard w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl animate-slide-up border dark:border-gray-700">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold dark:text-white" x-text="editingTodo ? 'Edit Task' : 'Add New Task'"></h2>
+                <button @click="modals.todoItem = false" class="text-gray-400"><i data-lucide="x"
+                        class="w-6 h-6"></i></button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Task Title</label>
+                    <input type="text" x-model="todoForm.title"
+                        class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                        placeholder="e.g. Buy groceries">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Notes (Optional)</label>
+                    <textarea x-model="todoForm.note" rows="3"
+                        class="w-full p-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                        placeholder="Add any extra details..."></textarea>
+                </div>
+            </div>
+
+            <button @click="saveTodoItem()"
+                class="w-full mt-6 py-3.5 bg-purple-600 text-white rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform hover:bg-purple-700"
+                :disabled="!todoForm.title.trim()">
+                <span x-text="editingTodo ? 'Save Changes' : 'Save Task'"></span>
+            </button>
+        </div>
+    </div>
+
     <div x-show="modals.cardItem"
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
         x-transition.opacity>
@@ -809,7 +1145,8 @@
 
             <div class="flex justify-between items-center p-6 pb-4 flex-shrink-0">
                 <h2 class="text-xl font-bold dark:text-white" x-text="editingCard ? 'Edit Card' : 'Add New Card'"></h2>
-                <button @click="modals.cardItem = false" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
+                <button @click="modals.cardItem = false" class="text-gray-400"><i data-lucide="x"
+                        class="w-6 h-6"></i></button>
             </div>
 
             <div class="overflow-y-auto px-6 flex-1">
@@ -892,7 +1229,7 @@
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
             <div
                 class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-exclamation-triangle text-xl"></i>
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
             </div>
             <h3 class="text-lg font-bold mb-2 dark:text-white"
                 x-text="itemToDelete && getItemType(itemToDelete) === 'card' ? 'Delete this card?' : 'Delete this item?'">
@@ -913,7 +1250,8 @@
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 shadow-xl dark:border dark:border-gray-700">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold dark:text-white">Create New Tab</h2>
-                <button @click="modals.tab = false" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
+                <button @click="modals.tab = false" class="text-gray-400"><i data-lucide="x"
+                        class="w-6 h-6"></i></button>
             </div>
 
             <div class="space-y-4">
@@ -960,7 +1298,8 @@
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 shadow-xl dark:border dark:border-gray-700">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold dark:text-white">Rename Tab</h2>
-                <button @click="modals.editTab = false" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
+                <button @click="modals.editTab = false" class="text-gray-400"><i data-lucide="x"
+                        class="w-6 h-6"></i></button>
             </div>
 
             <div class="space-y-4">
@@ -988,7 +1327,7 @@
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
             <div
                 class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-exclamation-triangle text-xl"></i>
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
             </div>
             <h3 class="text-lg font-bold mb-2 dark:text-white">Delete the '<span
                     x-text="toTitleCase(currentContextTab)"></span>' tab?</h3>
@@ -1002,6 +1341,7 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
     <div x-show="modals.settings" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
         x-transition.opacity>
         <div
@@ -1010,7 +1350,7 @@
                 class="flex justify-between items-center p-6 pb-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
                 <h2 class="text-xl font-bold dark:text-white">App Settings</h2>
                 <button @click="modals.settings = false" class="text-gray-400">
-                    <i class="fas fa-times text-xl"></i>
+                    <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
             </div>
 
@@ -1034,7 +1374,7 @@
                             <select x-model="tempDefaultTabID"
                                 class="w-full p-2 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                                 <template x-for="tab in tabs">
-                                    <template x-if="tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice'">
+                                    <template x-if="tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice' && tab !== 'todo'">
                                         <option :value="tab" x-text="toTitleCase(tab)"></option>
                                     </template>
                                 </template>
@@ -1078,8 +1418,8 @@
                         </div>
                         <button @click="toggleTheme()"
                             class="p-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors active:scale-95">
-                            <i x-show="darkMode" class="fas fa-sun text-yellow-500 text-lg"></i>
-                            <i x-show="!darkMode" class="fas fa-moon text-blue-500 text-lg"></i>
+                            <i x-show="darkMode" data-lucide="sun" class="w-5 h-5 text-yellow-500"></i>
+                            <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5 text-blue-500"></i>
                         </button>
                     </div>
                 </div>
@@ -1124,7 +1464,7 @@
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
             <div
                 class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-skull text-xl"></i>
+                <i data-lucide="skull" class="w-6 h-6"></i>
             </div>
             <h3 class="text-lg font-bold mb-2 dark:text-white">Delete ALL App Data?</h3>
             <p class="text-sm text-red-500 mb-6 font-bold">This includes all items, tabs, and preferences. THIS
@@ -1146,7 +1486,7 @@
             class="bg-white dark:bg-darkcard w-full max-w-sm rounded-2xl p-6 text-center shadow-xl dark:border dark:border-gray-700">
             <div
                 class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-cloud-download-alt text-xl"></i>
+                <i data-lucide="cloud-download" class="w-6 h-6"></i>
             </div>
             <h3 class="text-lg font-bold mb-2 dark:text-white">App Update Ready!</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">A new version is available. Restart the app to
@@ -1163,14 +1503,14 @@
             <li>
                 <button @click="modals.tabContext = false; openEditTabModal()"
                     class="w-full text-left px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                    <i class="fas fa-pencil-alt text-sm"></i>
+                    <i data-lucide="pencil" class="w-4 h-4"></i>
                     Rename
                 </button>
             </li>
             <li>
                 <button @click="modals.tabContext = false; confirmDeleteTab(currentContextTab)"
                     class="w-full text-left px-3 py-2 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center gap-2">
-                    <i class="fas fa-trash-alt text-sm"></i>
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                     Delete
                 </button>
             </li>
@@ -1180,11 +1520,12 @@
     <script>
         function app() {
             return {
-                version: '4.4.0',
+                version: '4.5.0',
 
                 // Voice Input State
                 isRecording: false,
                 voiceText: '',
+                todoVoiceText: '',
                 recognition: null,
                 recordingTime: 0,
                 recordingTimer: null,
@@ -1207,8 +1548,7 @@
                 longPressTimer: null,
                 homeLongPressTimer: null,
                 longPressDuration: 500,
-                // ADDED: web-series to default tabs
-                tabs: ['food', 'travel', 'movies', 'music', 'web-series', 'voice', 'secure-notes', 'cards'],
+                tabs: ['food', 'travel', 'movies', 'music', 'todo', 'voice', 'secure-notes', 'cards'],
                 data: {},
                 musicAppPreference: 'youtube_music',
                 oldMusicAppPreference: 'youtube_music',
@@ -1226,6 +1566,20 @@
                 contextMenuY: 0,
                 copyMessage: null,
                 copyTimer: null,
+                
+                // Todo specific states
+                showPreviousDays: false,
+                todoForm: {
+                    id: null,
+                    title: '',
+                    note: '',
+                    date: 'today',
+                    isDone: false,
+                    isFavorite: false,
+                    type: 'todo'
+                },
+                editingTodo: false,
+                
                 modals: {
                     item: false,
                     tab: false,
@@ -1237,7 +1591,9 @@
                     cardItem: false,
                     deleteAll: false,
                     update: false,
-                    voiceInput: false
+                    voiceInput: false,
+                    todoVoiceInput: false,
+                    todoItem: false
                 },
                 updateAvailable: false,
                 waitingWorker: null,
@@ -1288,17 +1644,17 @@
                     const sTabMeta = localStorage.getItem('bd_tab_metadata');
 
                     this.data = sData ? JSON.parse(sData) : {};
-                    this.tabs = sTabs ? JSON.parse(sTabs) : ['food', 'travel', 'movies', 'music', 'web-series', 'voice', 'secure-notes', 'cards'];
+                    this.tabs = sTabs ? JSON.parse(sTabs) : ['food', 'travel', 'movies', 'music', 'todo', 'voice', 'secure-notes', 'cards'];
                     this.tabMetadata = sTabMeta ? JSON.parse(sTabMeta) : {};
 
+                    // Initialize todo tab if it doesn't exist
+                    if (!this.data['todo']) {
+                        this.data['todo'] = [];
+                    }
+                    
                     // Initialize voice tab if it doesn't exist
                     if (!this.data['voice']) {
                         this.data['voice'] = [];
-                    }
-
-                    // Initialize web-series tab if it doesn't exist
-                    if (!this.data['web-series']) {
-                        this.data['web-series'] = [];
                     }
 
                     // Migrate old secure data to new structure
@@ -1331,29 +1687,19 @@
                         this.tempDefaultView = sDefaultView;
                     }
 
-                    // IMPROVED: Fixed back button navigation
-                    // Set initial state based on URL hash
-                    const hash = window.location.hash.substring(1);
-                    if (hash && hash !== 'home' && this.tabs.includes(hash)) {
+                    // Robust Default View Logic
+                    if (this.defaultView === 'tab') {
                         this.currentView = 'tab';
-                        this.activeTab = hash;
-                        window.history.replaceState({ view: 'tab', tab: hash }, '', `#${hash}`);
-                    } else if (hash === 'home') {
-                        this.currentView = 'home';
-                        window.history.replaceState({ view: 'home' }, '', '#home');
+                        this.activeTab = this.defaultTabID;
                     } else {
-                        // Default view logic
-                        if (this.defaultView === 'tab') {
-                            this.currentView = 'tab';
-                            this.activeTab = this.defaultTabID;
-                            window.history.replaceState({ view: 'tab', tab: this.defaultTabID }, '', `#${this.defaultTabID}`);
-                        } else {
-                            this.currentView = 'home';
-                            window.history.replaceState({ view: 'home' }, '', '#home');
+                        this.currentView = 'home';
+                        const lastActiveTab = localStorage.getItem('bd_last_active_tab');
+                        if (lastActiveTab && this.tabs.includes(lastActiveTab)) {
+                            this.activeTab = lastActiveTab;
                         }
                     }
 
-                    // Ensure active tab exists
+                    // 5. Ensure active tab exists
                     if (!this.tabs.includes(this.activeTab)) {
                         this.activeTab = this.defaultTabID;
                     }
@@ -1368,10 +1714,14 @@
                     this.$watch('activeTab', (newTab) => {
                         if (this.currentView === 'tab') {
                             localStorage.setItem('bd_last_active_tab', newTab);
+                            this.updateHistoryState(newTab);
                         }
+                        this.$nextTick(() => {
+                            lucide.createIcons();
+                        });
                     });
                     this.$watch('darkMode', () => {
-                        // No icon initialization needed for Font Awesome
+                        this.$nextTick(() => lucide.createIcons());
                     });
 
                     // 9. Service Worker
@@ -1386,39 +1736,543 @@
                             window.location.reload();
                         });
                     }
+
+                    // 10. Process old to-do items (move undone tasks to today)
+                    this.processOldTodoItems();
+
+                    this.$nextTick(() => lucide.createIcons());
                 },
 
-                // IMPROVED: History API for back button navigation - FIXED
-                setupHistoryNavigation() {
-                    window.addEventListener('popstate', (event) => {
-                        if (event.state) {
-                            if (event.state.view === 'tab' && event.state.tab && this.tabs.includes(event.state.tab)) {
-                                this.currentView = 'tab';
-                                this.activeTab = event.state.tab;
-                            } else if (event.state.view === 'home') {
-                                this.goToHome();
-                            }
-                        } else {
-                            // No state, check hash
-                            const hash = window.location.hash.substring(1);
-                            if (hash && hash !== 'home' && this.tabs.includes(hash)) {
-                                this.currentView = 'tab';
-                                this.activeTab = hash;
-                            } else {
-                                this.goToHome();
-                            }
-                        }
+                // FIX 1: Initialize icons after data changes
+                initializeIconsAfterUpdate() {
+                    this.$nextTick(() => {
+                        lucide.createIcons();
                     });
                 },
 
-                // IMPROVED: Update history state
-                updateHistoryState(tab) {
-                    if (this.currentView === 'tab') {
-                        window.history.pushState({ view: 'tab', tab: tab }, '', `#${tab}`);
+                // Todo Tab Methods
+                getTodoCount() {
+                    return (this.data['todo'] || []).length;
+                },
+
+                getTodoUndoneCount() {
+                    return (this.data['todo'] || []).filter(item => !item.isDone).length;
+                },
+
+                getTodayTodoCount() {
+                    const today = new Date().toISOString().split('T')[0];
+                    return (this.data['todo'] || []).filter(item => this.isToday(item.date) && !item.isDone).length;
+                },
+
+                getPreviousDaysTodoCount() {
+                    return (this.data['todo'] || []).filter(item => !this.isToday(item.date)).length;
+                },
+
+                get sortedTodoItems() {
+                    let items = this.data['todo'] || [];
+                    return items.sort((a, b) => {
+                        // Sort by date (today first), then by done status, then by favorite, then by id
+                        const aIsToday = this.isToday(a.date);
+                        const bIsToday = this.isToday(b.date);
+                        
+                        if (aIsToday !== bIsToday) {
+                            return aIsToday ? -1 : 1;
+                        }
+                        
+                        if (a.isDone !== b.isDone) {
+                            return a.isDone ? 1 : -1;
+                        }
+                        
+                        if (a.isFavorite !== b.isFavorite) {
+                            return a.isFavorite ? -1 : 1;
+                        }
+                        
+                        return b.id - a.id;
+                    });
+                },
+
+                isToday(dateString) {
+                    if (!dateString || dateString === 'today') return true;
+                    const today = new Date().toISOString().split('T')[0];
+                    
+                    // Handle date strings that might be in different formats
+                    if (dateString === today) return true;
+                    
+                    // Try to parse the date
+                    try {
+                        const date = new Date(dateString);
+                        const dateFormatted = date.toISOString().split('T')[0];
+                        return dateFormatted === today;
+                    } catch {
+                        return false;
                     }
                 },
 
-                // Enhanced Speech Recognition initialization
+                formatTodoDate(dateString) {
+                    if (!dateString || dateString === 'today') return 'Today';
+                    
+                    try {
+                        const date = new Date(dateString);
+                        const today = new Date();
+                        const yesterday = new Date(today);
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        
+                        if (date.toDateString() === today.toDateString()) {
+                            return 'Today';
+                        } else if (date.toDateString() === yesterday.toDateString()) {
+                            return 'Yesterday';
+                        } else {
+                            return date.toLocaleDateString('en-US', { 
+                                weekday: 'short', 
+                                month: 'short', 
+                                day: 'numeric' 
+                            });
+                        }
+                    } catch {
+                        return dateString;
+                    }
+                },
+
+                processOldTodoItems() {
+                    const items = this.data['todo'] || [];
+                    const today = new Date().toISOString().split('T')[0];
+                    let changed = false;
+                    
+                    items.forEach(item => {
+                        // If item doesn't have a date, set it to today
+                        if (!item.date) {
+                            item.date = today;
+                            changed = true;
+                        }
+                        // If item is not done and date is in the past, move to today
+                        else if (!item.isDone && !this.isToday(item.date)) {
+                            // Check if date is in the past
+                            try {
+                                const itemDate = new Date(item.date);
+                                const todayDate = new Date(today);
+                                if (itemDate < todayDate) {
+                                    item.date = today;
+                                    changed = true;
+                                }
+                            } catch (e) {
+                                // If date parsing fails, move to today
+                                item.date = today;
+                                changed = true;
+                            }
+                        }
+                    });
+                    
+                    if (changed) {
+                        this.persist();
+                    }
+                },
+
+                openAddTodoModal() {
+                    this.editingTodo = false;
+                    this.todoForm = {
+                        id: Date.now(),
+                        title: '',
+                        note: '',
+                        date: 'today',
+                        isDone: false,
+                        isFavorite: false,
+                        type: 'todo'
+                    };
+                    this.modals.todoItem = true;
+                    this.initializeIconsAfterUpdate();
+                },
+
+                openEditTodoModal(item) {
+                    this.editingTodo = true;
+                    this.todoForm = {
+                        id: item.id,
+                        title: item.title,
+                        note: item.note || '',
+                        date: item.date || 'today',
+                        isDone: item.isDone || false,
+                        isFavorite: item.isFavorite || false,
+                        type: 'todo'
+                    };
+                    this.modals.todoItem = true;
+                    this.initializeIconsAfterUpdate();
+                },
+
+                saveTodoItem() {
+                    if (!this.todoForm.title.trim()) {
+                        this.showCopyToast('Please enter a task title');
+                        return;
+                    }
+
+                    // Convert 'today' to actual date string
+                    if (this.todoForm.date === 'today') {
+                        this.todoForm.date = new Date().toISOString().split('T')[0];
+                    }
+
+                    let list = this.data['todo'] || [];
+
+                    if (this.editingTodo) {
+                        const index = list.findIndex(i => i.id === this.todoForm.id);
+                        if (index !== -1) {
+                            list[index] = { ...this.todoForm };
+                        }
+                    } else {
+                        this.todoForm.id = Date.now();
+                        list.unshift(this.todoForm);
+                    }
+
+                    this.data['todo'] = list;
+                    this.persist();
+                    this.modals.todoItem = false;
+                    
+                    // FIX 1: Initialize icons after save
+                    this.initializeIconsAfterUpdate();
+                    
+                    this.showCopyToast(this.editingTodo ? 'Task updated!' : 'Task added!');
+                },
+
+                toggleTodoDone(id) {
+                    const item = (this.data['todo'] || []).find(i => i.id === id);
+                    if (item) {
+                        item.isDone = !item.isDone;
+                        this.persist();
+                        
+                        // FIX 1: Initialize icons after toggle
+                        this.initializeIconsAfterUpdate();
+                    }
+                },
+
+                toggleTodoFavorite(id) {
+                    const item = (this.data['todo'] || []).find(i => i.id === id);
+                    if (item) {
+                        item.isFavorite = !item.isFavorite;
+                        this.persist();
+                        
+                        // FIX 1: Initialize icons after toggle
+                        this.initializeIconsAfterUpdate();
+                    }
+                },
+
+                moveTodoToToday(id) {
+                    const item = (this.data['todo'] || []).find(i => i.id === id);
+                    if (item) {
+                        item.date = new Date().toISOString().split('T')[0];
+                        this.persist();
+                        this.initializeIconsAfterUpdate();
+                        this.showCopyToast('Task moved to today!');
+                    }
+                },
+
+                openTodoVoiceModal() {
+                    this.todoVoiceText = '';
+                    this.finalTranscript = '';
+                    this.interimTranscript = '';
+                    this.modals.todoVoiceInput = true;
+                    this.initializeIconsAfterUpdate();
+                },
+
+                closeTodoVoiceModal() {
+                    if (this.isRecording) {
+                        this.stopRecording();
+                    }
+                    this.modals.todoVoiceInput = false;
+                    this.todoVoiceText = '';
+                    this.finalTranscript = '';
+                    this.interimTranscript = '';
+                },
+
+                startTodoRecording() {
+                    this.startActualRecording('todo');
+                },
+
+                splitTodoVoiceTasks() {
+                    if (!this.todoVoiceText.trim()) return [];
+                    
+                    // Split by common separators: and, then, comma, period, new line
+                    const separators = /\s+(?:and|then|,|\.|\n)\s+/gi;
+                    const tasks = this.todoVoiceText.split(separators);
+                    
+                    // Clean up each task
+                    return tasks
+                        .map(task => task.trim())
+                        .filter(task => task.length > 0)
+                        .map(task => {
+                            // Capitalize first letter
+                            return task.charAt(0).toUpperCase() + task.slice(1);
+                        });
+                },
+
+                getTodoVoiceTaskCount() {
+                    return this.splitTodoVoiceTasks().length;
+                },
+
+                saveTodoVoiceTasks() {
+                    const tasks = this.splitTodoVoiceTasks();
+                    
+                    if (tasks.length === 0) {
+                        this.showCopyToast('No tasks to save');
+                        return;
+                    }
+
+                    const today = new Date().toISOString().split('T')[0];
+                    let list = this.data['todo'] || [];
+                    
+                    // Add each task
+                    tasks.forEach((task, index) => {
+                        const taskId = Date.now() + index; // Ensure unique IDs
+                        const taskItem = {
+                            id: taskId,
+                            title: task,
+                            note: '',
+                            date: today,
+                            isDone: false,
+                            isFavorite: false,
+                            type: 'todo'
+                        };
+                        list.unshift(taskItem);
+                    });
+
+                    this.data['todo'] = list;
+                    this.persist();
+                    this.modals.todoVoiceInput = false;
+                    
+                    // FIX 1: Initialize icons after save
+                    this.initializeIconsAfterUpdate();
+                    
+                    this.showCopyToast(`Saved ${tasks.length} tasks!`);
+                    this.todoVoiceText = '';
+                    this.finalTranscript = '';
+                    this.interimTranscript = '';
+                },
+
+                // Updated existing methods for icon initialization
+                saveItem() {
+                    let list = this.data[this.activeTab] || [];
+
+                    // Validation
+                    if (this.activeTab === 'voice') {
+                        if (!this.form.note.trim()) {
+                            this.showCopyToast('Please enter a note');
+                            return;
+                        }
+                    } else if (this.activeTab !== 'secure-notes') {
+                        if (!this.form.title.trim()) {
+                            this.showCopyToast('Please enter a title');
+                            return;
+                        }
+                    }
+
+                    if (this.activeTab !== 'secure-notes' && !this.isTodoTab(this.activeTab) && this.activeTab !== 'voice' && (!this.form.link || !this.form.link.trim()) && this.form.title.trim()) {
+                        if (this.activeTab === 'food') {
+                            this.form.link = this.autoGenerateYouTubeSearchLink(this.form.title);
+                        } else if (this.activeTab !== 'music') {
+                            this.form.link = this.autoGenerateGoogleSearchLink(this.form.title);
+                        }
+                    }
+
+                    if (this.activeTab === 'secure-notes') {
+                        this.form.link = '';
+                        this.form.isDone = false;
+                        this.form.isFavorite = false;
+                        this.form.type = 'note';
+                    }
+
+                    if (this.activeTab === 'voice') {
+                        this.form.link = '';
+                        this.form.type = 'note';
+                    }
+
+                    if (this.editingItem) {
+                        const index = list.findIndex(i => i.id === this.form.id);
+                        if (index !== -1) {
+                            const oldItem = list[index];
+                            list[index] = { ...oldItem, ...this.form };
+                        }
+                    } else {
+                        this.form.id = Date.now();
+
+                        if (!this.form.link && this.activeTab !== 'secure-notes' && this.activeTab !== 'voice') {
+                            this.form.link = this.autoGenerateMusicLink(this.form.title);
+                        }
+                        list.unshift(this.form);
+                    }
+
+                    this.data[this.activeTab] = list;
+                    this.persist();
+                    this.modals.item = false;
+                    
+                    // FIX 1: Initialize icons after save
+                    this.initializeIconsAfterUpdate();
+                    
+                    this.showCopyToast(this.editingItem ? 'Item updated!' : 'Item saved!');
+                },
+
+                saveCard() {
+                    if (!this.cardForm.number) return;
+
+                    this.cardForm.number = this.cardForm.number.replace(/\s/g, '');
+                    this.cardForm.expiry = this.cardForm.expiry.replace('/', '').slice(0, 4);
+                    this.cardForm.cvv = this.cardForm.cvv.slice(0, 4);
+
+                    let cardData = this.data['cards'] || [];
+
+                    if (this.editingCard) {
+                        const index = cardData.findIndex(i => i.id === this.cardForm.id);
+                        if (index !== -1) {
+                            cardData[index] = { ...this.cardForm };
+                        }
+                    } else {
+                        cardData.unshift(this.cardForm);
+                    }
+
+                    this.data['cards'] = cardData;
+                    this.persist();
+                    this.modals.cardItem = false;
+                    this.initializeIconsAfterUpdate();
+                },
+
+                saveVoiceNote() {
+                    if (!this.voiceText.trim()) {
+                        this.showCopyToast('No text to save.');
+                        return;
+                    }
+
+                    const noteId = Date.now();
+                    const noteItem = {
+                        id: noteId,
+                        title: '',
+                        note: this.voiceText.trim(),
+                        link: '',
+                        isFavorite: false,
+                        isDone: false,
+                        type: 'note'
+                    };
+
+                    let list = this.data['voice'] || [];
+                    list.unshift(noteItem);
+                    this.data['voice'] = list;
+
+                    this.persist();
+
+                    this.modals.voiceInput = false;
+                    this.initializeIconsAfterUpdate();
+                    this.showCopyToast('Voice note saved successfully!');
+                    this.voiceText = '';
+                    this.finalTranscript = '';
+                    this.interimTranscript = '';
+                },
+
+                // Updated delete method
+                confirmDeleteItem(id, tab) {
+                    this.itemToDelete = {id: id, tab: tab};
+                    this.modals.delete = true;
+                },
+
+                performDelete() {
+                    if (this.itemToDelete) {
+                        this.modals.delete = false;
+                        setTimeout(() => {
+                            const tabData = this.data[this.itemToDelete.tab];
+                            if (tabData && tabData.some(i => i.id === this.itemToDelete.id)) {
+                                this.data[this.itemToDelete.tab] = tabData.filter(i => i.id !== this.itemToDelete.id);
+                                this.persist();
+                                this.initializeIconsAfterUpdate();
+                            }
+                            this.itemToDelete = null;
+                        }, this.ANIMATION_DURATION);
+                    }
+                },
+
+                toggleFavorite(id) {
+                    const item = (this.data[this.activeTab] || []).find(i => i.id === id);
+                    if (item && this.activeTab !== 'secure-notes') {
+                        item.isFavorite = !item.isFavorite;
+                        this.persist();
+                        this.initializeIconsAfterUpdate();
+                    }
+                },
+
+                toggleDone(id) {
+                    const item = (this.data[this.activeTab] || []).find(i => i.id === id);
+                    if (item && this.activeTab !== 'secure-notes') {
+                        item.isDone = !item.isDone;
+                        this.persist();
+                        this.initializeIconsAfterUpdate();
+                    }
+                },
+
+                // Updated getTabIcon to include todo
+                getTabIcon(tab) {
+                    const iconMap = {
+                        'food': 'utensils',
+                        'travel': 'map-pin',
+                        'movies': 'film',
+                        'music': 'music',
+                        'todo': 'check-square',
+                        'voice': 'mic',
+                        'secure-notes': 'lock',
+                        'cards': 'credit-card',
+                        'books': 'book',
+                        'reading': 'book-open',
+                        'shopping': 'shopping-cart',
+                        'work': 'briefcase',
+                        'health': 'heart',
+                        'fitness': 'dumbbell',
+                        'ideas': 'lightbulb',
+                        'projects': 'folder-kanban'
+                    };
+                    return iconMap[tab] || 'folder';
+                },
+
+                // Updated getTabCount to handle todo tab
+                getTabCount(tab) {
+                    const items = this.data[tab] || [];
+                    if (this.isTodoTab(tab)) {
+                        return items.filter(item => !item.isDone).length;
+                    }
+                    if (tab === 'voice') {
+                        return items.filter(item => !item.isDone).length;
+                    }
+                    return items.length;
+                },
+
+                // Updated sortedItems getter
+                get sortedItems() {
+                    let items = this.data[this.activeTab] || [];
+
+                    if (this.activeTab === 'secure-notes') {
+                        return items.filter(item => item.type !== 'card').sort((a, b) => b.id - a.id);
+                    }
+
+                    if (this.activeTab === 'voice') {
+                        return items.sort((a, b) => {
+                            if (a.isDone !== b.isDone) {
+                                return a.isDone ? 1 : -1;
+                            }
+
+                            if (a.isFavorite !== b.isFavorite) {
+                                return a.isFavorite ? -1 : 1;
+                            }
+
+                            return b.id - a.id;
+                        });
+                    }
+
+                    return items.sort((a, b) => {
+                        const isTodo = this.isTodoTab(this.activeTab);
+
+                        if (a.isDone !== b.isDone) {
+                            return a.isDone ? 1 : -1;
+                        }
+
+                        if (a.isFavorite !== b.isFavorite) {
+                            return a.isFavorite ? -1 : 1;
+                        }
+
+                        return b.id - a.id;
+                    });
+                },
+
+                // Voice recording functions
                 initializeSpeechRecognition() {
                     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -1428,7 +2282,6 @@
                         this.recognition.interimResults = true;
                         this.recognition.lang = this.voiceLanguage;
 
-                        // Reset transcripts
                         this.finalTranscript = '';
                         this.interimTranscript = '';
 
@@ -1436,7 +2289,6 @@
                             let interimTranscript = '';
                             let newFinalTranscript = '';
 
-                            // Process all results
                             for (let i = event.resultIndex; i < event.results.length; i++) {
                                 const transcript = event.results[i][0].transcript;
                                 if (event.results[i].isFinal) {
@@ -1448,7 +2300,6 @@
                                 }
                             }
 
-                            // Update final transcript with new unique final results
                             if (newFinalTranscript) {
                                 const newWords = newFinalTranscript.trim().split(' ');
                                 const existingWords = this.finalTranscript.trim().split(' ');
@@ -1464,8 +2315,12 @@
                                 }
                             }
 
-                            // Update the displayed text
-                            this.voiceText = this.cleanVoiceText(this.finalTranscript + interimTranscript);
+                            // Update the appropriate text field
+                            if (this.modals.todoVoiceInput) {
+                                this.todoVoiceText = this.cleanVoiceText(this.finalTranscript + interimTranscript);
+                            } else {
+                                this.voiceText = this.cleanVoiceText(this.finalTranscript + interimTranscript);
+                            }
                             this.interimTranscript = interimTranscript;
                         };
 
@@ -1485,14 +2340,10 @@
                     }
                 },
 
-                // Enhanced voice text cleaning to remove duplicates
                 cleanVoiceText(text) {
                     if (!text) return '';
 
-                    // Remove extra spaces
                     text = text.replace(/\s+/g, ' ');
-
-                    // Remove duplicate words or phrases
                     const words = text.split(' ');
                     const uniqueWords = [];
 
@@ -1506,181 +2357,33 @@
                     }
 
                     text = uniqueWords.join(' ');
-
-                    // Fix common punctuation issues
                     text = text.replace(/\s*\.\s*/g, '. ');
                     text = text.replace(/\s*,\s*/g, ', ');
                     text = text.replace(/\s*\?\s*/g, '? ');
                     text = text.replace(/\s*!\s*/g, '! ');
-
-                    // Capitalize first letter
                     text = text.charAt(0).toUpperCase() + text.slice(1);
-
-                    // Remove trailing space before punctuation
                     text = text.replace(/\s+([.,?!])/g, '$1');
 
                     return text.trim();
                 },
 
-                // NEW: Enhanced voice command processing
-                processVoiceCommand(text) {
-                    const lowerText = text.toLowerCase();
-                    
-                    // Command patterns
-                    const patterns = [
-                        /add\s+(.+?)\s+(?:in|to)\s+(.+?)\s+tab/i,
-                        /add\s+(.+?)\s+to\s+(.+)/i,
-                        /create\s+(.+?)\s+in\s+(.+)/i,
-                        /put\s+(.+?)\s+in\s+(.+)/i
-                    ];
-
-                    let match = null;
-                    let itemName = '';
-                    let tabName = '';
-
-                    for (const pattern of patterns) {
-                        match = text.match(pattern);
-                        if (match) {
-                            itemName = match[1].trim();
-                            tabName = match[2].trim().toLowerCase().replace(/\s+/g, '-');
-                            break;
-                        }
-                    }
-
-                    if (!match) {
-                        // Try simple pattern: "add [item] in [tab]"
-                        const simpleMatch = text.match(/add\s+(.+?)\s+in\s+(.+)/i);
-                        if (simpleMatch) {
-                            itemName = simpleMatch[1].trim();
-                            tabName = simpleMatch[2].trim().toLowerCase().replace(/\s+/g, '-');
-                        }
-                    }
-
-                    if (itemName && tabName) {
-                        // Check if tab exists (with fuzzy matching)
-                        let existingTab = this.findTabByName(tabName);
-                        
-                        if (!existingTab) {
-                            // Create new tab
-                            this.createTabFromVoice(tabName);
-                            existingTab = tabName;
-                            this.showCopyToast(`Created new tab: ${this.toTitleCase(tabName)}`);
-                        }
-
-                        // Switch to the tab
-                        this.switchToTab(existingTab);
-
-                        // Add the item
-                        this.addItemFromVoice(itemName, existingTab);
-                        
-                        return true;
-                    }
-
-                    return false;
-                },
-
-                // Helper: Find tab by name (with fuzzy matching)
-                findTabByName(name) {
-                    // Exact match
-                    if (this.tabs.includes(name)) {
-                        return name;
-                    }
-
-                    // Fuzzy matching
-                    const normalizedSearch = name.replace(/-/g, ' ').replace(/s$/, '');
-                    
-                    for (const tab of this.tabs) {
-                        const normalizedTab = tab.replace(/-/g, ' ').replace(/s$/, '');
-                        
-                        // Check for close matches
-                        if (normalizedTab.includes(normalizedSearch) || normalizedSearch.includes(normalizedTab)) {
-                            return tab;
-                        }
-                        
-                        // Check for plural/singular variations
-                        if (normalizedTab === normalizedSearch + 's' || normalizedTab + 's' === normalizedSearch) {
-                            return tab;
-                        }
-                    }
-
-                    return null;
-                },
-
-                // Helper: Create tab from voice command
-                createTabFromVoice(tabName) {
-                    const normalizedName = tabName.toLowerCase().replace(/\s+/g, '-');
-                    
-                    if (!this.tabs.includes(normalizedName)) {
-                        // Insert before special tabs
-                        const voiceIndex = this.tabs.indexOf('voice');
-                        const secureIndex = this.tabs.indexOf('secure-notes');
-                        const insertIndex = Math.min(voiceIndex, secureIndex);
-                        
-                        this.tabs.splice(insertIndex, 0, normalizedName);
-                        this.data[normalizedName] = [];
-                        this.tabMetadata[normalizedName] = 'normal';
-                        
-                        this.persist();
+                startRecording() {
+                    if (this.activeTab === 'todo') {
+                        this.openTodoVoiceModal();
+                        return;
                     }
                     
-                    return normalizedName;
-                },
-
-                // Helper: Add item from voice command
-                addItemFromVoice(itemName, tabName) {
-                    const itemId = Date.now();
-                    const item = {
-                        id: itemId,
-                        title: itemName,
-                        note: '',
-                        link: '',
-                        isFavorite: false,
-                        isDone: false,
-                        type: 'note'
-                    };
-
-                    // Generate appropriate link based on tab type
-                    if (tabName === 'food') {
-                        item.link = this.autoGenerateYouTubeSearchLink(itemName);
-                    } else if (tabName === 'music') {
-                        item.link = this.autoGenerateMusicLink(itemName);
-                    } else if (tabName === 'movies' || tabName === 'web-series') {
-                        item.link = `https://www.google.com/search?q=${encodeURIComponent(itemName + ' watch online')}`;
-                    } else if (tabName !== 'secure-notes' && tabName !== 'voice') {
-                        item.link = this.autoGenerateGoogleSearchLink(itemName);
-                    }
-
-                    let list = this.data[tabName] || [];
-                    list.unshift(item);
-                    this.data[tabName] = list;
-
-                    this.persist();
-                    this.showCopyToast(`Added "${itemName}" to ${this.toTitleCase(tabName)}`);
-                },
-
-                // Voice Input Functions
-                startVoiceInput() {
                     this.voiceText = '';
                     this.finalTranscript = '';
                     this.interimTranscript = '';
                     this.modals.voiceInput = true;
+                    this.$nextTick(() => {
+                        this.startActualRecording('voice');
+                        lucide.createIcons();
+                    });
                 },
 
-                startRecording() {
-                    if (this.activeTab === 'voice' && this.currentView === 'tab') {
-                        this.voiceText = '';
-                        this.finalTranscript = '';
-                        this.interimTranscript = '';
-                        this.modals.voiceInput = true;
-                        this.$nextTick(() => {
-                            this.startActualRecording();
-                        });
-                    } else {
-                        this.startVoiceInput();
-                    }
-                },
-
-                startActualRecording() {
+                startActualRecording(type) {
                     if (!this.recognition) {
                         this.showCopyToast('Speech recognition not supported in your browser.');
                         return;
@@ -1689,16 +2392,20 @@
                     try {
                         this.isRecording = true;
                         this.recordingTime = 0;
-                        this.voiceText = '';
+                        
+                        if (type === 'todo') {
+                            this.todoVoiceText = '';
+                        } else {
+                            this.voiceText = '';
+                        }
+                        
                         this.finalTranscript = '';
                         this.interimTranscript = '';
 
-                        // Start timer
                         this.recordingTimer = setInterval(() => {
                             this.recordingTime++;
                         }, 1000);
 
-                        // Start speech recognition
                         this.recognition.lang = this.voiceLanguage;
                         this.recognition.start();
 
@@ -1707,16 +2414,6 @@
                         this.isRecording = false;
                         this.showCopyToast('Error starting voice recording.');
                     }
-                },
-
-                closeVoiceModal() {
-                    if (this.isRecording) {
-                        this.stopRecording();
-                    }
-                    this.modals.voiceInput = false;
-                    this.voiceText = '';
-                    this.finalTranscript = '';
-                    this.interimTranscript = '';
                 },
 
                 stopRecording() {
@@ -1734,55 +2431,61 @@
                         this.recordingTimer = null;
                     }
 
-                    // Clean up the final text one more time
-                    this.voiceText = this.cleanVoiceText(this.finalTranscript);
+                    // Clean up the final text
+                    if (this.modals.todoVoiceInput) {
+                        this.todoVoiceText = this.cleanVoiceText(this.finalTranscript);
+                    } else {
+                        this.voiceText = this.cleanVoiceText(this.finalTranscript);
+                    }
+
+                    // If auto-save is enabled and we have text, save immediately
+                    if (this.autoSaveVoiceNotes && this.voiceText.trim() && !this.modals.todoVoiceInput) {
+                        setTimeout(() => this.saveVoiceNote(), 500);
+                    }
                 },
 
-                saveVoiceNote() {
-                    if (!this.voiceText.trim()) {
-                        this.showCopyToast('No text to save.');
-                        return;
+                closeVoiceModal() {
+                    if (this.isRecording) {
+                        this.stopRecording();
                     }
-
-                    // Check if this is a command
-                    if (this.processVoiceCommand(this.voiceText)) {
-                        // Command was processed, close modal
-                        this.modals.voiceInput = false;
-                        this.voiceText = '';
-                        this.finalTranscript = '';
-                        this.interimTranscript = '';
-                        return;
-                    }
-
-                    // Regular voice note saving
-                    const noteId = Date.now();
-                    const noteItem = {
-                        id: noteId,
-                        title: '',
-                        note: this.voiceText.trim(),
-                        link: '',
-                        isFavorite: false,
-                        isDone: false,
-                        type: 'note'
-                    };
-
-                    // Add to voice tab
-                    let list = this.data['voice'] || [];
-                    list.unshift(noteItem);
-                    this.data['voice'] = list;
-
-                    // Persist data
-                    this.persist();
-
-                    // Close modal and show success message
                     this.modals.voiceInput = false;
-                    this.showCopyToast('Voice note saved successfully!');
                     this.voiceText = '';
                     this.finalTranscript = '';
                     this.interimTranscript = '';
                 },
 
-                // Improved long press handling
+                // The rest of existing functions (keep them as is)
+                setupHistoryNavigation() {
+                    if (!window.history.state || window.history.state.view !== this.currentView) {
+                        const state = { view: this.currentView };
+                        if (this.currentView === 'tab') {
+                            state.tab = this.activeTab;
+                            window.history.replaceState(state, '', `#${this.activeTab}`);
+                        } else {
+                            window.history.replaceState(state, '', '#home');
+                        }
+                    }
+
+                    window.addEventListener('popstate', (event) => {
+                        if (event.state && event.state.view === 'tab' && event.state.tab) {
+                            if (this.tabs.includes(event.state.tab)) {
+                                this.currentView = 'tab';
+                                this.activeTab = event.state.tab;
+                            } else {
+                                this.goToHome();
+                            }
+                        } else {
+                            this.goToHome();
+                        }
+                    });
+                },
+
+                updateHistoryState(tab) {
+                    if (this.currentView === 'tab') {
+                        window.history.pushState({ view: 'tab', tab: tab }, '', `#${tab}`);
+                    }
+                },
+
                 homeLongPressStart(event, tab) {
                     this.homeLongPressActive = false;
                     clearTimeout(this.homeLongPressTimer);
@@ -1822,7 +2525,7 @@
                 },
 
                 openTabContextMenu(tab, event) {
-                    if (tab === 'secure-notes' || tab === 'cards' || tab === 'voice') return;
+                    if (tab === 'secure-notes' || tab === 'cards' || tab === 'voice' || tab === 'todo') return;
                     this.currentContextTab = tab;
 
                     let clientX, clientY;
@@ -1857,62 +2560,20 @@
                     this.modals.tabContext = true;
                 },
 
-                // Voice notes counter now only counts un-done items
-                getTabCount(tab) {
-                    const items = this.data[tab] || [];
-                    if (this.isTodoTab(tab)) {
-                        return items.filter(item => !item.isDone).length;
-                    }
-                    if (tab === 'voice') {
-                        return items.filter(item => !item.isDone).length;
-                    }
-                    return items.length;
-                },
-
-                // FIXED: Improved back button navigation
                 goToHome() {
                     this.currentView = 'home';
-                    // Replace state instead of push to prevent multiple back clicks
-                    window.history.replaceState({ view: 'home' }, '', '#home');
+                    window.history.pushState({ view: 'home' }, '', '#home');
+                    this.initializeIconsAfterUpdate();
                 },
 
                 switchToTab(tab) {
                     this.currentView = 'tab';
                     this.activeTab = tab;
-                    // Push new state for the tab
                     this.updateHistoryState(tab);
-                    this.$nextTick(() => {
-                        if (tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice') {
-                            this.scrollTabIntoView(tab, 'smooth', 'center');
-                        }
-                    });
-                },
-
-                // UPDATED: Font Awesome icons
-                getTabIcon(tab) {
-                    const iconMap = {
-                        'food': 'fas fa-utensils',
-                        'travel': 'fas fa-map-marker-alt',
-                        'movies': 'fas fa-film',
-                        'music': 'fas fa-music',
-                        'web-series': 'fas fa-tv',
-                        'voice': 'fas fa-microphone',
-                        'secure-notes': 'fas fa-lock',
-                        'cards': 'fas fa-credit-card',
-                        'books': 'fas fa-book',
-                        'reading': 'fas fa-book-open',
-                        'shopping': 'fas fa-shopping-cart',
-                        'work': 'fas fa-briefcase',
-                        'health': 'fas fa-heart',
-                        'fitness': 'fas fa-dumbbell',
-                        'ideas': 'fas fa-lightbulb',
-                        'projects': 'fas fa-folder'
-                    };
-                    return iconMap[tab] || 'fas fa-folder';
+                    this.initializeIconsAfterUpdate();
                 },
 
                 migrateOldData() {
-                    // Migration logic remains the same
                     // Keep existing migration code
                 },
 
@@ -1972,7 +2633,6 @@
                     localStorage.setItem('bd_default_view', this.defaultView);
                     localStorage.setItem('bd_last_active_tab', this.activeTab);
 
-                    // Save voice preferences
                     localStorage.setItem('bd_voice_language', this.voiceLanguage);
                     localStorage.setItem('bd_auto_save_voice', this.autoSaveVoiceNotes);
                 },
@@ -1994,7 +2654,7 @@
                 },
 
                 handleSwipe() {
-                    if (this.modals.item || this.modals.cardItem || this.modals.settings || this.modals.tabContext || this.activeTab === 'secure-notes' || this.activeTab === 'cards' || this.activeTab === 'voice') return;
+                    if (this.modals.item || this.modals.cardItem || this.modals.settings || this.modals.tabContext || this.activeTab === 'secure-notes' || this.activeTab === 'cards' || this.activeTab === 'voice' || this.activeTab === 'todo') return;
                     if (this.touchendX < this.touchstartX - this.swipeThreshold) {
                         this.changeTab('next');
                     }
@@ -2004,7 +2664,7 @@
                 },
 
                 changeTab(direction) {
-                    const visibleTabs = this.tabs.filter(t => t !== 'secure-notes' && t !== 'cards' && t !== 'voice');
+                    const visibleTabs = this.tabs.filter(t => t !== 'secure-notes' && t !== 'cards' && t !== 'voice' && t !== 'todo');
                     let currentIndex = visibleTabs.indexOf(this.activeTab);
                     let nextIndex;
 
@@ -2030,12 +2690,14 @@
                     this.tempVoiceLanguage = this.voiceLanguage;
                     this.tempAutoSaveVoiceNotes = this.autoSaveVoiceNotes;
                     this.modals.settings = true;
+                    this.initializeIconsAfterUpdate();
                 },
 
                 openSecureNotesSettings() {
                     this.currentView = 'tab';
                     this.activeTab = 'secure-notes';
                     this.updateHistoryState('secure-notes');
+                    this.initializeIconsAfterUpdate();
                 },
 
                 confirmDeleteAllData() {
@@ -2075,42 +2737,6 @@
                     return item ? item.type : 'note';
                 },
 
-                get sortedItems() {
-                    let items = this.data[this.activeTab] || [];
-
-                    if (this.activeTab === 'secure-notes') {
-                        return items.filter(item => item.type !== 'card').sort((a, b) => b.id - a.id);
-                    }
-
-                    if (this.activeTab === 'voice') {
-                        return items.sort((a, b) => {
-                            if (a.isDone !== b.isDone) {
-                                return a.isDone ? 1 : -1;
-                            }
-
-                            if (a.isFavorite !== b.isFavorite) {
-                                return a.isFavorite ? -1 : 1;
-                            }
-
-                            return b.id - a.id;
-                        });
-                    }
-
-                    return items.sort((a, b) => {
-                        const isTodo = this.isTodoTab(this.activeTab);
-
-                        if (a.isDone !== b.isDone) {
-                            return a.isDone ? 1 : -1;
-                        }
-
-                        if (a.isFavorite !== b.isFavorite) {
-                            return a.isFavorite ? -1 : 1;
-                        }
-
-                        return b.id - a.id;
-                    });
-                },
-
                 openAddCardModal() {
                     this.editingCard = false;
                     this.cardForm = {
@@ -2125,6 +2751,7 @@
                         note: ''
                     };
                     this.modals.cardItem = true;
+                    this.initializeIconsAfterUpdate();
                 },
 
                 openEditCardModal(card) {
@@ -2140,34 +2767,7 @@
                         note: card.note
                     };
                     this.modals.cardItem = true;
-                },
-
-                saveCard() {
-                    if (!this.cardForm.number) return;
-
-                    this.cardForm.number = this.cardForm.number.replace(/\s/g, '');
-                    this.cardForm.expiry = this.cardForm.expiry.replace('/', '').slice(0, 4);
-                    this.cardForm.cvv = this.cardForm.cvv.slice(0, 4);
-
-                    let cardData = this.data['cards'] || [];
-
-                    if (this.editingCard) {
-                        const index = cardData.findIndex(i => i.id === this.cardForm.id);
-                        if (index !== -1) {
-                            cardData[index] = { ...this.cardForm };
-                        }
-                    } else {
-                        cardData.unshift(this.cardForm);
-                    }
-
-                    this.data['cards'] = cardData;
-                    this.persist();
-                    this.modals.cardItem = false;
-                },
-
-                confirmDeleteCard(id) {
-                    this.itemToDelete = id;
-                    this.modals.delete = true;
+                    this.initializeIconsAfterUpdate();
                 },
 
                 openAddItemModal() {
@@ -2182,6 +2782,7 @@
                         type: 'note'
                     };
                     this.modals.item = true;
+                    this.initializeIconsAfterUpdate();
                 },
 
                 openEditItemModal(item) {
@@ -2192,120 +2793,14 @@
                     this.editingItem = true;
                     this.form = { ...item, type: item.type || 'note' };
                     this.modals.item = true;
-                },
-
-                saveItem() {
-                    console.log('saveItem called:', { tab: this.activeTab, editing: this.editingItem });
-
-                    let list = this.data[this.activeTab] || [];
-
-                    // FIXED VALIDATION:
-                    if (this.activeTab === 'voice') {
-                        if (!this.form.note.trim()) {
-                            this.showCopyToast('Please enter a note');
-                            return;
-                        }
-                    } else if (this.activeTab !== 'secure-notes') {
-                        if (!this.form.title.trim()) {
-                            this.showCopyToast('Please enter a title');
-                            return;
-                        }
-                    }
-
-                    // BUG FIX 1: Changed activeTab → this.activeTab
-                    if (this.activeTab !== 'secure-notes' && !this.isTodoTab(this.activeTab) && this.activeTab !== 'voice' && (!this.form.link || !this.form.link.trim()) && this.form.title.trim()) {
-                        if (this.activeTab === 'food') {
-                            this.form.link = this.autoGenerateYouTubeSearchLink(this.form.title);
-                        } else if (this.activeTab !== 'music') {
-                            this.form.link = this.autoGenerateGoogleSearchLink(this.form.title);
-                        }
-                    }
-
-                    if (this.activeTab === 'secure-notes') {
-                        this.form.link = '';
-                        this.form.isDone = false;
-                        this.form.isFavorite = false;
-                        this.form.type = 'note';
-                    }
-
-                    if (this.activeTab === 'voice') {
-                        this.form.link = '';
-                        this.form.type = 'note';
-                    }
-
-                    if (this.editingItem) {
-                        const index = list.findIndex(i => i.id === this.form.id);
-                        if (index !== -1) {
-                            const oldItem = list[index];
-
-                            const wasAutoLink = oldItem.link && (
-                                oldItem.link.includes('music.youtube.com/search?q=') ||
-                                oldItem.link.includes('open.spotify.com/search') ||
-                                oldItem.link.includes('music.apple.com/search?term=')
-                            );
-
-                            if (this.activeTab !== 'secure-notes' && oldItem.title !== this.form.title && !this.form.link && this.activeTab !== 'voice') {
-                                this.form.link = this.autoGenerateMusicLink(this.form.title);
-                            }
-
-                            // BUG FIX 3: Merge instead of replace
-                            list[index] = { ...oldItem, ...this.form };
-                        }
-                    } else {
-                        // BUG FIX 2: Add ID for new items
-                        this.form.id = Date.now();
-
-                        if (!this.form.link && this.activeTab !== 'secure-notes' && this.activeTab !== 'voice') {
-                            this.form.link = this.autoGenerateMusicLink(this.form.title);
-                        }
-                        list.unshift(this.form);
-                    }
-
-                    this.data[this.activeTab] = list;
-                    this.persist();
-                    this.modals.item = false;
-                    this.showCopyToast(this.editingItem ? 'Item updated!' : 'Item saved!');
+                    this.initializeIconsAfterUpdate();
                 },
 
                 generateLinkForMusic() {
                     if (this.form.title.trim()) {
                         this.form.link = this.autoGenerateMusicLink(this.form.title);
                         this.showCopyToast('Link auto-generated');
-                    }
-                },
-
-                confirmDelete(id) {
-                    this.itemToDelete = id;
-                    this.modals.delete = true;
-                },
-
-                performDelete() {
-                    if (this.itemToDelete) {
-                        this.modals.delete = false;
-                        setTimeout(() => {
-                            const tabData = this.data[this.activeTab];
-                            if (tabData && tabData.some(i => i.id === this.itemToDelete)) {
-                                this.data[this.activeTab] = tabData.filter(i => i.id !== this.itemToDelete);
-                                this.persist();
-                            }
-                            this.itemToDelete = null;
-                        }, this.ANIMATION_DURATION);
-                    }
-                },
-
-                toggleFavorite(id) {
-                    const item = (this.data[this.activeTab] || []).find(i => i.id === id);
-                    if (item && this.activeTab !== 'secure-notes') {
-                        item.isFavorite = !item.isFavorite;
-                        this.persist();
-                    }
-                },
-
-                toggleDone(id) {
-                    const item = (this.data[this.activeTab] || []).find(i => i.id === id);
-                    if (item && this.activeTab !== 'secure-notes') {
-                        item.isDone = !item.isDone;
-                        this.persist();
+                        this.initializeIconsAfterUpdate();
                     }
                 },
 
@@ -2324,7 +2819,7 @@
                         this.newTabError = 'Please enter a name for the new tab.';
                         return;
                     }
-                    if (newName === 'secure-notes' || newName === 'cards' || newName === 'voice') {
+                    if (newName === 'secure-notes' || newName === 'cards' || newName === 'voice' || newName === 'todo') {
                         this.newTabError = `"${newName}" is a reserved tab name.`;
                         return;
                     }
@@ -2334,7 +2829,6 @@
                         return;
                     }
 
-                    // Insert before secure-notes, cards, and voice tabs
                     const voiceIndex = this.tabs.indexOf('voice');
                     const secureIndex = this.tabs.indexOf('secure-notes');
                     const insertIndex = Math.min(voiceIndex, secureIndex);
@@ -2384,6 +2878,7 @@
                             this.persist();
                             this.$nextTick(() => {
                                 this.scrollTabIntoView(newName);
+                                lucide.createIcons();
                             });
                         }
                     }
@@ -2418,7 +2913,7 @@
                 },
 
                 setDefaultTab(tab) {
-                    if (tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice') {
+                    if (tab !== 'secure-notes' && tab !== 'cards' && tab !== 'voice' && tab !== 'todo') {
                         this.defaultTabID = tab;
                         this.persist();
                         this.showCopyToast(this.toTitleCase(tab) + ' set as default tab');
@@ -2528,16 +3023,16 @@
                 },
 
                 getLinkIcon(link) {
-                    if (!link) return `<i class="fas fa-link icon-link"></i>`;
+                    if (!link) return `<i data-lucide="link" class="w-4 h-4 icon-link"></i>`;
 
                     if (link.includes('open.spotify.com/search') || link.includes('spotify:')) {
-                        return `<i class="fab fa-spotify icon-spotify"></i>`;
+                        return `<i data-lucide="music" class="w-4 h-4 icon-spotify" fill="currentColor"></i>`;
                     } else if (link.includes('music.apple.com')) {
-                        return `<i class="fab fa-apple icon-apple"></i>`;
+                        return `<i data-lucide="apple" class="w-4 h-4 icon-apple" fill="currentColor"></i>`;
                     } else if (link.includes('youtube.com') || link.includes('music.youtube.com')) {
-                        return `<i class="fab fa-youtube icon-youtube"></i>`;
+                        return `<i data-lucide="youtube" class="w-4 h-4 icon-youtube" fill="currentColor"></i>`;
                     } else {
-                        return `<i class="fas fa-link icon-link"></i>`;
+                        return `<i data-lucide="link" class="w-4 h-4 icon-link"></i>`;
                     }
                 },
 
@@ -2555,7 +3050,6 @@
                     if (this.isTodoTab(this.activeTab)) return 'e.g. Buy groceries';
                     if (this.activeTab === 'secure-notes') return 'e.g. Netflix Password';
                     if (this.activeTab === 'voice') return '';
-                    if (this.activeTab === 'web-series') return 'e.g. Stranger Things';
                     return 'e.g. Item Title';
                 },
 
@@ -2570,7 +3064,6 @@
                     if (this.activeTab === 'travel') return 'Location Details';
                     if (this.activeTab === 'secure-notes') return 'Sensitive Information / Password Notes';
                     if (this.activeTab === 'voice') return 'Voice Note';
-                    if (this.activeTab === 'web-series') return 'Series Details';
                     return 'Notes / Details';
                 },
 
@@ -2580,24 +3073,11 @@
                     if (this.activeTab === 'travel') return 'Best time to visit: October\nGoogle Map Coords...';
                     if (this.activeTab === 'secure-notes') return 'Write your secure notes here.';
                     if (this.activeTab === 'voice') return 'Your transcribed voice note will appear here...';
-                    if (this.activeTab === 'web-series') return 'Season 1 Episode 1\nAvailable on Netflix...';
                     return 'Add any extra details here...';
                 },
 
                 getTabElementID(tab) {
                     return `tab-${tab}`;
-                },
-
-                scrollTabIntoView(tab, behavior = 'smooth', block = 'start') {
-                    const id = this.getTabElementID(tab);
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.scrollIntoView({
-                            behavior: behavior,
-                            block: block,
-                            inline: 'center'
-                        });
-                    }
                 },
 
                 toggleTabType(tab) {
@@ -2607,10 +3087,6 @@
                     this.modals.tabContext = false;
                     this.persist();
                     this.showCopyToast(`Tab type changed to ${newType}!`);
-                },
-
-                reloadApp() {
-                    if (this.waitingWorker) this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
                 },
 
                 savePreferences() {
@@ -2661,5 +3137,4 @@
         }
     </script>
 </body>
-
 </html>
